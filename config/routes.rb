@@ -8,6 +8,7 @@ Rails.application.routes.draw do
   resources :authorizations, only: :create
   get '/auth' => 'authorizations#new', as: :auth
 
+  get '/login' => 'sessions#new', as: :login
   get '/logout' => 'sessions#destroy', as: :logout
   root 'sessions#home'
 end
