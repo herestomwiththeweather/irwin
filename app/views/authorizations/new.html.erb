@@ -1,8 +1,8 @@
-<h2>Authenticate</h2>
+<h2 class="my-3 text-2xl text-gray-700 font-bold">Authenticate</h2>
 <div>
   The app has requested the following scopes: <%= params[:scope] %>
 </div>
 <div>
-<%= form_tag authorizations_path do %>
+<%= form_tag authorizations_path, data: {turbo: false} do %>
   <%= submit_tag 'Approve' %>
 <% end %>
