@@ -1,5 +1,13 @@
 class AccessTokensController < ApplicationController
   skip_before_action :verify_authenticity_token
+  before_action :require_oauth_user_token, except: [:create]
+
+  def show
+    Rails.logger.info "Verifying token for #{current_user.url}"
+    respond_to do |format|
+      format.json { render json: {me: current_user.url, scope: current_token.authorization_code.scope} }
+    end
+  end
 
   def create
     http_status, message, access_token, expires_in, me, scope = AuthorizationCode.verify(params)
