@@ -4,8 +4,9 @@ class AccessTokensController < ApplicationController
 
   def show
     Rails.logger.info "Verifying token for #{current_user.url}"
+    oauth_params = {me: current_user.url, scope: current_token.authorization_code.scope, client_id: current_token.authorization_code.client_id}
     respond_to do |format|
-      format.json { render json: {me: current_user.url, scope: current_token.authorization_code.scope} }
+      format.json { render json: oauth_params.to_query, status: :ok }
     end
   end
 
