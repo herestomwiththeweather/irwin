@@ -8,14 +8,25 @@
 
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
+    <style>
+      button a {
+        text-decoration: none;
+      }
+    </style>
   </head>
 
   <body>
+    <div id="user_nav" class="px-3">
     <% if current_user %>
-      <%= link_to 'Log Out', logout_path %>
+      <span class="mr-3"><a href="<%= current_user.url %>"><%= current_user.url %></a></span> |
+      <button class="ml-3 mt-1 py-1 px-2 rounded-lg border-2 bg-blue-600 border-blue-700 hover:bg-blue-100 hover:text-blue-600 text-blue-100 transition-colors duration-300"><a href="/logout">Logout</a></button>
     <% else %>
       <%= link_to 'Log in', new_session_path('current') %>
     <% end %>
     <%= yield %>
+    </div>
+    <div class="px-3 my-3">
+      This website is <a href="https://github.com/herestomwiththeweather/irwin">open source</a>
+    </div>
   </body>
 </html>
