@@ -2,6 +2,11 @@ class AuthorizationsController < ApplicationController
   before_action :login_required
 
   def new
+    unless params[:me].blank?
+      if current_user.url != params[:me]
+        redirect_to root_url, notice: "Requested url #{params[:me]} does not match logged in user #{current_user.url}"
+      end
+    end
     session[:client_id] = params[:client_id]
     session[:redirect_uri] = params[:redirect_uri]
     session[:scope] = params[:scope]
