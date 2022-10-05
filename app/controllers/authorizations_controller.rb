@@ -3,7 +3,7 @@ class AuthorizationsController < ApplicationController
 
   def new
     unless params[:me].blank?
-      if current_user.url != params[:me]
+      if current_user.url != URI(params[:me]).normalize.to_s
         redirect_to root_url, notice: "Requested url #{params[:me]} does not match logged in user #{current_user.url}"
       end
     end

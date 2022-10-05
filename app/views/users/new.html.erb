@@ -1,28 +1,35 @@
-<h1>Sign Up</h1>
+<div class="px-3">
+<h1 class="px-3 my-3 text-2xl text-gray-700 font-bold">Sign Up</h1>
 
-<%= form_for @user do |f| %>
+<%= form_for @user, data: { turbo: false } do |f| %>
   <% if @user.errors.any? %>
     <div class="error_messages">
-      <h2>Form is invalid</h2>
       <ul>
         <% @user.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
+          <li style="color: red"><%= message %></li>
         <% end %>
       </ul>
     </div>
   <% end %>
 
   <div class="field">
-    <%= f.label :email %><br />
+    <%= f.label :email, style: "display: block" %>
     <%= f.text_field :email %>
   </div>
   <div class="field">
-    <%= f.label :password %><br />
+    <%= f.label :url, style: "display: block" %>
+    <%= f.text_field :url %>
+  </div>
+  <div class="field">
+    <%= f.label :password, style: "display: block" %>
     <%= f.password_field :password %>
   </div>
   <div class="field">
-    <%= f.label :password_confirmation %><br />
+    <%= f.label :password_confirmation, style: "display: block" %>
     <%= f.password_field :password_confirmation %>
   </div>
-  <div class="actions"><%= f.submit "Sign Up" %></div>
+  <div style="width: 290px; height: 40px;">
+    <button style="float: right" class="py-1 px-2 bg-blue-600 border-2 border-blue-700 hover:bg-blue-100 hover:text-blue-600 rounded-lg my-3 text-blue-100 transition-colors duration-300"><%= f.submit  "Sign up"%></button>
+  </div>
 <% end %>
+</div>

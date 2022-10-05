@@ -9,7 +9,7 @@ Rails.application.routes.draw do
   # root "articles#index"
   resources :authorizations, only: :create
   get '/auth' => 'authorizations#new', as: :auth
-
+  get '/signup' => 'users#new', as: :signup
   get '/login' => 'sessions#new', as: :login
   get '/logout' => 'sessions#destroy', as: :logout
   root 'sessions#home'
