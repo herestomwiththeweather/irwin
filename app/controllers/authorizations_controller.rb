@@ -7,10 +7,19 @@ class AuthorizationsController < ApplicationController
         redirect_to root_url, notice: "Requested url #{params[:me]} does not match logged in user #{current_user.url}"
       end
     end
-    session[:client_id] = params[:client_id]
-    session[:redirect_uri] = params[:redirect_uri]
-    session[:scope] = params[:scope]
-    session[:state] = params[:state]
+
+    @app_name = params[:client_id]
+    @logo_url = ''
+    store_oauth_params
+
+    doc = Microformats.parse params[:client_id]
+    h_app = doc['items'].select {|i| i['type'].include?('h-app')}
+    @app_name = h_app.first['properties']['name'].first
+    @logo_url = h_app.first['properties']['logo'].first
+    Rails.logger.info "app name: #{@app_name}"
+    Rails.logger.info "app logo url: #{@logo_url}"
+  rescue => e
+    Rails.logger.info "authorizations#new Error: #{e.message}"
   end
 
   def create
@@ -21,6 +30,13 @@ class AuthorizationsController < ApplicationController
   end
 
   private
+
+  def store_oauth_params
+    session[:client_id] = params[:client_id]
+    session[:redirect_uri] = params[:redirect_uri]
+    session[:scope] = params[:scope]
+    session[:state] = params[:state]
+  end
 
   def clear_oauth_params
     session[:state] = nil
