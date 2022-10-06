@@ -1,13 +1,15 @@
-<h2 class="my-3 text-2xl text-gray-700 font-bold">Log in</h2>
+<h2 class="my-3 px-3 text-2xl text-gray-700 font-bold">Log in</h2>
 
 <%= form_tag sessions_path do %>
-  <div class="field">
+  <div class="px-3">
     <%= label_tag :email %><br />
     <%= text_field_tag :email, params[:email] %>
   </div>
-  <div class="field">
+  <div class="px-3">
     <%= label_tag :password %><br />
     <%= password_field_tag :password %>
   </div>
-  <div class="actions"><%= submit_tag "Log In" %></div>
+  <div style="width: 220px; height: 40px;">
+    <button style="float: right" class="py-1 px-2 bg-blue-600 border-2 border-blue-700 hover:bg-blue-100 hover:text-blue-600 rounded-lg my-3 text-blue-100 transition-colors duration-300"><%= submit_tag "Log In"%></button>
+  </div>
 <% end %>
