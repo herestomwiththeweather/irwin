@@ -29,6 +29,7 @@ class AuthorizationCode < ApplicationRecord
       break if authorization_code.expired?
       break unless authorization_code.redirect_uri == params[:redirect_uri]
       break unless authorization_code.client_id == params[:client_id]
+      break unless authorization_code.pkce_valid?(params[:code_verifier])
       access_token = authorization_code.user.access_tokens.create(authorization_code: authorization_code) 
       http_status = :ok if access_token.valid?
     end until true
@@ -46,5 +47,19 @@ class AuthorizationCode < ApplicationRecord
 
   def expired?
     expires_at < Time.now.utc
+  end
+
+  def computed_pkce_challenge(code_verifier)
+    hash = Digest::SHA256.digest(code_verifier)
+    Base64.urlsafe_encode64(hash).tr('=', '')
+  end
+
+  def pkce_valid?(code_verifier)
+    if code_verifier.present?
+      Rails.logger.info "AuthorizationCode#pkce_valid? code_verifier: #{code_verifier}"
+      pkce_challenge == computed_pkce_challenge(code_verifier)
+    else
+      true
+    end
   end
 end

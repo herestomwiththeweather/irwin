@@ -17,7 +17,7 @@ class AuthorizationsController < ApplicationController
   end
 
   def create
-    code = current_user.authorization_codes.create!(client_id: session[:client_id], redirect_uri: session[:redirect_uri], scope: session[:scope])
+    code = current_user.authorization_codes.create!(pkce_challenge: session[:code_challenge], client_id: session[:client_id], redirect_uri: session[:redirect_uri], scope: session[:scope])
     oauth_params = {code: code.token, state: session[:state]}
     clear_oauth_params
     redirect_to "#{code.redirect_uri}?#{oauth_params.to_query}", allow_other_host: true
@@ -62,6 +62,7 @@ class AuthorizationsController < ApplicationController
     session[:redirect_uri] = params[:redirect_uri]
     session[:scope] = params[:scope]
     session[:state] = params[:state]
+    session[:code_challenge] = params[:code_challenge]
   end
 
   def clear_oauth_params
@@ -69,5 +70,6 @@ class AuthorizationsController < ApplicationController
     session[:redirect_uri] = nil
     session[:scope] = nil
     session[:client_id] = nil
+    session[:code_challenge] = nil
   end
 end
