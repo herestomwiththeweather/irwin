@@ -1,6 +1,7 @@
 class AccessTokensController < ApplicationController
   skip_before_action :verify_authenticity_token
-  before_action :require_oauth_user_token, except: [:create]
+  before_action :require_oauth_user_token, except: [:create, :index]
+  before_action :login_required, only: [:index]
 
   def show
     Rails.logger.info "Verifying token for #{current_user.url}"
@@ -20,5 +21,9 @@ class AccessTokensController < ApplicationController
         format.json { render json: {error: message}, status: http_status}
       end
     end
+  end
+
+  def index
+    @access_tokens = current_user.access_tokens.order('created_at DESC')
   end
 end

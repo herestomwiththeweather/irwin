@@ -1,0 +1,5 @@
+<div id="<%= dom_id access_token %>" class="m-2 px-5">
+  <p class="text-gray-800">
+    <span class="mr-3"><%= access_token.created_at.to_s(:rfc822) %></span><span><a href="<%= access_token.authorization_code.client_id %>"><%= access_token.authorization_code.client_id %></a></span>
+  </p>
+</div>
