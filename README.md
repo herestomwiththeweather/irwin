@@ -2,4 +2,8 @@
 
 Required environment variables:
 
-* INDIEAUTH_HOST - hostname of your indieauth server (e.g. https://example.herokuapp.com)
+* INDIEAUTH_HOST - hostname of your server like: https://example.herokuapp.com
+
+Optional environment variables:
+
+* INDIEAUTH_TIME_ZONE - timezone of your server (default: UTC) like: Central Time (US & Canada)
