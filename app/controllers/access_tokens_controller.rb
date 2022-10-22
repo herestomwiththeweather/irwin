@@ -12,7 +12,7 @@ class AccessTokensController < ApplicationController
   end
 
   def show
-    @access_token = AccessToken.find(params[:id])
+    @access_token = current_user.access_tokens.find(params[:id])
   end
 
   def create
@@ -28,7 +28,7 @@ class AccessTokensController < ApplicationController
   end
 
   def destroy
-    @access_token = AccessToken.find(params[:id])
+    @access_token = current_user.access_tokens.find(params[:id])
     @access_token.expire!
     respond_to do |format|
       format.html { redirect_to access_tokens_url, notice: "Access token was revoked." }
