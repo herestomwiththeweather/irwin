@@ -1,7 +1,7 @@
 class AccessTokensController < ApplicationController
   skip_before_action :verify_authenticity_token
-  before_action :require_oauth_user_token, except: [:create, :index]
-  before_action :login_required, only: [:index]
+  before_action :require_oauth_user_token, except: [:create, :index, :show, :destroy]
+  before_action :login_required, except: [:validate, :create]
 
   def validate
     Rails.logger.info "Verifying token for #{current_user.url}"
@@ -9,6 +9,10 @@ class AccessTokensController < ApplicationController
     respond_to do |format|
       format.json { render json: oauth_params.to_query, status: :ok }
     end
+  end
+
+  def show
+    @access_token = AccessToken.find(params[:id])
   end
 
   def create
@@ -23,7 +27,15 @@ class AccessTokensController < ApplicationController
     end
   end
 
+  def destroy
+    @access_token = AccessToken.find(params[:id])
+    @access_token.expire!
+    respond_to do |format|
+      format.html { redirect_to access_tokens_url, notice: "Access token was revoked." }
+    end
+  end
+
   def index
-    @access_tokens = current_user.access_tokens.order('created_at DESC')
+    @access_tokens = current_user.access_tokens.order('created_at DESC').valid
   end
 end
