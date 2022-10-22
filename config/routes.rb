@@ -4,7 +4,7 @@ Rails.application.routes.draw do
   resources :access_tokens, only: [:index]
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
-  get '/token' => 'access_tokens#show', as: :introspect
+  get '/token' => 'access_tokens#validate', as: :validate
   post '/token' => 'access_tokens#create', as: :token
   # Defines the root path route ("/")
   # root "articles#index"

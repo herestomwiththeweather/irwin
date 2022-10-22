@@ -3,7 +3,7 @@ class AccessTokensController < ApplicationController
   before_action :require_oauth_user_token, except: [:create, :index]
   before_action :login_required, only: [:index]
 
-  def show
+  def validate
     Rails.logger.info "Verifying token for #{current_user.url}"
     oauth_params = {me: current_user.url, scope: current_token.authorization_code.scope, client_id: current_token.authorization_code.client_id}
     respond_to do |format|
