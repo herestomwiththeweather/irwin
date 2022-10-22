@@ -1,7 +1,7 @@
 class AuthorizationCode < ApplicationRecord
   belongs_to :user
   has_secure_token
-  has_many :access_tokens
+  has_one :access_token
 
   before_validation :setup, on: :create
 
@@ -35,6 +35,7 @@ class AuthorizationCode < ApplicationRecord
     end until true
 
     if :ok == http_status
+      authorization_code.expire!
       [:ok, '', access_token.token, access_token.expires_in, authorization_code.user.url, authorization_code.scope]
     else
       [http_status, message, nil, nil, nil, nil]
@@ -47,6 +48,11 @@ class AuthorizationCode < ApplicationRecord
 
   def expired?
     expires_at < Time.now.utc
+  end
+
+  def expire!
+    self.expires_at = Time.now.utc
+    self.save!
   end
 
   def computed_pkce_challenge(code_verifier)
