@@ -1,9 +1,9 @@
 <%= render partial: 'authorization_code', locals: { authorization_code: @authorization_code } %>
 
 <div>
-  <%= link_to "Back to authorizations", authorizations_path %>
-
   <% unless @authorization_code.access_token_expired? %>
-    <%= button_to "Revoke this token", @authorization_code.access_token, method: :delete %>
+    <%= button_to "Revoke this token", @authorization_code.access_token, method: :delete, style: 'text-decoration: underline' %>
   <% end %>
+
+  <%= link_to "Back to authorizations", authorizations_path %>
 </div>
