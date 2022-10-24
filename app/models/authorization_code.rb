@@ -43,6 +43,36 @@ class AuthorizationCode < ApplicationRecord
     end
   end
 
+  def self.profile_url(params)
+    http_status = :bad_request
+    message = ''
+    authorization_code = nil
+
+    begin
+      message = 'unsupported_grant_type'
+      break if params[:grant_type].present? && 'authorization_code' != params[:grant_type]
+      message = 'invalid_request'
+      break unless params[:code].present?
+      break unless params[:client_id].present?
+      break unless params[:redirect_uri].present?
+      message = 'invalid_grant'
+      authorization_code = self.where(token: params[:code]).first
+      break unless authorization_code.present?
+      break if authorization_code.expired?
+      break unless authorization_code.redirect_uri == params[:redirect_uri]
+      break unless authorization_code.client_id == params[:client_id]
+      break unless authorization_code.pkce_valid?(params[:code_verifier])
+      http_status = :ok
+    end until true
+
+    if :ok == http_status
+      authorization_code.expire!
+      [:ok, '', authorization_code.user.url]
+    else
+      [http_status, message, nil]
+    end
+  end
+
   def setup
     self.expires_at ||= 1.minute.from_now
   end

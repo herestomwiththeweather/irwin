@@ -10,6 +10,7 @@ Rails.application.routes.draw do
   # root "articles#index"
   resources :authorizations, only: :create
   get '/auth' => 'authorizations#new', as: :auth
+  post '/auth' => 'access_tokens#profile_url', as: :profile_url
   get '/signup' => 'users#new', as: :signup
   get '/login' => 'sessions#new', as: :login
   get '/logout' => 'sessions#destroy', as: :logout

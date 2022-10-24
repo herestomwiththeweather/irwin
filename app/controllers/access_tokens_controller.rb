@@ -1,7 +1,7 @@
 class AccessTokensController < ApplicationController
   skip_before_action :verify_authenticity_token
-  before_action :require_oauth_user_token, except: [:create, :index, :show, :destroy]
-  before_action :login_required, except: [:validate, :create]
+  before_action :require_oauth_user_token, except: [:create, :index, :show, :destroy, :profile_url]
+  before_action :login_required, except: [:validate, :create, :profile_url]
 
   def validate
     Rails.logger.info "Verifying token for #{current_user.url}"
@@ -21,6 +21,18 @@ class AccessTokensController < ApplicationController
     respond_to do |format|
       if :ok == http_status
         format.json { render json: { access_token: access_token, expires_in: expires_in, me: me, scope: scope, token_type: 'Bearer'}, status: http_status }
+      else
+        format.json { render json: {error: message}, status: http_status}
+      end
+    end
+  end
+
+  def profile_url
+    http_status, message, me = AuthorizationCode.profile_url(params)
+
+    respond_to do |format|
+      if :ok == http_status
+        format.json { render json: { me: me }, status: http_status }
       else
         format.json { render json: {error: message}, status: http_status}
       end
