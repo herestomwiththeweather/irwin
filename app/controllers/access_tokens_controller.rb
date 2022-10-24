@@ -1,6 +1,6 @@
 class AccessTokensController < ApplicationController
   skip_before_action :verify_authenticity_token
-  before_action :require_oauth_user_token, except: [:create, :index, :show, :destroy, :profile_url]
+  before_action :require_oauth_user_token, except: [:create, :destroy, :profile_url]
   before_action :login_required, except: [:validate, :create, :profile_url]
 
   def validate
@@ -9,10 +9,6 @@ class AccessTokensController < ApplicationController
     respond_to do |format|
       format.json { render json: oauth_params.to_query, status: :ok }
     end
-  end
-
-  def show
-    @access_token = current_user.access_tokens.find(params[:id])
   end
 
   def create
@@ -43,11 +39,7 @@ class AccessTokensController < ApplicationController
     @access_token = current_user.access_tokens.find(params[:id])
     @access_token.expire!
     respond_to do |format|
-      format.html { redirect_to access_tokens_url, notice: "Access token was revoked." }
+      format.html { redirect_to authorizations_url, notice: "Access token was revoked." }
     end
-  end
-
-  def index
-    @access_tokens = current_user.access_tokens.order('created_at DESC').valid
   end
 end

@@ -77,6 +77,10 @@ class AuthorizationCode < ApplicationRecord
     self.expires_at ||= 1.minute.from_now
   end
 
+  def access_token_expired?
+    !access_token.present? || access_token.expired?
+  end
+
   def expired?
     expires_at < Time.now.utc
   end

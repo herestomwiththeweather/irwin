@@ -1,0 +1,7 @@
+<h1 class="px-3 my-3 text-2xl text-gray-700 font-bold">History</h1>
+
+<div id="authorization_codes" class="px-2">
+  <% @authorization_codes.each do |authorization_code| %>
+    <%= render partial: 'authorization_code', locals: { authorization_code: authorization_code } %>
+  <% end %>
+</div>

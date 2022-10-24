@@ -12,6 +12,10 @@ class AccessToken < ApplicationRecord
     (expires_at - Time.now.utc).to_i
   end
 
+  def expired?
+    expires_at < Time.now.utc
+  end
+
   def expire!
     self.expires_at = Time.now.utc
     self.save!

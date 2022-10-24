@@ -19,6 +19,14 @@ class AuthorizationsController < ApplicationController
     redirect_to "#{code.redirect_uri}?#{oauth_params.to_query}", allow_other_host: true
   end
 
+  def show
+    @authorization_code = current_user.authorization_codes.find(params[:id])
+  end
+
+  def index
+    @authorization_codes = current_user.authorization_codes.order('created_at DESC')
+  end
+
   private
 
   def parameter_missing?
