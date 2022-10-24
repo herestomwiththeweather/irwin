@@ -3,35 +3,23 @@ class AuthorizationsController < ApplicationController
   before_action :validate_oauth_parameters, only: :new
 
   def new
-    @app_name = params[:client_id]
-    @logo_url = ''
     store_oauth_params
 
-    @app_name, @logo_url = fetch_client_info
-
-    Rails.logger.info "app name: #{@app_name}"
-    Rails.logger.info "app logo url: #{@logo_url}"
+    @client = ClientApp::fetch(params[:client_id])
 
   rescue => e
     Rails.logger.info "authorizations#new Error: #{e.message}"
   end
 
   def create
-    code = current_user.authorization_codes.create!(pkce_challenge: session[:code_challenge], client_id: session[:client_id], redirect_uri: session[:redirect_uri], scope: session[:scope])
+    client_app = ClientApp.where(url: session[:client_id]).first
+    code = current_user.authorization_codes.create!(client_app: client_app, pkce_challenge: session[:code_challenge], client_id: session[:client_id], redirect_uri: session[:redirect_uri], scope: session[:scope])
     oauth_params = {code: code.token, state: session[:state]}
     clear_oauth_params
     redirect_to "#{code.redirect_uri}?#{oauth_params.to_query}", allow_other_host: true
   end
 
   private
-
-  def fetch_client_info
-    doc = Microformats.parse params[:client_id]
-    h_app = doc['items'].select {|i| i['type'].include?('h-app')}
-    props = h_app.first['properties']
-
-    [props['name'].first, props['logo'].first]
-  end
 
   def parameter_missing?
     params[:client_id].blank? || params[:redirect_uri].blank? || params[:scope].blank? || params[:state].blank?

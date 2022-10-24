@@ -1,5 +1,6 @@
 class AuthorizationCode < ApplicationRecord
   belongs_to :user
+  belongs_to :client_app
   has_secure_token
   has_one :access_token
 

@@ -1,5 +1,4 @@
 <div id="<%= dom_id access_token %>" class="m-2 px-5">
-  <p class="text-gray-800">
-  <span class="mr-3"><%= link_to access_token.created_at.to_s(:rfc822), access_token_path(access_token) %></span><span class="mr-3"><a href="<%= access_token.authorization_code.client_id %>"><%= access_token.authorization_code.client_id %></a></span><span class="font-bold"><%= access_token.authorization_code.scope %></span>
-  </p>
+    <img src="<%= access_token.authorization_code.client_app.logo_url %>" style="display: inline;" width=100 height=100>
+    <span class="mr-3"><%= link_to access_token.created_at.to_s(:rfc822), access_token_path(access_token) %></span><span class="mr-3"><a href="<%= access_token.authorization_code.client_id %>"><%= access_token.authorization_code.client_id %></a></span><span class="font-bold"><%= access_token.authorization_code.scope %></span>
 </div>
