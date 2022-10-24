@@ -22,7 +22,7 @@ class AuthorizationsController < ApplicationController
   private
 
   def parameter_missing?
-    params[:client_id].blank? || params[:redirect_uri].blank? || params[:scope].blank? || params[:state].blank?
+    params[:client_id].blank? || params[:redirect_uri].blank? || params[:state].blank?
   end
 
   def invalid_redirect_uri_host?

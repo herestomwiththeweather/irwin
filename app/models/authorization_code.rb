@@ -8,7 +8,6 @@ class AuthorizationCode < ApplicationRecord
 
   validates :redirect_uri, presence: true
   validates :expires_at, presence: true
-  validates :scope, presence: true
   validates :client_id, presence: true
 
   def self.verify(params)
@@ -27,6 +26,7 @@ class AuthorizationCode < ApplicationRecord
       message = 'invalid_grant'
       authorization_code = self.where(token: params[:code]).first
       break unless authorization_code.present?
+      break unless authorization_code.scope.present?
       break if authorization_code.expired?
       break unless authorization_code.redirect_uri == params[:redirect_uri]
       break unless authorization_code.client_id == params[:client_id]
