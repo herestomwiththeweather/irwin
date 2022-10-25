@@ -103,4 +103,8 @@ class AuthorizationCode < ApplicationRecord
       true
     end
   end
+
+  def logo_url_or_default
+    client_app.logo_url || 'indieweb_400x400.jpg'
+  end
 end

@@ -5,5 +5,5 @@
     <%= button_to "Revoke this token", @authorization_code.access_token, method: :delete, style: 'text-decoration: underline' %>
   <% end %>
 
-  <%= link_to "Back to authorizations", authorizations_path %>
+  <%= link_to "Back to history", authorizations_path %>
 </div>
