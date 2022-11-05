@@ -1,0 +1,16 @@
+databases:
+  - name: irwin_production
+
+services:
+  - type: web
+    name: irwin
+    env: ruby
+    buildCommand: "./bin/render-build.sh"
+    startCommand: "bundle exec puma -C config/puma.rb"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: irwin_production
+          property: connectionString
+      - key: RAILS_MASTER_KEY
+        sync: false

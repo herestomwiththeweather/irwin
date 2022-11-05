@@ -81,6 +81,7 @@ test:
 #
 production:
   <<: *default
+  url: <%= ENV["DATABASE_URL"] %>
   database: irwin_production
   username: irwin
   password: <%= ENV["IRWIN_DATABASE_PASSWORD"] %>
