@@ -1,0 +1,9 @@
+<%= form_with(model: @new_status) do |form| %>
+  <%= form.hidden_field(:in_reply_to_id, value: @status.id) if @status.present? %>
+  <div class="px-3 ml-3">
+    <%= form.text_area :text, value: @status.present? ? "@#{@status.account.webfinger_to_s} " : "" %>
+  </div>
+  <div style="width: 280px; height: 40px;">
+    <button style="float: right" class="py-1 px-2 bg-blue-600 border-2 border-blue-700 hover:bg-blue-100 hover:text-blue-600 rounded-lg my-3 text-blue-100 transition-colors duration-300"><%= form.submit "Reply"%></button>
+  </div>
+<% end %>

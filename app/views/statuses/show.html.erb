@@ -1,0 +1,12 @@
+<%= render @status %>
+<% if current_user %>
+  <%= render 'form' %>
+<% end %>
+
+<div class="px-3">
+  <% @status.replies.each do |status| %>
+    <div class="px-3">
+      <%= render status %>
+    </div>
+  <% end %>
+</div>

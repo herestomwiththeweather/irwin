@@ -1,0 +1,20 @@
+<%= render @account %>
+<div class="m-2 px-5">
+  <% if @account.moved_to_account.present? %>
+    <b><%= @account.preferred_username %> has indicated that their new account is now <%= link_to @account.moved_to_account.preferred_username, @account.moved_to_account %><br/></b>
+  <% end %>
+  <%= link_to "identifier", @account.identifier %><br/>
+  <%= link_to @account.following, @account.following %><br/>
+  <%= link_to @account.followers, @account.followers %><br/>
+</div>
+<div class="m-2 px-5">
+  <% @account.statuses.each do |status| %>
+    <%= render status %>
+    <hr />
+  <% end %>
+</div>
+<div style="height: 20px">
+</div>
+<div class="m-2 px-5">
+  <%= link_to "Back to accounts", accounts_path %>
+</div>

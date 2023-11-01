@@ -1,0 +1,8 @@
+<h1 class="px-3 my-3 text-2xl text-gray-700 font-bold">Following (<%= @follows.count %>)</h1>
+
+<div id="following" class="px-2">
+  <% @follows.each do |follow| %>
+    <%= render follow.target_account %> <%= button_to 'Unfollow', follow_path(follow), method: :delete, class: "mt-2 rounded-lg py-3 px-5 bg-gray-100 font-medium", 'data-turbo': false %>
+    <hr />
+  <% end %>
+</div>

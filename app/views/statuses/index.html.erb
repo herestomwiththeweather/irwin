@@ -1,0 +1,7 @@
+<div class="m-2 px-5">
+  <%= render 'form' %>
+  <% @statuses.each do |status| %>
+    <%= render status.reblog || status %>
+    <hr />
+  <% end %>
+</div>

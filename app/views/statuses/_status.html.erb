@@ -1,0 +1,9 @@
+<div id="<%= dom_id status %>" class="m-2 px-5">
+  <% if status.thread.present? %>
+    <%= link_to "replying to", status_path(status.thread) %> <%= status.thread.account.webfinger_to_s %>
+  <% end %>
+  <div><%= image_tag status.account.icon_url_or_default, style: 'display: inline; padding: 2px; max-width: 50px; max-height: 50px;' %><b><%= status.account.name %></b> posted <%= link_to("#{ time_ago_in_words(status.created_at) } ago", status_path(status) ) %></div>
+  <p class="text-gray-800">
+    <%= sanitize status.text, tags: %w(b i u p a) %>
+  </p>
+</div>
