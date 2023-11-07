@@ -4,6 +4,7 @@ class Status < ApplicationRecord
   belongs_to :reblog, foreign_key: 'reblog_of_id', class_name: 'Status', optional: true
 
   has_many :replies, foreign_key: 'in_reply_to_id', class_name: 'Status', inverse_of: :thread
+  has_many :mentions, dependent: :destroy
 
   validates :uri, uniqueness: true, presence: true, unless: :local?
 

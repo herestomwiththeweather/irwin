@@ -5,7 +5,7 @@ class Account < ApplicationRecord
   has_many :passive_relationships, class_name: 'Follow', foreign_key: 'target_account_id', dependent: :destroy
   has_many :account_followers, -> { order('follows.id desc') }, through: :passive_relationships, source: :account
 
-  has_many :statuses
+  has_many :statuses, dependent: :destroy
 
   has_one :user
 
@@ -122,11 +122,11 @@ class Account < ApplicationRecord
   end
 
   def mastodon?
-    identifier.present?
+    user.nil?
   end
 
   def local?
-    identifier.blank?
+    user.present?
   end
 
   def webfinger_to_s
@@ -147,10 +147,23 @@ class Account < ApplicationRecord
 
   def create_status!(status_object)
     Rails.logger.info "#{__method__} id: #{status_object['id']}"
+    mentions = []
     language = status_object['contentMap']&.keys&.first
     thread = nil
     if status_object['inReplyTo'].present?
       thread = Status.find_by(uri: status_object['inReplyTo'])
+    end
+
+    if status_object['tag'].present?
+      status_object['tag'].each do |tag|
+        if 'Mention' == tag['type']
+          Rails.logger.info "XXX mention: looking up #{tag['name']} : #{tag['href']}"
+          account = Account.fetch_and_create_mastodon_account(tag['href'])
+          if account.present?
+            mentions << Mention.new(account: account, silent: false)
+          end
+        end
+      end
     end
 
     # if inReplyTo is present but there is no status with a matching uri, then we can use in_reply_to_uri to assign thread later
@@ -163,6 +176,11 @@ class Account < ApplicationRecord
                                     uri: status_object['id'],
                                     url: status_object['url']
     )
+
+    mentions.each do |m|
+      m.status = status
+      m.save
+    end
 
     if status_object['inReplyTo'].present?
       if nil == thread

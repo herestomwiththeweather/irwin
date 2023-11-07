@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_10_23_195647) do
+ActiveRecord::Schema[7.0].define(version: 2023_11_06_180237) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -77,6 +77,16 @@ ActiveRecord::Schema[7.0].define(version: 2023_10_23_195647) do
     t.datetime "updated_at", null: false
     t.index ["account_id", "target_account_id"], name: "index_follows_on_account_id_and_target_account_id", unique: true
     t.index ["identifier"], name: "index_follows_on_identifier"
+  end
+
+  create_table "mentions", force: :cascade do |t|
+    t.integer "account_id"
+    t.integer "status_id"
+    t.boolean "silent"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "status_id"], name: "index_mentions_on_account_id_and_status_id", unique: true
+    t.index ["status_id"], name: "index_mentions_on_status_id"
   end
 
   create_table "statuses", force: :cascade do |t|

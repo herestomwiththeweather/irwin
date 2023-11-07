@@ -52,7 +52,8 @@ class User < ApplicationRecord
   end
 
   def feed
-    Status.where(account_id: self.account.active_relationships.select(:target_account_id)).or(Status.where(account_id: self.account.id))
+    status_ids = Mention.where(account: self.account).map {|m| m.status.id}
+    Status.where(account_id: self.account.active_relationships.select(:target_account_id)).or(Status.where(account_id: self.account.id)).or(Status.where(id: status_ids))
   end
 
   def post(receiver, body)
