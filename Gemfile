@@ -55,6 +55,7 @@ gem "bootsnap", require: false
 gem 'indieweb-endpoints'
 gem 'microformats'
 gem 'sidekiq', '6.5.9'
+gem 'webfinger'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

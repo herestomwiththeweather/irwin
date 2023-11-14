@@ -38,6 +38,19 @@ class Account < ApplicationRecord
     Account.create_mastodon_account(actor)
   end
 
+  def self.fetch_and_create_mastodon_account_by_address(address)
+    preferred_username, domain = address.split('@')
+    account = Account.find_by(preferred_username: preferred_username, domain: domain)
+    return account if account.present?
+
+    result = WebFinger.discover! "acct:#{address}"
+    actor_url = result['links'].select {|link| link['rel'] == 'self'}.first['href']
+
+    actor = fetch_mastodon_account(actor_url)
+
+    Account.create_mastodon_account(actor)
+  end
+
   def self.fetch_and_create_or_update_mastodon_account(actor_url)
     account = find_by(identifier: actor_url)
 
@@ -95,6 +108,7 @@ class Account < ApplicationRecord
   def update_mastodon_account(actor)
     self.public_key = actor['publicKey']['publicKeyPem']
     self.identifier = actor['id']
+    self.domain = URI.parse(identifier).hostname
     self.preferred_username = actor['preferredUsername']
     self.name = actor['name']
     self.also_known_as = actor['alsoKnownAs']
@@ -135,10 +149,6 @@ class Account < ApplicationRecord
 
   def username
     local? ? user.username : preferred_username
-  end
-
-  def domain
-    local? ? user.domain : URI.parse(identifier).hostname
   end
 
   def follow!(target_account, object_uri = '')

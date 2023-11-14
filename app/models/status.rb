@@ -10,6 +10,8 @@ class Status < ApplicationRecord
 
   default_scope { order(created_at: :desc) }
 
+  after_create :create_mentions_for_local_account
+
   # returns JSON response or nil
   def self.fetch_remote_original_status(u)
     headers = {'Accept': 'application/json'}
@@ -50,6 +52,15 @@ class Status < ApplicationRecord
     )
   end
 
+  def create_mentions_for_local_account
+    if account.local?
+      find_mentions.each do |mention|
+        mention.status = self
+        mention.save
+      end
+    end
+  end
+
   def local_uri
     Rails.application.routes.url_helpers.status_url(self, host: URI(ENV['INDIEAUTH_HOST']).host)
   end
@@ -59,15 +70,20 @@ class Status < ApplicationRecord
     if thread.present?
       recipients << thread.account unless recipients.include?(thread.account)
     end
-    recipients.each do |follower|
-      Rails.logger.info "#{__method__} sending to [#{follower.id}] #{follower.webfinger_to_s}"
+
+    mentions.each do |mention|
+      recipients << mention.account unless recipients.include?(mention.account)
+    end
+
+    recipients.each do |recipient|
+      Rails.logger.info "#{__method__} sending to [#{recipient.id}] #{recipient.webfinger_to_s}"
       activity = {}
       activity['actor'] = account.user.actor_url
       activity['type'] = 'Create'
       activity['id'] =  local_uri
       activity['to'] = [
         "https://www.w3.org/ns/activitystreams#Public"
-      ],
+      ]
       activity['object'] = {
         "id" => local_uri,
         "type" => "Note",
@@ -81,6 +97,18 @@ class Status < ApplicationRecord
       cc_list = [
         account.user.followers_url
       ]
+
+      tag_list = []
+
+      mentions.each do |mention|
+        cc_list << mention.account.identifier
+        tag_list << {
+          "name" => "@#{mention.account.webfinger_to_s}",
+          "href" => mention.account.identifier,
+          "type" => "Mention"
+        }
+      end
+
       if thread.present?
         cc_list << thread.account.identifier
         thread_options = {
@@ -92,10 +120,33 @@ class Status < ApplicationRecord
         activity['object'].merge!("cc" => cc_list)
       end
 
-      account.user.post(follower, activity)
+      activity['object'].merge!("tag" => tag_list) unless tag_list.empty?
+
+      account.user.post(recipient, activity)
     end
 
     true
+  end
+
+  def find_mentions
+    new_mentions = []
+
+    mentions_found.each do |mention|
+      mention_account = Account.fetch_and_create_mastodon_account_by_address(mention)
+      if mention_account.present?
+        new_mentions << Mention.new(account: mention_account, silent: false)
+      else
+        Rails.logger.info "#{__method__} error retrieving account for #{mention}"
+      end
+    end
+
+    new_mentions
+  end
+
+  def mentions_found
+    email_regex = /\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b/
+
+    matches = text.scan(email_regex)
   end
 
   def local?
