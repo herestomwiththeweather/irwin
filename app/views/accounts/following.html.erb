@@ -2,7 +2,7 @@
 
 <div id="following" class="px-2">
   <% @follows.each do |follow| %>
-    <%= render follow.target_account %> <%= button_to 'Unfollow', follow_path(follow), method: :delete, class: "mt-2 rounded-lg py-3 px-5 bg-gray-100 font-medium", 'data-turbo': false %>
+    <%= render follow.target_account %>
     <hr />
   <% end %>
 </div>

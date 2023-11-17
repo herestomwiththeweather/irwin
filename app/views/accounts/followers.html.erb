@@ -2,7 +2,7 @@
 
 <div id="followers" class="px-2">
   <% @followers.each do |account| %>
-    <%= render account %><%= button_to('Follow', follow_account_path(account), method: :post, class: "mt-2 rounded-lg py-3 px-5 bg-gray-100 font-medium", 'data-turbo': false) unless current_user.account.follows?(account) %>
+    <%= render account %>
     <hr />
   <% end %>
 </div>
