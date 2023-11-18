@@ -117,6 +117,7 @@ class AccountsController < ApplicationController
       Rails.logger.info "process_item received a follow for #{item['object']} from account id: #{@current_mastodon_account.id}"
       validate_follow_params(item)
       follow = @current_mastodon_account.follow!(@target_account, item['id'])
+      AcceptFollowJob.perform_later(follow.id)
       follow.nil? ? 500 : 202
     when 'Move'
       return 401 unless @current_mastodon_account.matches_activity_actor?(item['object'])
