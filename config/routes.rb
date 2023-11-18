@@ -11,6 +11,7 @@ Rails.application.routes.draw do
   resources :statuses, only: [:index, :show, :create]
   resources :follows, only: [:destroy]
   resources :sessions
+  resources :searches, only: [:new, :create]
   resources :authorizations, only: [:index, :show]
   resources :access_tokens, only: [:destroy]
 
