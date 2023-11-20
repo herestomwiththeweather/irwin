@@ -1,5 +1,6 @@
 class Status < ApplicationRecord
   belongs_to :account
+  belongs_to :direct_recipient, class_name: 'Account', optional: true
   belongs_to :thread, foreign_key: 'in_reply_to_id', class_name: 'Status', optional: true
   belongs_to :reblog, foreign_key: 'reblog_of_id', class_name: 'Status', optional: true
 

@@ -158,6 +158,25 @@ class Account < ApplicationRecord
   def create_status!(status_object)
     Rails.logger.info "#{__method__} id: #{status_object['id']}"
     mentions = []
+    direct_recipient = nil
+
+    if status_object['to'].include?('https://www.w3.org/ns/activitystreams#Public')
+      Rails.logger.info "#{__method__} received public post"
+    else
+      status_object['to'].each do |recipient|
+        Rails.logger.info "#{__method__} to: recipient: #{recipient}"
+        account = Account.find_by(identifier: recipient)
+        direct_recipient = account if account.present? && account.local?
+      end
+
+      if direct_recipient.nil?
+        Rails.logger.info "#{__method__} direct message recipient not found"
+        status_object['cc'].each do |cc_recipient|
+          Rails.logger.info "#{__method__} cc: recipient: #{cc_recipient}"
+        end
+      end
+    end
+
     language = status_object['contentMap']&.keys&.first
     thread = nil
     if status_object['inReplyTo'].present?
@@ -183,6 +202,7 @@ class Account < ApplicationRecord
                                     thread: thread,
                                     in_reply_to_uri: status_object['inReplyTo'],
                                     text: status_object['content'],
+                                    direct_recipient: direct_recipient,
                                     uri: status_object['id'],
                                     url: status_object['url']
     )

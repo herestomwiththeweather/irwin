@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_11_11_032608) do
+ActiveRecord::Schema[7.0].define(version: 2023_11_20_004103) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -103,6 +103,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_11_11_032608) do
     t.string "url"
     t.bigint "in_reply_to_id"
     t.string "in_reply_to_uri"
+    t.bigint "direct_recipient_id"
     t.index ["account_id"], name: "index_statuses_on_account_id"
     t.index ["in_reply_to_id"], name: "index_statuses_on_in_reply_to_id"
     t.index ["reblog_of_id"], name: "index_statuses_on_reblog_of_id"
