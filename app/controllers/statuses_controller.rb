@@ -2,6 +2,8 @@ class StatusesController < ApplicationController
   before_action :login_required, except: [:show]
   before_action :set_status, only: [:show]
 
+  authorize_resource
+
   def index
     @statuses = current_user.feed
     @new_status = Status.new

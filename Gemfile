@@ -56,6 +56,7 @@ gem 'indieweb-endpoints'
 gem 'microformats'
 gem 'sidekiq', '6.5.9'
 gem 'webfinger'
+gem 'cancancan'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
