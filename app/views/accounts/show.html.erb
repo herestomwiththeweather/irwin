@@ -8,6 +8,9 @@
   <%= link_to @account.followers, @account.followers %><br/>
 </div>
 <div class="m-2 px-5">
+  <%= render partial: 'statuses/form', locals: { direct_recipient_id: @account.id } %>
+</div>
+<div class="m-2 px-5">
   <% @account.statuses.each do |status| %>
     <%= render status %>
     <hr />

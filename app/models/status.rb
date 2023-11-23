@@ -63,11 +63,16 @@ class Status < ApplicationRecord
   end
 
   def local_uri
-    Rails.application.routes.url_helpers.status_url(self, host: URI(ENV['INDIEAUTH_HOST']).host)
+    Rails.application.routes.url_helpers.status_url(self, host: URI(ENV['INDIEAUTH_HOST']).host, protocol: 'https')
   end
 
   def notify_cc
-    recipients = account.account_followers
+    if direct_recipient.present?
+      recipients = [ direct_recipient ]
+    else
+      recipients = account.account_followers
+    end
+
     if thread.present?
       recipients << thread.account unless recipients.include?(thread.account)
     end
@@ -83,7 +88,7 @@ class Status < ApplicationRecord
       activity['type'] = 'Create'
       activity['id'] =  local_uri
       activity['to'] = [
-        "https://www.w3.org/ns/activitystreams#Public"
+        direct_recipient.present? ? direct_recipient.identifier : "https://www.w3.org/ns/activitystreams#Public"
       ]
       activity['object'] = {
         "id" => local_uri,
@@ -92,12 +97,12 @@ class Status < ApplicationRecord
         "attributedTo" => account.user.actor_url,
         "content" => text,
         "to" => [
-          "https://www.w3.org/ns/activitystreams#Public"
+          direct_recipient.present? ? direct_recipient.identifier : "https://www.w3.org/ns/activitystreams#Public"
         ]
       }
       cc_list = [
-        account.user.followers_url
       ]
+      cc_list << account.user.followers_url unless direct_recipient.present?
 
       tag_list = []
 
@@ -106,6 +111,14 @@ class Status < ApplicationRecord
         tag_list << {
           "name" => "@#{mention.account.webfinger_to_s}",
           "href" => mention.account.identifier,
+          "type" => "Mention"
+        }
+      end
+
+      if direct_recipient.present?
+        tag_list << {
+          "name" => "@#{direct_recipient.webfinger_to_s}",
+          "href" => direct_recipient.identifier,
           "type" => "Mention"
         }
       end

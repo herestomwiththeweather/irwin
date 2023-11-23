@@ -46,6 +46,6 @@ class StatusesController < ApplicationController
   end
 
   def status_params
-    params.require(:status).permit(:text, :in_reply_to_id)
+    params.require(:status).permit(:text, :in_reply_to_id, :direct_recipient_id)
   end
 end

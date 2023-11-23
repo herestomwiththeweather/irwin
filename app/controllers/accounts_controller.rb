@@ -21,6 +21,7 @@ class AccountsController < ApplicationController
   end
 
   def show
+    @new_status = Status.new
   end
 
   def follow

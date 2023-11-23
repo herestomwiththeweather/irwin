@@ -1,5 +1,6 @@
 <%= form_with(model: @new_status) do |form| %>
   <%= form.hidden_field(:in_reply_to_id, value: @status.id) if @status.present? %>
+  <%= form.hidden_field(:direct_recipient_id, value: direct_recipient_id) %>
   <div class="px-3 ml-3">
     <%= form.text_area :text, value: @status.present? ? "@#{@status.account.webfinger_to_s} " : "" %>
   </div>
