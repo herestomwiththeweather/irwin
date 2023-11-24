@@ -6,6 +6,7 @@ class Account < ApplicationRecord
   has_many :account_followers, -> { order('follows.id desc') }, through: :passive_relationships, source: :account
 
   has_many :statuses, dependent: :destroy
+  has_many :likes
 
   has_one :user
 
@@ -153,6 +154,11 @@ class Account < ApplicationRecord
 
   def follow!(target_account, object_uri = '')
     Follow.add(self, target_account, object_uri)
+  end
+
+  def like!(status_uri)
+    status = Status.from_local_uri(status_uri)
+    self.likes.create!(status: status)
   end
 
   def create_status!(status_object)

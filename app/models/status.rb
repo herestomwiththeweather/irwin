@@ -6,6 +6,7 @@ class Status < ApplicationRecord
 
   has_many :replies, foreign_key: 'in_reply_to_id', class_name: 'Status', inverse_of: :thread
   has_many :mentions, dependent: :destroy
+  has_many :likes, dependent: :destroy
 
   validates :uri, uniqueness: true, presence: true, unless: :local?
 
@@ -17,6 +18,14 @@ class Status < ApplicationRecord
   def self.fetch_remote_original_status(u)
     headers = {'Accept': 'application/json'}
     HttpClient.new(u, headers).get
+  end
+
+  def self.from_local_uri(uri)
+    status_uri = URI(uri)
+    return nil unless URI(ENV['INDIEAUTH_HOST']).host == status_uri.host
+    id = status_uri.path.split('/').last
+    # nil uri means the status was created locally
+    Status.find_by(id: id, uri: nil)
   end
 
   def self.from_object_uri(uri)

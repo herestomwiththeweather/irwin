@@ -47,7 +47,7 @@ class AccountsController < ApplicationController
       #process_items @json['items']
     when 'OrderedCollection', 'OrderedCollectionPage'
       #process_items @json['orderedItems']
-    when 'Follow', 'Undo', 'Accept', 'Create', 'Announce', 'Move'
+    when 'Follow', 'Undo', 'Accept', 'Create', 'Announce', 'Move', 'Like'
       if process_header
         Rails.logger.info "inbox: current mastodon account id: #{@current_mastodon_account.id}"
         response_code = process_item(@json)
@@ -120,6 +120,9 @@ class AccountsController < ApplicationController
       follow = @current_mastodon_account.follow!(@target_account, item['id'])
       AcceptFollowJob.perform_later(follow.id)
       follow.nil? ? 500 : 202
+    when 'Like'
+      @current_mastodon_account.like!(item['object'])
+      202
     when 'Move'
       return 401 unless @current_mastodon_account.matches_activity_actor?(item['object'])
 
@@ -173,6 +176,11 @@ class AccountsController < ApplicationController
         else
           Rails.logger.info "Error. Undo: follow lookup failed."
         end
+      elsif 'Like' == item['object']['type']
+        Rails.logger.info "undo like [#{@current_mastodon_account.id}, #{item['object']['object']}]"
+        status = Status.from_local_uri(item['object']['object'])
+        like = Like.find_by(status: status, account: @current_mastodon_account)
+        like.destroy!
       else
         Rails.logger.info "Error. Unsupported type for undo: #{item['object']['type']}"
       end
