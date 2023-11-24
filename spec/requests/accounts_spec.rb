@@ -11,6 +11,7 @@ RSpec.describe "Accounts", type: :request do
   let(:recipient_user) { create :user }
   let(:recipient_url) { "#{ENV['INDIEAUTH_HOST']}/actor/#{recipient_user.to_short_webfinger_s}" }
   let(:follow) { create :follow, target_account: origin_account, account: recipient_user.account }
+  let(:target_status) { create :status, account_id: recipient_user.account.id, uri: nil }
   let(:valid_move_attributes) do
     { id: 'https://example.com/users/actor#moves/123',
       type: 'Move',
@@ -19,19 +20,38 @@ RSpec.describe "Accounts", type: :request do
       object: origin_url
     }
   end
+  let(:valid_like_attributes) do
+    { id: 'https://example.com/users/actor#likes/123',
+      type: 'Like',
+      actor: origin_url,
+      object: target_status.local_uri
+    }
+  end
+
+  before do
+    allow(IndieWeb::Endpoints).to receive(:get).and_return(indieweb_info)
+
+    # intended for recipient to fetch origin account
+    allow(Account).to receive(:fetch_by_key).and_return(origin_account)
+    origin_account.public_key = keypair.public_key.to_pem
+
+    allow(Account).to receive(:fetch_and_create_or_update_mastodon_account).and_return(target_account)
+    allow(Follow).to receive(:add).and_return(nil)
+  end
+
+  describe "like" do
+    it "returns success" do
+      receiver_inbox = "#{recipient_url}/inbox"
+
+      activity = Activity.new(receiver_inbox, valid_like_attributes, origin_url, private_key)
+
+      post receiver_inbox, params: valid_like_attributes.to_json, headers: activity.request_headers
+
+      expect(response).to have_http_status(202)
+    end
+  end
 
   describe "move" do
-    before do
-      allow(IndieWeb::Endpoints).to receive(:get).and_return(indieweb_info)
-
-      # intended for recipient to fetch origin account
-      allow(Account).to receive(:fetch_by_key).and_return(origin_account)
-      origin_account.public_key = keypair.public_key.to_pem
-
-      allow(Account).to receive(:fetch_and_create_or_update_mastodon_account).and_return(target_account)
-      allow(Follow).to receive(:add).and_return(nil)
-    end
-
     it "returns success" do
       allow(Follow).to receive(:find_by).and_return(follow)
 
