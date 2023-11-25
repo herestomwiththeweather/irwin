@@ -23,9 +23,7 @@ class LikesController < ApplicationController
 
   def show
     respond_to do |format|
-      format.html do
-        format.json { render json: {} }
-      end
+      format.json { render json: {} }
     end
   end
 
