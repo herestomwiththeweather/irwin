@@ -121,8 +121,8 @@ class AccountsController < ApplicationController
       AcceptFollowJob.perform_later(follow.id)
       follow.nil? ? 500 : 202
     when 'Like'
-      @current_mastodon_account.like!(item['object'])
-      202
+      like = @current_mastodon_account.like!(item['object'])
+      like.nil? ? 500 : 202
     when 'Move'
       return 401 unless @current_mastodon_account.matches_activity_actor?(item['object'])
 

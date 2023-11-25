@@ -158,7 +158,7 @@ class Account < ApplicationRecord
 
   def like!(status_uri)
     status = Status.from_local_uri(status_uri)
-    self.likes.create!(status: status)
+    status.like!(self)
   end
 
   def create_status!(status_object)

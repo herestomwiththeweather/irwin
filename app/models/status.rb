@@ -62,6 +62,10 @@ class Status < ApplicationRecord
     )
   end
 
+  def like!(account)
+    self.likes.create!(account: account)
+  end
+
   def create_mentions_for_local_account
     if account.local?
       find_mentions.each do |mention|

@@ -1,4 +1,4 @@
-<div id="<%= dom_id status %>" class="m-2 px-5">
+<%= turbo_frame_tag(dom_id status) do %>
   <% if status.thread.present? %>
     <%= link_to "replying to", status_path(status.thread) %> <%= status.thread.account.webfinger_to_s %>
   <% end %>
@@ -6,4 +6,11 @@
   <p class="text-gray-800">
     <%= sanitize status.text, tags: %w(b i u p a) %>
   </p>
-</div>
+  <% if status.account != current_user.account %>
+    <% if like = Like.find_by(status: status, account: current_user.account) %>
+      <%= button_to('Unlike', like_path(like), method: 'delete', style: 'text-decoration: underline') %>
+    <% else %>
+      <%= button_to('Like', likes_path(status_id: status.id), method: 'post', style: 'text-decoration: underline') %>
+    <% end %>
+  <% end %>
+<% end %>

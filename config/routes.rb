@@ -10,6 +10,7 @@ Rails.application.routes.draw do
   end
   resources :statuses, only: [:index, :show, :create]
   resources :follows, only: [:destroy]
+  resources :likes, only: [:create, :show, :destroy]
   resources :sessions
   resources :searches, only: [:new, :create]
   resources :authorizations, only: [:index, :show]
