@@ -62,6 +62,15 @@ class Status < ApplicationRecord
     )
   end
 
+  def private_mention?
+    direct_recipient.present?
+  end
+
+  def counterparty(current_account)
+    return nil unless direct_recipient.present?
+    (direct_recipient == current_account) ? account : direct_recipient
+  end
+
   def like!(account)
     self.likes.create!(account: account)
   end

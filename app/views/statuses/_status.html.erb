@@ -2,7 +2,7 @@
   <% if status.thread.present? %>
     <%= link_to "replying to", status_path(status.thread) %> <%= status.thread.account.webfinger_to_s %>
   <% end %>
-  <div><%= image_tag status.account.icon_url_or_default, style: 'display: inline; padding: 2px; max-width: 50px; max-height: 50px;' %><b><%= link_to status.account.name, status.account %></b> posted <%= link_to("#{ time_ago_in_words(status.created_at) } ago", status_path(status) ) %></div>
+  <div><%= image_tag status.account.icon_url_or_default, style: 'display: inline; padding: 2px; max-width: 50px; max-height: 50px;' %><b><%= link_to status.account.name, status.account %></b> posted <%= link_to("#{ time_ago_in_words(status.created_at) } ago", status_path(status), data: {'turbo-frame': '_top'} ) %></div>
   <p class="text-gray-800">
     <%= sanitize status.text, tags: %w(b i u p a) %>
   </p>

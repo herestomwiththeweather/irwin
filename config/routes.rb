@@ -8,7 +8,11 @@ Rails.application.routes.draw do
       post :follow
     end
   end
-  resources :statuses, only: [:index, :show, :create]
+  resources :statuses, only: [:index, :show, :create] do
+    collection do
+      get :private_mentions
+    end
+  end
   resources :follows, only: [:destroy]
   resources :likes, only: [:create, :show, :destroy]
   resources :sessions

@@ -9,6 +9,10 @@ class StatusesController < ApplicationController
     @new_status = Status.new
   end
 
+  def private_mentions
+    @statuses = Status.where(direct_recipient: current_user.account).or(@current_user.account.statuses.where('direct_recipient_id IS NOT NULL'))
+  end
+
   def show
     # api access only allowed for statuses that were created by local users
 
@@ -16,6 +20,12 @@ class StatusesController < ApplicationController
       format.html do
         @new_status = Status.new
         @new_status.in_reply_to_id = @status.id
+
+        # XXX d'oh! what if recipient was only mentioned in a private mention and not the direct recipient?
+        @direct_recipient_id = nil
+        if @status.private_mention?
+          @direct_recipient_id = @status.counterparty(current_user.account).id
+        end
       end
       format.json do
         if @status.local?
@@ -29,7 +39,6 @@ class StatusesController < ApplicationController
 
   def create
     @status = Status.new(status_params)
-    Rails.logger.info "XXX create: #{@status.in_reply_to_id}"
     @status.account = current_user.account
     @status.language = 'en'
 
