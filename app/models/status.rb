@@ -75,6 +75,14 @@ class Status < ApplicationRecord
     self.likes.create!(account: account)
   end
 
+  def boost!(account)
+    Rails.logger.info "#{__method__} account #{account.id} boosting #{id}"
+    raise StandardError if account.user.nil?
+    status = account.statuses.create!(reblog: self)
+    NotifyFollowersJob.perform_later(status.id)
+    status
+  end
+
   def create_mentions_for_local_account
     if account.local?
       find_mentions.each do |mention|
@@ -88,11 +96,46 @@ class Status < ApplicationRecord
     Rails.application.routes.url_helpers.status_url(self, host: URI(ENV['INDIEAUTH_HOST']).host, protocol: 'https')
   end
 
+  def notify_announce
+    return false if (direct_recipient.present? || reblog.nil?)
+
+    recipients = [ reblog.account ]
+    recipients << account.account_followers
+    recipients.flatten!
+
+    cc_list = []
+    cc_list << account.user.followers_url
+    cc_list << reblog.account.identifier
+
+    recipients.each do |recipient|
+      Rails.logger.info "#{__method__} sending to [#{recipient.id}] #{recipient.webfinger_to_s}"
+      activity = {}
+      activity['actor'] = account.user.actor_url
+      activity['type'] = 'Announce'
+      activity['id'] =  local_uri
+      activity['to'] = [
+        "https://www.w3.org/ns/activitystreams#Public"
+      ]
+      activity['cc'] = cc_list
+      activity['published'] =  created_at.iso8601
+
+      activity['object'] = reblog.uri
+
+      account.user.post(recipient, activity)
+    end
+
+    true
+  end
+
   def notify_cc
+    recipients = []
+
     if direct_recipient.present?
-      recipients = [ direct_recipient ]
+      recipients << direct_recipient
     else
-      recipients = account.account_followers
+      account.account_followers.each do |follower|
+        recipients << follower
+      end
     end
 
     if thread.present?

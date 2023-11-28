@@ -4,6 +4,10 @@ class NotifyFollowersJob < ApplicationJob
 
   def perform(status_id)
     status = Status.find(status_id)
-    status.notify_cc
+    if status.reblog.present?
+      status.notify_announce
+    else
+      status.notify_cc
+    end
   end
 end

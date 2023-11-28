@@ -1,6 +1,6 @@
 class StatusesController < ApplicationController
   before_action :login_required, except: [:show]
-  before_action :set_status, only: [:show]
+  before_action :set_status, only: [:show, :boost]
 
   authorize_resource
 
@@ -11,6 +11,15 @@ class StatusesController < ApplicationController
 
   def private_mentions
     @statuses = Status.where(direct_recipient: current_user.account).or(@current_user.account.statuses.where('direct_recipient_id IS NOT NULL'))
+  end
+
+  def boost
+    respond_to do |format|
+      format.html do
+        @status.boost!(current_user.account)
+        render @status
+      end
+    end
   end
 
   def show

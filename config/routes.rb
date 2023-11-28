@@ -9,6 +9,9 @@ Rails.application.routes.draw do
     end
   end
   resources :statuses, only: [:index, :show, :create] do
+    member do
+      post :boost
+    end
     collection do
       get :private_mentions
     end
