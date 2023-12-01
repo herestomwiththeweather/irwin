@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-  before_action :set_user, only: [:actor]
+  before_action :set_user, only: [:actor, :followers, :following]
 
   def new
     @user = User.new
@@ -26,6 +26,30 @@ class UsersController < ApplicationController
     end
   end
 
+  def followers
+    @target_user.current_page = params[:page]
+
+    respond_to do |format|
+      format.html do
+      end
+      format.all do
+        render json: @target_user, serializer: ListSerializer, content_type: 'application/activity+json'
+      end
+    end
+  end
+
+  def following
+    @target_user.current_page = params[:page]
+
+    respond_to do |format|
+      format.html do
+      end
+      format.all do
+        render json: @target_user, serializer: ListSerializer, content_type: 'application/activity+json'
+      end
+    end
+  end
+
   def activity
     raise StandardError
   end
@@ -48,7 +72,7 @@ class UsersController < ApplicationController
   def set_user
     identifier = params[:id].gsub(/^@/,'')
     username, domain = identifier.split('@')
-    @target_user = User.where(username: username, domain: domain).first
+    @target_user = User.find_by(username: username, domain: domain)
     raise ActiveRecord::RecordNotFound if @target_user.nil?
   end
 

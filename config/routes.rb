@@ -39,7 +39,8 @@ Rails.application.routes.draw do
   get '/.well-known/webfinger' => 'users#webfinger', as: :webfinger
   get '/actor/:id' => 'users#actor', as: :actor, id: /[^\/]+/
   post '/actor/:id/inbox' => 'accounts#inbox', as: :inbox, id: /[^\/]+/
-  get '/actor/:id/followers' => 'accounts#api_followers', as: :api_folowers, id: /[^\/]+/
+  get '/actor/:id/followers' => 'users#followers', as: :api_followers, id: /[^\/]+/
+  get '/actor/:id/following' => 'users#following', as: :api_following, id: /[^\/]+/
 
   get '/activities/:id' => 'users#activity', as: :activity
 

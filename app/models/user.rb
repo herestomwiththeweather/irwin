@@ -15,6 +15,7 @@ class User < ApplicationRecord
 
   attr_accessor :auth_endpoint_host
   attr_accessor :token_endpoint_host
+  attr_accessor :current_page
 
   before_validation :generate_keys, on: :create
   before_validation :discover_indieauth, on: :create

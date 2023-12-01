@@ -8,10 +8,6 @@ class AccountsController < ApplicationController
     @followers = current_user.account.account_followers
   end
 
-  def api_followers
-    render plain: '', status: 404
-  end
-
   def following
     @follows = Follow.where(account: current_user.account)
   end
