@@ -3,7 +3,7 @@ Rails.application.routes.draw do
   mount Sidekiq::Web => '/sidekiq'
 
   resources :users
-  resources :accounts, only: [:index, :show] do
+  resources :accounts, only: [:index, :show, :edit, :update] do
     member do
       post :follow
     end

@@ -6,6 +6,7 @@
   <p class="text-gray-800">
     <%= sanitize status.text, tags: %w(b i u p a) %>
   </p>
+  <% if current_user %>
   <% if status.account != current_user.account %>
     <div style="display: inline-block;">
     <% if like = Like.find_by(status: status, account: current_user.account) %>
@@ -21,5 +22,6 @@
       <%= button_to('Boost', boost_status_path(status), method: 'post', style: 'text-decoration: underline') %>
     <% end %>
     </div>
+  <% end %>
   <% end %>
 <% end %>

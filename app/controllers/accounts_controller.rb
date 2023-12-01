@@ -1,8 +1,10 @@
 class AccountsController < ApplicationController
   before_action :set_target_account, only: [:inbox]
-  before_action :set_account, only: [:show, :follow]
+  before_action :set_account, only: [:show, :edit, :update, :follow]
   skip_before_action :verify_authenticity_token, only: [:inbox]
   before_action :login_required, except: [:inbox]
+
+  authorize_resource
 
   def followers
     @followers = current_user.account.account_followers
@@ -18,6 +20,19 @@ class AccountsController < ApplicationController
 
   def show
     @new_status = Status.new
+  end
+
+  def edit
+  end
+
+  def update
+    respond_to do |format|
+      if @account.update(account_params)
+        format.html { redirect_to root_url, notice: "Account was successfully updated." }
+      else
+        format.html { render :edit, status: :unprocessable_entity }
+      end
+    end
   end
 
   def follow
@@ -185,6 +200,12 @@ class AccountsController < ApplicationController
       Rails.logger.info "process_item does not support item type: #{item['type']}"
       404
     end
+  end
+
+  private
+
+  def account_params
+    params.require(:account).permit(:name, :summary, :url, :icon)
   end
 
   def set_target_account

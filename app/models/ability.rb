@@ -32,5 +32,7 @@ class Ability
       user && (status.direct_recipient.nil? || status.direct_recipient == user.account || status.account == user.account)
     end
     can :create, Status
+    can [:read, :index, :inbox, :follow, :following, :followers], Account
+    can :update, Account, user: user
   end
 end

@@ -23,6 +23,7 @@
       <span class="mr-3 ml-3"><%= link_to "Search", new_search_path %></a></span> |
       <span class="mr-3 ml-3"><%= link_to "Private Mentions", private_mentions_statuses_path %></a></span> |
       <span class="mr-3 ml-3"><%= link_to "Authorizations", authorizations_path %></a></span> |
+      <span class="mr-3 ml-3"><%= link_to "Settings", edit_account_path(current_user.account) %></a></span> |
       <span class="mr-3 ml-3"><%= link_to "Followers", followers_path %></a></span> |
       <span class="mr-3 ml-3"><%= link_to "Following", following_path %></a></span> |
       <button class="ml-3 mt-1 py-1 px-2 rounded-lg border-2 bg-blue-600 border-blue-700 hover:bg-blue-100 hover:text-blue-600 text-blue-100 transition-colors duration-300"><a href="/logout">Logout</a></button>

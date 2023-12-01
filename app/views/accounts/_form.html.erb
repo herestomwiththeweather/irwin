@@ -1,0 +1,36 @@
+<%= form_with(model: account, class: "contents") do |form| %>
+  <% if account.errors.any? %>
+    <div id="error_explanation" class="bg-red-50 text-red-500 px-3 py-2 font-medium rounded-lg mt-3">
+      <h2><%= pluralize(account.errors.count, "error") %> prohibited this account from being saved:</h2>
+
+      <ul>
+        <% account.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class='pt-5'>
+    <%= form.label :name %><br />
+    <%= form.text_field :name %>
+  </div>
+
+  <div class='pt-5'>
+    <%= form.label :summary %><br />
+    <%= form.text_field :summary %>
+  </div>
+
+  <div class='py-5'>
+    <%= form.label :url %><br />
+    <%= form.text_field :url %>
+  </div>
+
+  <div class='pt-5'>
+    <%= form.label :icon %><br />
+    <%= form.text_field :icon %>
+  </div>
+
+  <button class="py-1 px-2 bg-blue-600 border-2 border-blue-700 hover:bg-blue-100 hover:text-blue-600 rounded-lg my-3 text-blue-100 transition-colors duration-300"><%= form.submit %></button>
+
+<% end %>

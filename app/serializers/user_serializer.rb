@@ -5,7 +5,7 @@ class UserSerializer < ApplicationSerializer
 
   has_one :public_key, serializer: PublicKeySerializer
 
-  attributes :id, :type, :preferred_username, :inbox, '@context'
+  attributes :id, :type, :preferred_username, :inbox, '@context', :following, :followers, :name, :summary, :url, :icon
 
   def type
     "Person"
@@ -25,6 +25,30 @@ class UserSerializer < ApplicationSerializer
 
   def inbox
     action_url('inbox', 'accounts')
+  end
+
+  def following
+    action_url('following', 'users')
+  end
+
+  def followers
+    action_url('followers', 'users')
+  end
+
+  def name
+    object.account.name
+  end
+
+  def summary
+    object.account.summary
+  end
+
+  def url
+    object.account.url
+  end
+
+  def icon
+    object.account.icon
   end
 
   def action_url(action, controller)
