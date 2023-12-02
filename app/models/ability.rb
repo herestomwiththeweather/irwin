@@ -29,7 +29,11 @@ class Ability
     # See the wiki for details:
     # https://github.com/CanCanCommunity/cancancan/blob/develop/docs/define_check_abilities.md
     can [:read, :boost, :private_mentions], Status do |status|
-      user && (status.direct_recipient.nil? || status.direct_recipient == user.account || status.account == user.account)
+      if user
+        status.direct_recipient.nil? || status.direct_recipient == user.account || status.account == user.account
+      else
+        status.direct_recipient.nil? && status.account.user.present?
+      end
     end
     can :create, Status
     can [:read, :index, :inbox, :follow, :following, :followers], Account
