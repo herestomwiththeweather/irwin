@@ -49,7 +49,7 @@ class User < ApplicationRecord
   end
 
   def assign_account
-    self.account = Account.create! if account.nil?
+    self.account = Account.create!(preferred_username: nil) if account.nil?
   end
 
   def feed

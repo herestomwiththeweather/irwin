@@ -124,6 +124,10 @@ class Account < ApplicationRecord
     self.summary = actor['summary']
   end
 
+  def preferred_username
+    self[:preferred_username] || user&.username
+  end
+
   def also_known_as
     self[:also_known_as] || []
   end
@@ -145,11 +149,7 @@ class Account < ApplicationRecord
   end
 
   def webfinger_to_s
-    "#{username}@#{domain}"
-  end
-
-  def username
-    local? ? user.username : preferred_username
+    "#{preferred_username}@#{domain}"
   end
 
   def follow!(target_account, object_uri = '')
