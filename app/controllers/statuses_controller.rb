@@ -5,7 +5,7 @@ class StatusesController < ApplicationController
   authorize_resource
 
   def index
-    @statuses = current_user.feed
+    @statuses = current_user.feed.page(params[:page])
     @new_status = Status.new
   end
 
