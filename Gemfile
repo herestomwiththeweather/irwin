@@ -58,6 +58,7 @@ gem 'sidekiq', '6.5.9'
 gem 'webfinger'
 gem 'cancancan'
 gem 'kaminari'
+gem 'exception_notification'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

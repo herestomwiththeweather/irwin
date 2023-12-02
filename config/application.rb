@@ -36,5 +36,13 @@ module Irwin
     config.generators.system_tests = nil
 
     config.active_job.queue_adapter = :sidekiq
+    if ENV['EXCEPTION_NOTIFICATION']
+      config.middleware.use ExceptionNotification::Rack,
+        email: {
+          sender_address: %("Application Error" <app.error@#{ENV['SMTP_DOMAIN']}>),
+          exception_recipients: ENV['EXCEPTION_NOTIFICATION'].split,
+          email_prefix: "[Irwin] "
+        }
+    end
   end
 end

@@ -99,6 +99,9 @@ GEM
       dotenv (= 2.8.1)
       railties (>= 3.2)
     erubi (1.11.0)
+    exception_notification (4.5.0)
+      actionmailer (>= 5.2, < 8)
+      activesupport (>= 5.2, < 8)
     factory_bot (6.2.1)
       activesupport (>= 5.0.0)
     factory_bot_rails (6.2.0)
@@ -293,6 +296,7 @@ DEPENDENCIES
   cssbundling-rails
   debug
   dotenv-rails
+  exception_notification
   factory_bot_rails
   indieweb-endpoints
   jbuilder
