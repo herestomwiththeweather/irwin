@@ -104,6 +104,9 @@ class Account < ApplicationRecord
     account.update_mastodon_account(actor)
     account.save!
     account
+  rescue ActiveRecord::RecordNotUnique => e
+    Rails.logger.info "#{__method__} error actor exists: #{actor['id']}"
+    find_by(identifier: actor['id'])
   end
 
   def update_mastodon_account(actor)
@@ -237,6 +240,9 @@ class Account < ApplicationRecord
                                     reblog: original_status,
                                     uri: item['id']
     )
+  rescue ActiveRecord::RecordInvalid => e
+    Rails.logger.info "#{self.class}##{__method__} exception: #{e.message}"
+    Status.find_by(uri: item['id'])
   end
 
   def matches_activity_actor?(actor_identifier)
