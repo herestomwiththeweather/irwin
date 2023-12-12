@@ -1,6 +1,6 @@
 class StatusesController < ApplicationController
-  before_action :login_required, except: [:show]
-  before_action :set_status, only: [:show, :boost]
+  before_action :login_required, except: [:show, :replies]
+  before_action :set_status, only: [:show, :boost, :replies]
 
   authorize_resource
 
@@ -11,6 +11,19 @@ class StatusesController < ApplicationController
 
   def private_mentions
     @statuses = Status.where(direct_recipient: current_user.account).or(@current_user.account.statuses.where('direct_recipient_id IS NOT NULL'))
+  end
+
+  def replies
+    @status.current_replies_page = params[:page]
+    respond_to do |format|
+      format.all do
+        if @status.local?
+          render json: @status, serializer: RepliesSerializer, content_type: 'application/activity+json'
+        else
+          render json: {}, status: :unprocessable_entity
+        end
+      end
+    end
   end
 
   def boost
@@ -36,7 +49,7 @@ class StatusesController < ApplicationController
           @direct_recipient_id = @status.counterparty(current_user.account).id
         end
       end
-      format.json do
+      format.all do
         if @status.local?
           render json: @status, serializer: StatusSerializer, content_type: 'application/activity+json'
         else
@@ -52,6 +65,7 @@ class StatusesController < ApplicationController
     @status.language = 'en'
 
     if @status.save!
+      @status.update_attribute(:uri, @status.local_uri)
       NotifyFollowersJob.perform_later(@status.id)
       redirect_to root_url, notice: "Success!"
     end

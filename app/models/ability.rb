@@ -35,7 +35,7 @@ class Ability
         status.direct_recipient.nil? && status.account.user.present?
       end
     end
-    can :create, Status
+    can [:create, :replies], Status
     can [:read, :index, :inbox, :follow, :following, :followers], Account
     can :update, Account, user: user
   end

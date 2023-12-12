@@ -164,7 +164,7 @@ class Account < ApplicationRecord
     status.like!(self)
   end
 
-  def create_status!(status_object)
+  def create_status!(status_object, thread = nil)
     Rails.logger.info "#{__method__} id: #{status_object['id']}"
     mentions = []
     direct_recipient = nil
@@ -187,8 +187,8 @@ class Account < ApplicationRecord
     end
 
     language = status_object['contentMap']&.keys&.first
-    thread = nil
-    if status_object['inReplyTo'].present?
+
+    if !thread.present? && status_object['inReplyTo'].present?
       thread = Status.find_by(uri: status_object['inReplyTo'])
     end
 
@@ -215,6 +215,8 @@ class Account < ApplicationRecord
                                     uri: status_object['id'],
                                     url: status_object['url']
     )
+
+    Rails.logger.info "#{__method__} created status #{status.id}"
 
     mentions.each do |m|
       m.status = status

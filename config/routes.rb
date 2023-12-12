@@ -11,6 +11,7 @@ Rails.application.routes.draw do
   resources :statuses, only: [:index, :show, :create] do
     member do
       post :boost
+      get :replies
     end
     collection do
       get :private_mentions

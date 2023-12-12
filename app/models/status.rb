@@ -8,17 +8,13 @@ class Status < ApplicationRecord
   has_many :mentions, dependent: :destroy
   has_many :likes, dependent: :destroy
 
-  validates :uri, uniqueness: true, presence: true, unless: :local?
+  attr_accessor :current_replies_page
+
+  validates :uri, uniqueness: true, presence: true, allow_nil: true
 
   default_scope { order(created_at: :desc) }
 
   after_create :create_mentions_for_local_account
-
-  # returns JSON response or nil
-  def self.fetch_remote_original_status(u)
-    headers = {'Accept': 'application/json'}
-    HttpClient.new(u, headers).get
-  end
 
   def self.from_local_uri(uri)
     status_uri = URI(uri)
@@ -28,11 +24,11 @@ class Status < ApplicationRecord
     Status.find_by(id: id, uri: nil)
   end
 
-  def self.from_object_uri(uri)
+  def self.from_object_uri(uri, thread = nil)
     status = Status.find_by(uri: uri)
     return status unless status.nil?
 
-    json_status = Status.fetch_remote_original_status(uri)
+    json_status = HttpClient.new(uri).get
     if nil == json_status
       Rails.logger.info "#{__method__} error fetching status"
       return nil
@@ -43,7 +39,14 @@ class Status < ApplicationRecord
     end
 
     original_actor_url = json_status['attributedTo']
-    language = json_status['contentMap']&.keys&.first
+
+    if thread
+      if json_status['inReplyTo'] != thread.uri
+        Rails.logger.info "#{__method__} inReplyTo: #{json_status['inReplyTo']}"
+        Rails.logger.info "#{__method__} thread.id: #{thread.uri}"
+        raise "oops"
+      end
+    end
 
     account = Account.fetch_and_create_mastodon_account(original_actor_url)
     if nil == account
@@ -53,13 +56,7 @@ class Status < ApplicationRecord
 
     # XXX embedded self boost?
 
-    status = Status.create!( account_id: account.id,
-                             created_at: json_status['published']&.to_datetime,
-                             language: language,
-                             text: json_status['content'],
-                             url: json_status['url'],
-                             uri: json_status['id']
-    )
+    status = account.create_status!(json_status, thread)
   end
 
   def private_mention?
@@ -92,8 +89,69 @@ class Status < ApplicationRecord
     end
   end
 
+  def replies_uri
+    "#{uri.nil? ? local_uri : uri}/replies"
+  end
+
+  def replies_first_page_uri
+    "#{replies_uri}?page=1"
+  end
+
   def local_uri
     Rails.application.routes.url_helpers.status_url(self, host: URI(ENV['INDIEAUTH_HOST']).host, protocol: 'https')
+  end
+
+  def refresh_replies
+    FetchRepliesJob.perform_later(self.id)
+  end
+
+  def fetch_replies
+    json_status = HttpClient.new(replies_uri).get
+    if nil == json_status
+      Rails.logger.info "#{__method__} error fetching replies"
+      return nil
+    end
+    if json_status['error'].present?
+      Rails.logger.info "error fetching replies: #{json_status['error']}"
+      return nil
+    end
+
+    if 'Collection' != json_status['type']
+      Rails.logger.info "#{__method__} [status #{id}] error type: #{json_status['type']}"
+      return nil
+    end
+
+    first = json_status['first']
+
+    if first['items'].length > 0
+      first['items'].each do |item|
+        Rails.logger.info "#{__method__} item: #{item}"
+      end
+      raise "items is not empty!"
+    end
+
+    return nil unless first['next'].present?
+
+    i=0
+    current_page = first['next']
+    begin
+      Rails.logger.info "#{__method__} [status #{id}] current page: #{current_page}"
+      page_result = HttpClient.new(current_page).get
+      page_result['items'].each do |item|
+        item = item['id'] if item.is_a?(Hash)
+        Rails.logger.info "#{__method__} [status #{id}] calling from_object_uri for: #{item}"
+        status = Status.from_object_uri(item, self)
+        if nil == status
+          Rails.logger.info "#{__method__} [status #{id}] from_object_uri error for: #{item}"
+        else
+          FetchRepliesJob.perform_later(status.id)
+        end
+      end
+      current_page = page_result['next']
+      i += 1
+    end until current_page.nil?
+    Rails.logger.info "#{__method__} [status #{id}] fetched #{i} pages!"
+    i # pages not replies
   end
 
   def notify_announce
@@ -229,7 +287,7 @@ class Status < ApplicationRecord
   end
 
   def local?
-    uri.nil?
+    account.user.present?
   end
 
   def reblog?

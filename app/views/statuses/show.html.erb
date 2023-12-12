@@ -1,7 +1,7 @@
 <% if @status.private_mention? %>
   <b>PRIVATE MENTION</b>
 <% end %>
-<%= render @status %>
+<%= render partial: @status, locals: { child_view: false } %>
 <% if current_user %>
   <%= render partial: 'form', locals: { direct_recipient_id: @direct_recipient_id } %>
 <% end %>
@@ -9,7 +9,7 @@
 <div class="px-3">
   <% @status.replies.each do |status| %>
     <div class="px-3">
-      <%= render status %>
+      <%= render partial: status, locals: { child_view: true } %>
     </div>
   <% end %>
 </div>

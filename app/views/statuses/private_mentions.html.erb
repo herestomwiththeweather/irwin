@@ -1,6 +1,6 @@
 <div class="m-2 px-5">
   <% @statuses.each do |status| %>
-    <%= render status %>
+    <%= render partial: status, locals: { child_view: false } %>
     <hr />
   <% end %>
 </div>

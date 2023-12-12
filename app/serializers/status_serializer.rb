@@ -1,6 +1,16 @@
 class StatusSerializer < ApplicationSerializer
+  define_method('@context') do
+    'https://www.w3.org/ns/activitystreams'
+  end
 
-  attributes :id, :type, :in_reply_to, :published, :content, :attributed_to, :language, :to, :cc
+  attr_accessor :action_name
+
+  attributes :id, :type, '@context', :in_reply_to, :published, :content, :attributed_to, :language, :to, :cc, :replies
+
+  def initialize(object, options={})
+    super
+    @action_name = options[:template]
+  end
 
   def id
     action_url('show', 'statuses')
@@ -46,6 +56,19 @@ class StatusSerializer < ApplicationSerializer
     end
 
     cc_list
+  end
+
+  def replies
+    {
+      id: object.replies_uri,
+      type: 'Collection',
+      first: {
+        type: 'CollectionPage',
+        partOf: object.replies_uri,
+        next: object.replies_first_page_uri,
+        items: []
+      }
+    }
   end
 
   def action_url(action, controller)

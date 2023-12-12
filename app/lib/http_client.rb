@@ -1,7 +1,7 @@
 require 'net/https'
 
 class HttpClient
-  def initialize(url, headers = {}, body = {})
+  def initialize(url, headers = {'Accept': 'application/json'}, body = {})
     @url = URI(url)
     @headers = headers
     @body = body
