@@ -28,6 +28,9 @@ class HttpClient
       Rails.logger.info "#{self.class}#{__method__} error: #{response.code}: #{response.message}"
       nil
     end
+  rescue OpenSSL::SSL::SSLError => e
+    Rails.logger.info "#{self.class}#{__method__} SSL error: #{e.message}"
+    return nil
   rescue JSON::ParserError
     Rails.logger.info "#{self.class}#{__method__} error: could not parse response: #{response.body}"
     nil

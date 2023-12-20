@@ -6,6 +6,8 @@ class AccountsController < ApplicationController
 
   authorize_resource
 
+  ACTIVITIES = ['Follow', 'Undo', 'Accept', 'Create', 'Announce', 'Move', 'Like']
+
   def followers
     @followers = current_user.account.account_followers
   end
@@ -51,7 +53,7 @@ class AccountsController < ApplicationController
     
     @json = JSON.parse(@body)
 
-    Rails.logger.info "-> type: #{@json['type']}, actor: #{@json['actor']}, from: #{request.remote_ip}"
+    Rails.logger.info "-> type: 😂#{@json['type']}😂, actor: #{@json['actor']}, from: #{request.remote_ip}"
 
     case @json['type']
     when 'Collection', 'CollectionPage'
@@ -103,8 +105,7 @@ class AccountsController < ApplicationController
       comparison_string << "\ncontent-type: #{request.headers['Content-Type']}"
     end
 
-    key = OpenSSL::PKey::RSA.new(@current_mastodon_account.public_key)
-    key.verify(OpenSSL::Digest::SHA256.new, signature, comparison_string)
+    @current_mastodon_account.verify(signature, comparison_string)
   end
 
   def process_items(items)
@@ -123,10 +124,25 @@ class AccountsController < ApplicationController
     end
   end
 
+  def log_item(item)
+    if ACTIVITIES.include? item['type']
+      info = case item['type']
+      when 'Follow'
+        "for #{item['object']}"
+      when 'Create', 'Undo'
+        "for type #{item['object']['type']}"
+      else
+        ""
+      end
+      Rails.logger.info "#{__method__} #{item['type']} #{info} from account id: #{@current_mastodon_account.id}"
+    end
+  end
+
   def process_item(item)
+    log_item(item)
+
     response_code = case item['type']
     when 'Follow'
-      Rails.logger.info "process_item received a follow for #{item['object']} from account id: #{@current_mastodon_account.id}"
       validate_follow_params(item)
       follow = @current_mastodon_account.follow!(@target_account, item['id'])
       AcceptFollowJob.perform_later(follow.id)
@@ -158,7 +174,6 @@ class AccountsController < ApplicationController
 
       202
     when 'Accept'
-      Rails.logger.info "process_item received an accept"
       Rails.logger.info "    actor: #{item['actor']}" # actor accepting the follow
       Rails.logger.info "    follower: #{item['object']['actor']}"
       follower = User.by_actor(item['object']['actor']).account
@@ -171,12 +186,29 @@ class AccountsController < ApplicationController
     when 'Delete'
       202
     when 'Create'
-      Rails.logger.info "process_item received a Create for type #{item['object']['type']} from account id: #{@current_mastodon_account.id}"
-      status = @current_mastodon_account.create_status!(item['object'])
-      # XXX if this status is a reply to a local account, broadcast it to local account's followers
+      # since current account could be sending a received reply, we cannot assume current account created the status
+      actor = @current_mastodon_account
+      if item['actor'] != @current_mastodon_account.identifier
+        Rails.logger.info "#{__method__} validating signature for: #{item['actor']}"
+        account = Account.fetch_by_key(item['signature']['creator'])
+        if account.nil?
+          Rails.logger.info "#{self.class}##{__method__} Error No account for #{item['actor']}"
+          return 400
+        end
+
+        return 400 unless account.verify_signature(item)
+        actor = account
+
+        Rails.logger.info "#{__method__} *** signature verification succeeded *** for actor: #{actor.id}"
+      end
+
+      status = actor.create_status!(item['object'])
+      if !status
+        Rails.logger.info "#{__method__} Error creating status id: #{item['object']['id']} from account id: #{actor.id}"
+      end
+
       202
     when 'Undo'
-      Rails.logger.info "process_item received an Undo for type #{item['object']['type']} from account id: #{@current_mastodon_account.id}"
       if 'Follow' == item['object']['type']
         target_account = User.by_actor(item['object']['object']).account
         Rails.logger.info "undo follow [#{@current_mastodon_account.id}, #{target_account.id}, #{item['object']['id']}]"

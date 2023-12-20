@@ -20,6 +20,8 @@ class Account < ApplicationRecord
   validates :url, uniqueness: true
 =end
 
+  CONTEXT = 'https://w3id.org/identity/v1'
+
   def self.fetch_by_key(key_url)
     account = nil
     Rails.logger.info "Account#fetch_by_key request url: #{key_url}"
@@ -34,7 +36,10 @@ class Account < ApplicationRecord
     account = find_by(identifier: actor_url)
     return account if account.present?
 
+    Rails.logger.info "#{__method__} fetching account: #{actor_url}"
+
     actor = fetch_mastodon_account(actor_url)
+    return nil if actor.nil?
 
     Account.create_mastodon_account(actor)
   end
@@ -100,6 +105,7 @@ class Account < ApplicationRecord
   end
 
   def self.create_mastodon_account(actor)
+    return nil if actor.nil?
     account = Account.new
     account.update_mastodon_account(actor)
     account.save!
@@ -109,7 +115,51 @@ class Account < ApplicationRecord
     find_by(identifier: actor['id'])
   end
 
+  def verify(signature, comparison_string)
+    Rails.logger.info "#{self.class}##{__method__}"
+
+    key = OpenSSL::PKey::RSA.new(public_key)
+    result = key.verify(OpenSSL::Digest::SHA256.new, signature, comparison_string)
+    if !result
+      Rails.logger.info "#{__method__} Error verifying signature for account: #{id}"
+    end
+
+    result
+  end
+
+  def verify_signature(json_obj)
+    Rails.logger.info "#{self.class}##{__method__}"
+    item = json_obj.with_indifferent_access
+
+    if item['signature'].blank?
+      Rails.logger.info "#{__method__} Error No signature for #{item['actor']}"
+      return false
+    end
+
+    creator_uri = URI.parse(item['signature']['creator'])
+    signature_creator = item['signature']['creator'].sub(creator_uri.fragment,'').chomp('#')
+    if signature_creator != item['actor']
+      Rails.logger.info "#{self.class}##{__method__} Error unexpected creator: #{item['signature']['creator']}"
+      return false
+    end
+
+    if 'RsaSignature2017' != item['signature']['type']
+      Rails.logger.info "#{__method__} Error Unknown signature type: #{item['signature']['type']}"
+      return false
+    end
+
+    signature = Base64.decode64(item['signature']['signatureValue'])
+    comparison_string = construct_comparison_string(item)
+    verify(signature, comparison_string)
+
+  rescue => e
+    Rails.logger.info "#{__method__} Error: #{e.message}"
+    false
+  end
+
   def update_mastodon_account(actor)
+    return if actor.nil?
+
     self.public_key = actor['publicKey']['publicKeyPem']
     self.identifier = actor['id']
     self.domain = URI.parse(identifier).hostname
@@ -141,6 +191,10 @@ class Account < ApplicationRecord
 
   def follows?(account)
     account_following.include?(account)
+  end
+
+  def has_a_local_follower?
+    account_followers.merge(User.all.map(&:account)).any?
   end
 
   def mastodon?
@@ -195,7 +249,7 @@ class Account < ApplicationRecord
     if status_object['tag'].present?
       status_object['tag'].each do |tag|
         if 'Mention' == tag['type']
-          Rails.logger.info "XXX mention: looking up #{tag['name']} : #{tag['href']}"
+          Rails.logger.info "#{__method__} found mention: looking up #{tag['name']} : #{tag['href']}"
           account = Account.fetch_and_create_mastodon_account(tag['href'])
           if account.present?
             mentions << Mention.new(account: account, silent: false)
@@ -230,6 +284,9 @@ class Account < ApplicationRecord
         Rails.logger.info "#{__method__} thread #{thread.id} already exists locally"
       end
     end
+
+    status
+
   rescue ActiveRecord::RecordInvalid => e
     Rails.logger.info "#{self.class}##{__method__} exception: #{e.message}"
     nil
@@ -251,4 +308,23 @@ class Account < ApplicationRecord
     self.identifier == actor_identifier
   end
 
+  private
+
+  def construct_comparison_string(item)
+    options_hash   = sha256_hash(obj1(item))
+    document_hash  = sha256_hash(obj2(item))
+    options_hash + document_hash
+  end
+
+  def obj1(item)
+    item['signature'].without('type', 'id', 'signatureValue').merge('@context' => CONTEXT)
+  end
+
+  def obj2(item)
+    item.without('signature')
+  end
+
+  def sha256_hash(obj)
+    Digest::SHA256.hexdigest(JsonHelper.canonicalize(obj))
+  end
 end
