@@ -205,6 +205,10 @@ class AccountsController < ApplicationController
       status = actor.create_status!(item['object'])
       if !status
         Rails.logger.info "#{__method__} Error creating status id: #{item['object']['id']} from account id: #{actor.id}"
+      elsif status.thread.present? && status.thread.account.local?
+        if !status.private_mention?
+          DistributeRawReplyJob.perform_later(JSON.dump(item), status.thread.account_id, actor.id)
+        end
       end
 
       202

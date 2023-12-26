@@ -9,7 +9,7 @@ class Activity
   def request_headers
     url = URI.parse(@inbox_url)
     headers = {"Content-type"=>"application/activity+json"}
-    digest = "SHA-256=#{Digest::SHA256.base64digest(@body.to_json)}"
+    digest = "SHA-256=#{Digest::SHA256.base64digest(@body)}"
     headers['Digest'] = digest
     date = Time.now.utc.httpdate
     headers['Date'] = date

@@ -61,7 +61,7 @@ class User < ApplicationRecord
   def post(receiver, body)
     body["@context"] = ["https://www.w3.org/ns/activitystreams"]
 
-    activity = Activity.new(receiver.inbox, body, actor_url, private_key)
+    activity = Activity.new(receiver.inbox, body.to_json, actor_url, private_key)
     json_response = HttpClient.new(receiver.inbox, activity.request_headers, body.to_json).post
     if nil == json_response
       return false
