@@ -2,13 +2,17 @@ class UsersController < ApplicationController
   before_action :set_user, only: [:actor, :followers, :following]
 
   def new
-    @user = User.new
+    if global_prefs.enable_registrations?
+      @user = User.new
+    else
+      redirect_to login_url, notice: "Registrations are disabled."
+    end
   end
 
   def create
     @user = User.new(user_params)
     if @user.save
-      redirect_to root_url, notice: "Registration success!"
+      redirect_to login_url, notice: "Registration success!"
     else
       render 'new'
     end
