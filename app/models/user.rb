@@ -61,6 +61,12 @@ class User < ApplicationRecord
   def post(receiver, body)
     body["@context"] = ["https://www.w3.org/ns/activitystreams"]
 
+    if 'Create' == body['type'] && body['signature'].present?
+      json_signature = account.sign_json(body)
+      Rails.logger.info "#{__method__} user id: #{id} json_signature: #{json_signature}"
+      body['signature']['signatureValue'] = json_signature
+    end
+
     activity = Activity.new(receiver.inbox, body.to_json, actor_url, private_key)
     json_response = HttpClient.new(receiver.inbox, activity.request_headers, body.to_json).post
     if nil == json_response
@@ -86,6 +92,10 @@ class User < ApplicationRecord
 
   def actor_url
     "#{ENV['INDIEAUTH_HOST']}/actor/#{to_short_webfinger_s}"
+  end
+
+  def main_key_url
+    "#{actor_url}#main-key"
   end
 
   def followers_url

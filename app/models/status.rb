@@ -208,6 +208,11 @@ class Status < ApplicationRecord
       Rails.logger.info "#{__method__} sending to [#{recipient.id}] #{recipient.webfinger_to_s}"
       activity = {}
       activity['actor'] = account.user.actor_url
+      activity['signature'] = {
+        "type" => "RsaSignature2017",
+        "created" => created_at.iso8601,
+        "creator" => account.user.main_key_url
+      }
       activity['type'] = 'Create'
       activity['id'] =  local_uri
       activity['to'] = [

@@ -308,6 +308,12 @@ class Account < ApplicationRecord
     self.identifier == actor_identifier
   end
 
+  def sign_json(item)
+    str = construct_comparison_string(item)
+    keypair=OpenSSL::PKey::RSA.new(user.private_key)
+    signature = Base64.strict_encode64(keypair.sign(OpenSSL::Digest::SHA256.new, str))
+  end
+
   private
 
   def construct_comparison_string(item)
