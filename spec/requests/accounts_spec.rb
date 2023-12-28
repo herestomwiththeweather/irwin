@@ -43,7 +43,7 @@ RSpec.describe "Accounts", type: :request do
     it "returns success" do
       receiver_inbox = "#{recipient_url}/inbox"
 
-      activity = Activity.new(receiver_inbox, valid_like_attributes, origin_url, private_key)
+      activity = Activity.new(receiver_inbox, valid_like_attributes.to_json, origin_url, private_key)
 
       post receiver_inbox, params: valid_like_attributes.to_json, headers: activity.request_headers
 
@@ -59,7 +59,7 @@ RSpec.describe "Accounts", type: :request do
 
       target_account.update(also_known_as: [origin_url])
 
-      activity = Activity.new(receiver_inbox, valid_move_attributes, origin_url, private_key)
+      activity = Activity.new(receiver_inbox, valid_move_attributes.to_json, origin_url, private_key)
 
       post receiver_inbox, params: valid_move_attributes.to_json, headers: activity.request_headers
 
@@ -70,7 +70,7 @@ RSpec.describe "Accounts", type: :request do
       receiver_inbox = "#{recipient_url}/inbox"
 
       valid_move_attributes[:object] = 'https://example.com/users/victim'
-      activity = Activity.new(receiver_inbox, valid_move_attributes, origin_url, private_key)
+      activity = Activity.new(receiver_inbox, valid_move_attributes.to_json, origin_url, private_key)
 
       post receiver_inbox, params: valid_move_attributes.to_json, headers: activity.request_headers
 
@@ -82,7 +82,7 @@ RSpec.describe "Accounts", type: :request do
 
       target_account.update(also_known_as: [origin_url])
 
-      activity = Activity.new(receiver_inbox, valid_move_attributes, origin_url, private_key)
+      activity = Activity.new(receiver_inbox, valid_move_attributes.to_json, origin_url, private_key)
 
       post receiver_inbox, params: valid_move_attributes.to_json, headers: activity.request_headers
 
