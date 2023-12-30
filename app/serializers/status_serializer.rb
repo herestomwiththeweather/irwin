@@ -6,6 +6,7 @@ class StatusSerializer < ApplicationSerializer
   attr_accessor :action_name
 
   attributes :id, :type, '@context', :in_reply_to, :published, :content, :attributed_to, :language, :to, :cc, :replies
+  attribute :tag, unless: -> { object.mentions.empty? }
 
   def initialize(object, options={})
     super
@@ -56,6 +57,10 @@ class StatusSerializer < ApplicationSerializer
     end
 
     cc_list
+  end
+
+  def tag
+    object.mentions.map {|mention| {"type": "Mention", "href": mention.account.identifier, "name": "@#{mention.account.webfinger_to_s}"}}
   end
 
   def replies
