@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_10_24_004647) do
+ActiveRecord::Schema[7.0].define(version: 2023_12_27_223053) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -24,6 +24,26 @@ ActiveRecord::Schema[7.0].define(version: 2022_10_24_004647) do
     t.index ["authorization_code_id"], name: "index_access_tokens_on_authorization_code_id"
     t.index ["token"], name: "index_access_tokens_on_token", unique: true
     t.index ["user_id"], name: "index_access_tokens_on_user_id"
+  end
+
+  create_table "accounts", force: :cascade do |t|
+    t.text "public_key", default: ""
+    t.string "identifier", default: ""
+    t.string "preferred_username", default: ""
+    t.string "name", default: ""
+    t.string "following", default: ""
+    t.string "followers", default: ""
+    t.string "inbox", default: ""
+    t.string "outbox", default: ""
+    t.string "url", default: ""
+    t.string "icon", default: ""
+    t.text "summary", default: ""
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "also_known_as", array: true
+    t.bigint "moved_to_account_id"
+    t.string "domain"
+    t.index ["preferred_username", "domain"], name: "index_accounts_on_preferred_username_and_domain", unique: true
   end
 
   create_table "authorization_codes", force: :cascade do |t|
@@ -49,15 +69,79 @@ ActiveRecord::Schema[7.0].define(version: 2022_10_24_004647) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "follows", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "target_account_id", null: false
+    t.string "identifier"
+    t.string "uri"
+    t.datetime "accepted_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "target_account_id"], name: "index_follows_on_account_id_and_target_account_id", unique: true
+    t.index ["identifier"], name: "index_follows_on_identifier"
+  end
+
+  create_table "likes", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "status_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_likes_on_account_id"
+    t.index ["status_id"], name: "index_likes_on_status_id"
+  end
+
+  create_table "mentions", force: :cascade do |t|
+    t.integer "account_id"
+    t.integer "status_id"
+    t.boolean "silent"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "status_id"], name: "index_mentions_on_account_id_and_status_id", unique: true
+    t.index ["status_id"], name: "index_mentions_on_status_id"
+  end
+
+  create_table "preferences", force: :cascade do |t|
+    t.boolean "enable_registrations", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "statuses", force: :cascade do |t|
+    t.string "language"
+    t.string "uri"
+    t.integer "visibility", default: 0, null: false
+    t.text "text", default: "", null: false
+    t.bigint "account_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "reblog_of_id"
+    t.string "url"
+    t.bigint "in_reply_to_id"
+    t.string "in_reply_to_uri"
+    t.bigint "direct_recipient_id"
+    t.index ["account_id"], name: "index_statuses_on_account_id"
+    t.index ["in_reply_to_id"], name: "index_statuses_on_in_reply_to_id"
+    t.index ["reblog_of_id"], name: "index_statuses_on_reblog_of_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email"
     t.string "password_digest"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "url", default: ""
+    t.string "username", default: "", null: false
+    t.string "domain", default: "", null: false
+    t.text "public_key", default: "", null: false
+    t.text "private_key"
+    t.bigint "account_id"
+    t.index ["account_id"], name: "index_users_on_account_id"
   end
 
   add_foreign_key "access_tokens", "authorization_codes"
   add_foreign_key "access_tokens", "users"
   add_foreign_key "authorization_codes", "users"
+  add_foreign_key "likes", "accounts"
+  add_foreign_key "likes", "statuses"
+  add_foreign_key "statuses", "accounts"
 end

@@ -1,0 +1,24 @@
+<%= render @account %>
+<div class="m-2 px-5">
+  <% if @account.moved_to_account.present? %>
+    <b><%= @account.preferred_username %> has indicated that their new account is now <%= link_to @account.moved_to_account.preferred_username, @account.moved_to_account %><br/></b>
+  <% end %>
+</div>
+<% if current_user %>
+<div class="m-2 px-5">
+  <%= render partial: 'statuses/form', locals: { direct_recipient_id: @account.id } %>
+</div>
+<% end %>
+<div class="m-2 px-5">
+  <% @account.statuses.each do |status| %>
+    <%= render partial: status, locals: { child_view: false } %>
+    <hr />
+  <% end %>
+</div>
+<div style="height: 20px">
+</div>
+<% if current_user %>
+<div class="m-2 px-5">
+  <%= link_to "Back to accounts", accounts_path %>
+</div>
+<% end %>

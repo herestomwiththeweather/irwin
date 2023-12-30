@@ -35,5 +35,9 @@ class ApplicationController < ActionController::Base
     session[:return_to] = nil
   end
 
+  def global_prefs
+    @global_prefs ||= Preference.first
+  end
+
   helper_method :current_user
 end

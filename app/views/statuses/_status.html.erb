@@ -1,0 +1,38 @@
+<%= turbo_frame_tag(dom_id status) do %>
+  <% if !child_view %>
+  <% if status.thread.present? %>
+    <%= link_to "replying to", status_path(status.thread), data: {'turbo-frame': '_top'} %> <%= status.thread.account.webfinger_to_s %>
+  <% end %>
+  <% end %>
+  <div><%= image_tag status.account.icon_url_or_default, style: 'display: inline; padding: 2px; max-width: 50px; max-height: 50px;' %><b><%= link_to status.account.name, status.account, data: {'turbo-frame': '_top'} %></b> posted <%= link_to("#{ time_ago_in_words(status.created_at) } ago", status_path(status), data: {'turbo-frame': '_top'} ) %></div>
+  <p class="text-gray-800">
+    <%= sanitize status.text, tags: %w(b i u p a) %>
+  </p>
+  <% if current_user %>
+  <% if status.account != current_user.account %>
+    <div style="display: inline-block;">
+    <% if like = Like.find_by(status: status, account: current_user.account) %>
+      <%= button_to('Unlike', like_path(like), method: 'delete', style: 'text-decoration: underline') %>
+    <% else %>
+      <%= button_to('Like', likes_path(status_id: status.id), method: 'post', style: 'text-decoration: underline') %>
+    <% end %>
+    </div>
+    <div style="display: inline-block;">
+    <% if boost = Status.find_by(account: current_user.account, reblog_of_id: status.id) %>
+      Boosted
+    <% else %>
+      <%= button_to('Boost', boost_status_path(status), method: 'post', style: 'text-decoration: underline') %>
+    <% end %>
+    </div>
+  <% end %>
+  <% end %>
+  <% if child_view %>
+  <div class="px-3">
+    <% status.replies.each do |reply| %>
+      <div class="px-3">
+        <%= render partial: reply, locals: { child_view: true } %>
+      </div>
+    <% end %>
+  </div>
+  <% end %>
+<% end %>

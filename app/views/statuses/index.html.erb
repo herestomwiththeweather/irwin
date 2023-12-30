@@ -1,0 +1,8 @@
+<div class="m-2 px-5">
+  <%= render partial: 'form', locals: { direct_recipient_id: nil } %>
+  <% @statuses.each do |status| %>
+    <%= render partial: status.reblog || status, locals: { child_view: false } %>
+    <hr />
+  <% end %>
+  <%= paginate @statuses %>
+</div>

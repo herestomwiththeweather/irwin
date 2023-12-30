@@ -1,0 +1,76 @@
+require 'rails_helper'
+
+RSpec.describe "Statuses", type: :request do
+  let(:indieweb_info) { {:authorization_endpoint => "#{ENV['INDIEAUTH_HOST']}/auth", :token_endpoint => "#{ENV['INDIEAUTH_HOST']}/token"} }
+  let(:user) { create :user }
+  let(:status) { create :status, account: user.account }
+  let(:replies_url) { "#{ENV['INDIEAUTH_HOST']}/statuses/#{status.id}/replies" }
+
+  describe "GET /statuses/1" do
+    before do
+      allow(IndieWeb::Endpoints).to receive(:get).and_return(indieweb_info)
+    end
+
+    it 'returns success' do
+      get status_url(status, format: :json)
+      json = JSON.parse(response.body)
+
+      expect(response.status).to eql(200)
+      expect(response.media_type).to eql('application/activity+json')
+      expect(json['type']).to eql('Note')
+    end
+
+    it 'returns camelcase keys' do
+      get status_url(status, format: :json)
+      json = JSON.parse(response.body)
+      expect(json['attributedTo']).to eql("#{ENV['INDIEAUTH_HOST']}/actor/#{user.to_short_webfinger_s}")
+    end
+
+    it 'returns replies collection' do
+      get status_url(status, format: :json)
+      json = JSON.parse(response.body)
+      expect(json['replies']['type']).to eql('Collection')
+      expect(json['replies']['id']).to eql(replies_url)
+      expect(json['replies']['first']['type']).to eql('CollectionPage')
+      expect(json['replies']['first']['next']).to eql("#{replies_url}?page=1")
+      expect(json['replies']['first']['partOf']).to eql(replies_url)
+    end
+  end
+
+  describe "GET /statuses/1/replies" do
+    before do
+      allow(IndieWeb::Endpoints).to receive(:get).and_return(indieweb_info)
+    end
+
+    it 'returns replies collection' do
+      get replies_status_url(status, format: :json)
+      json = JSON.parse(response.body)
+
+      expect(response.status).to eql(200)
+      expect(response.media_type).to eql('application/activity+json')
+      expect(json['type']).to eql('Collection')
+      expect(json['id']).to eql(replies_url)
+      expect(json['first']['type']).to eql('CollectionPage')
+      expect(json['first']['next']).to eql("#{replies_url}?page=1")
+      expect(json['first']['partOf']).to eql(replies_url)
+    end
+  end
+
+  describe "GET /statuses/1/replies?page=1" do
+    before do
+      allow(IndieWeb::Endpoints).to receive(:get).and_return(indieweb_info)
+    end
+
+    it 'returns replies page' do
+      get replies_status_url(status, format: :json), params: { page: 1 }
+      json = JSON.parse(response.body)
+
+      expect(response.status).to eql(200)
+      expect(response.media_type).to eql('application/activity+json')
+      expect(json['type']).to eql('CollectionPage')
+      expect(json['partOf']).to eql(replies_url)
+      expect(json['id']).to eql("#{replies_url}?page=1")
+      expect(json['items']).to eql([])
+    end
+  end
+end
