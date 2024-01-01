@@ -18,7 +18,7 @@ class User < ApplicationRecord
   attr_accessor :current_page
 
   before_validation :generate_keys, on: :create
-  before_validation :discover_indieauth, on: :create
+  before_validation :discover_indieauth
   before_validation :set_domain, on: :create
   before_validation :assign_account, on: :create
 
