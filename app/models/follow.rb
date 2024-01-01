@@ -14,7 +14,10 @@ class Follow < ApplicationRecord
       if source.local?
         follow = create!(account: source, target_account: target)
         result = follow.request!
-        follow.destroy! if !result
+        if !result
+          follow.destroy!
+          follow = nil
+        end
       else
         follow = create!(account: source, target_account: target, uri: object_uri)
       end

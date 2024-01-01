@@ -38,9 +38,12 @@ class AccountsController < ApplicationController
   end
 
   def follow
-    current_user.account.follow!(@account)
     respond_to do |format|
-      format.html { redirect_to followers_path, notice: "Followed #{@account.webfinger_to_s}" }
+      if current_user.account.follow!(@account)
+        format.html { redirect_to following_path, notice: "Followed #{@account.webfinger_to_s}" }
+      else
+        format.html { redirect_to following_path, notice: "Failed to follow #{@account.webfinger_to_s}" }
+      end
     end
   end
 
