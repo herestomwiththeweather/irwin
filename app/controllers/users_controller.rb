@@ -22,7 +22,11 @@ class UsersController < ApplicationController
     respond_to do |format|
       format.html do
         @account = @target_user.account
-        render 'accounts/show'
+        if @account.url.present?
+          redirect_to @account.url, allow_other_host: true
+        else
+          render 'accounts/show'
+        end
       end
       format.all do
         render json: @target_user, serializer: UserSerializer, content_type: 'application/activity+json'
