@@ -7,7 +7,7 @@ class UserSerializer < ApplicationSerializer
 
   attributes :id, :type, :preferred_username, :inbox, '@context', :following, :followers, :name, :summary, :url, :also_known_as, :attachment
   attribute :icon, if: -> { object.account.icon.present? }
-  attribute :image, if: -> { object.account.icon.present? }
+  attribute :image, if: -> { object.account.image.present? }
 
   def type
     "Person"
@@ -54,7 +54,7 @@ class UserSerializer < ApplicationSerializer
   end
 
   def image
-    { "type"=>"Image", "mediaType"=>"image/jpeg", "url"=> object.account.icon }
+    { "type"=>"Image", "mediaType"=>"image/jpeg", "url"=> object.account.image }
   end
 
   def also_known_as

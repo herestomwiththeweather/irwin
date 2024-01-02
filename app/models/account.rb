@@ -101,6 +101,7 @@ class Account < ApplicationRecord
     Rails.logger.info "summary: #{actor['summary']}"
     Rails.logger.info "mastodon_url: #{actor['url']}"
     Rails.logger.info "icon_url: #{actor['icon']['url']}" if actor['icon'].present?
+    Rails.logger.info "image_url: #{actor['image']['url']}" if actor['image'].present?
     Rails.logger.info "public_key: #{actor['publicKey']['publicKeyPem']}"
   end
 
@@ -173,6 +174,7 @@ class Account < ApplicationRecord
     self.outbox = actor['outbox']
     self.url = actor['url']
     self.icon = actor['icon']['url'] if actor['icon'].present?
+    self.image = actor['image']['url'] if actor['image'].present?
 
     self.summary = actor['summary']
   end

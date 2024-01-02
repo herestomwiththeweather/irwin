@@ -244,7 +244,7 @@ class AccountsController < ApplicationController
   private
 
   def account_params
-    params.require(:account).permit(:name, :summary, :url, :icon)
+    params.require(:account).permit(:name, :summary, :url, :icon, :image)
   end
 
   def set_target_account
