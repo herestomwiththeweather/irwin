@@ -26,7 +26,7 @@ class Account < ApplicationRecord
     account = nil
     Rails.logger.info "Account#fetch_by_key request url: #{key_url}"
     uri = URI.parse(key_url)
-    mastodon_identifier = key_url.sub(uri.fragment,'').chomp('#')
+    mastodon_identifier = uri.fragment.nil? ? key_url : key_url.sub(uri.fragment,'').chomp('#')
     account = Account.fetch_and_create_mastodon_account(mastodon_identifier)
 
     account
