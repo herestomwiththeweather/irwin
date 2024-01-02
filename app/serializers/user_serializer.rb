@@ -5,7 +5,9 @@ class UserSerializer < ApplicationSerializer
 
   has_one :public_key, serializer: PublicKeySerializer
 
-  attributes :id, :type, :preferred_username, :inbox, '@context', :following, :followers, :name, :summary, :url, :icon, :also_known_as
+  attributes :id, :type, :preferred_username, :inbox, '@context', :following, :followers, :name, :summary, :url, :also_known_as, :attachment
+  attribute :icon, if: -> { object.account.icon.present? }
+  attribute :image, if: -> { object.account.icon.present? }
 
   def type
     "Person"
@@ -48,11 +50,25 @@ class UserSerializer < ApplicationSerializer
   end
 
   def icon
-    object.account.icon
+    { "type"=>"Image", "mediaType"=>"image/jpeg", "url"=> object.account.icon }
+  end
+
+  def image
+    { "type"=>"Image", "mediaType"=>"image/jpeg", "url"=> object.account.icon }
   end
 
   def also_known_as
     object.account.also_known_as
+  end
+
+  def attachment
+    [
+      {
+        "type"=>"PropertyValue",
+        "name"=>"my website",
+        "value" => "<a href=\"#{object.url}\" target=\"_blank\" rel=\"nofollow noopener noreferrer me\" translate=\"no\"><span class=\"invisible\">https://</span><span class=\"\">#{object.domain}</span><span class=\"invisible\"></span></a>"
+      }
+    ]
   end
 
   def action_url(action, controller)
