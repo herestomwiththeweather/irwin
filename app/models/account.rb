@@ -107,7 +107,7 @@ class Account < ApplicationRecord
     Rails.logger.info "mastodon_url: #{actor['url']}"
     Rails.logger.info "icon_url: #{actor['icon']['url']}" if actor['icon'].present?
     Rails.logger.info "image_url: #{actor['image']['url']}" if actor['image'].present?
-    Rails.logger.info "public_key: #{actor['publicKey']['publicKeyPem']}"
+    Rails.logger.info "public_key: #{actor['publicKey']['publicKeyPem']}" if actor['publicKey'].present?
   end
 
   def self.create_mastodon_account(actor)
