@@ -20,8 +20,7 @@ class Status < ApplicationRecord
     status_uri = URI(uri)
     return nil unless URI(ENV['INDIEAUTH_HOST']).host == status_uri.host
     id = status_uri.path.split('/').last
-    # nil uri means the status was created locally
-    Status.find_by(id: id, uri: nil)
+    Status.find_by(id: id)
   end
 
   def self.from_object_uri(uri, thread = nil)
