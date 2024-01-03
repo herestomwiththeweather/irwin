@@ -181,7 +181,11 @@ class AccountsController < ApplicationController
       Rails.logger.info "    follower: #{item['object']['actor']}"
       follower = User.by_actor(item['object']['actor']).account
       follow = Follow.where(target_account: @current_mastodon_account, account: follower).first
-      follow.accept!
+      if follow.present?
+        follow.accept!
+      else
+        Rails.logger.info "#{__method__} Error finding follow to accept for: #{item['actor']}"
+      end
       200
     when 'Announce'
       status = @current_mastodon_account.create_boost!(item)
