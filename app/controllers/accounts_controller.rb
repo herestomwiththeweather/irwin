@@ -9,11 +9,11 @@ class AccountsController < ApplicationController
   ACTIVITIES = ['Follow', 'Undo', 'Accept', 'Create', 'Announce', 'Move', 'Like']
 
   def followers
-    @followers = current_user.account.account_followers
+    @followers = current_user.account.account_followers.page(params[:page])
   end
 
   def following
-    @follows = Follow.where(account: current_user.account)
+    @follows = Follow.where(account: current_user.account).page(params[:page])
   end
 
   def index
