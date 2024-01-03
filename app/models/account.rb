@@ -112,6 +112,10 @@ class Account < ApplicationRecord
 
   def self.create_mastodon_account(actor)
     return nil if actor.nil?
+    if actor['id'].blank?
+      Rails.logger.info "#{__method__} error actor is not present"
+      return nil
+    end
     account = Account.new
     account.update_mastodon_account(actor)
     account.save!
