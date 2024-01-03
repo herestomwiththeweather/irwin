@@ -33,6 +33,11 @@ class Account < ApplicationRecord
   end
 
   def self.fetch_and_create_mastodon_account(actor_url)
+    if actor_url.blank?
+      Rails.logger.info "#{__method__} Error. actor_url is nil"
+      return nil
+    end
+
     account = find_by(identifier: actor_url)
     return account if account.present?
 
