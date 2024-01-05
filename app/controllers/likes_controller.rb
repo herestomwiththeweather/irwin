@@ -12,10 +12,10 @@ class LikesController < ApplicationController
           if !result
             @like.destroy
           end
-          render status
+          render partial: status, locals: { child_view: false }
         else
           Rails.logger.info "Error saving like. status #{params[:status_id]} account #{current_user.account_id}"
-          render status
+          render partial: status, locals: { child_view: false }
         end
       end
     end
@@ -34,7 +34,7 @@ class LikesController < ApplicationController
     @like.destroy
 
     respond_to do |format|
-      format.html { render status }
+      format.html { render partial: status, locals: { child_view: false } }
     end
   end
 end
