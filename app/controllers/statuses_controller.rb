@@ -30,7 +30,7 @@ class StatusesController < ApplicationController
     respond_to do |format|
       format.html do
         @status.boost!(current_user.account)
-        render @status
+        render partial: @status, locals: { child_view: false }
       end
     end
   end
