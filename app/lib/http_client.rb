@@ -18,8 +18,6 @@ class HttpClient
     request(:post)
   end
 
-  private
-
   def request_headers(method_string)
     if @body.present?
       headers = {"Content-type"=>"application/activity+json"}
@@ -40,6 +38,8 @@ class HttpClient
 
     headers
   end
+
+  private
 
   def request(method)
     request = build_request(method)
