@@ -27,7 +27,7 @@ class Status < ApplicationRecord
     status = Status.find_by(uri: uri)
     return status unless status.nil?
 
-    json_status = HttpClient.new(uri).get
+    json_status = User.representative.get(uri)
     if nil == json_status
       Rails.logger.info "#{__method__} error fetching status"
       return nil
@@ -105,7 +105,7 @@ class Status < ApplicationRecord
   end
 
   def fetch_replies
-    json_status = HttpClient.new(replies_uri).get
+    json_status = User.representative.get(replies_uri)
     if nil == json_status
       Rails.logger.info "#{__method__} error fetching replies"
       return nil
@@ -135,7 +135,7 @@ class Status < ApplicationRecord
     current_page = first['next']
     begin
       Rails.logger.info "#{__method__} [status #{id}] current page: #{current_page}"
-      page_result = HttpClient.new(current_page).get
+      page_result = User.representative.get(current_page)
       page_result['items'].each do |item|
         item = item['id'] if item.is_a?(Hash)
         Rails.logger.info "#{__method__} [status #{id}] calling from_object_uri for: #{item}"

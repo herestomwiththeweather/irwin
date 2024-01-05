@@ -78,8 +78,7 @@ class Account < ApplicationRecord
   end
 
   def self.fetch_mastodon_account(actor_url)
-    headers = {'Accept': 'application/json'}
-    actor = HttpClient.new(actor_url, headers).get
+    actor = User.representative.get(actor_url)
     if nil == actor
       Rails.logger.info "#{__method__} error fetching actor"
       return nil

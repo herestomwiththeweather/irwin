@@ -44,6 +44,10 @@ class User < ApplicationRecord
     User.where(username: username, domain: domain).first
   end
 
+  def self.representative
+    Preference.first.user || User.first
+  end
+
   def set_domain
     self.domain = URI.parse(url).hostname
   end
@@ -58,6 +62,10 @@ class User < ApplicationRecord
     Status.where(direct_recipient: nil, account_id: self.account.active_relationships.select(:target_account_id)).or(Status.where(direct_recipient: nil, account_id: self.account.id)).or(Status.where(id: status_ids))
   end
 
+  def get(url)
+    HttpClient.new(url, actor_url, private_key).get
+  end
+
   def post(receiver, body)
     body["@context"] = ["https://www.w3.org/ns/activitystreams"]
 
@@ -67,8 +75,7 @@ class User < ApplicationRecord
       body['signature']['signatureValue'] = json_signature
     end
 
-    activity = Activity.new(receiver.inbox, body.to_json, actor_url, private_key)
-    json_response = HttpClient.new(receiver.inbox, activity.request_headers, body.to_json).post
+    json_response = HttpClient.new(receiver.inbox, actor_url, private_key, body.to_json).post
     if nil == json_response
       return false
     end

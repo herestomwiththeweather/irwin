@@ -1,4 +1,6 @@
 class Preference < ApplicationRecord
+  belongs_to :user #representative
+
   validate :enforce_singleton, on: :create
 
   def enforce_singleton
