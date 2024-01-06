@@ -297,6 +297,9 @@ class Account < ApplicationRecord
 
     status
 
+  rescue NoMethodError => e
+    Rails.logger.info "#{self.class}##{__method__} NoMethod exception: #{e.message}"
+    nil
   rescue ActiveRecord::RecordInvalid => e
     Rails.logger.info "#{self.class}##{__method__} exception: #{e.message}"
     nil
