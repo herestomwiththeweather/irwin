@@ -54,6 +54,9 @@ class HttpClient
   rescue OpenSSL::SSL::SSLError => e
     Rails.logger.info "#{self.class}#{__method__} SSL error: #{e.message}"
     nil
+  rescue Errno::ENETUNREACH => e
+    Rails.logger.info "#{self.class}#{__method__} unreachable error: #{e.message}"
+    nil
   rescue Errno::ECONNRESET => e
     Rails.logger.info "#{self.class}#{__method__} connection reset error: #{e.message}"
     nil
