@@ -5,7 +5,7 @@ class StatusSerializer < ApplicationSerializer
 
   attr_accessor :action_name
 
-  attributes :id, :type, '@context', :in_reply_to, :published, :content, :attributed_to, :language, :to, :cc, :replies
+  attributes :id, :type, '@context', :in_reply_to, :published, :content_map, :content, :attributed_to, :language, :to, :cc, :replies
   attribute :tag, unless: -> { object.mentions.empty? }
 
   def initialize(object, options={})
@@ -29,8 +29,14 @@ class StatusSerializer < ApplicationSerializer
     object.created_at.iso8601
   end
 
+  def content_map
+    {
+      language => marked_up_text
+    }
+  end
+
   def content
-    object.text
+    marked_up_text
   end
 
   def attributed_to 
@@ -74,6 +80,10 @@ class StatusSerializer < ApplicationSerializer
         items: []
       }
     }
+  end
+
+  def marked_up_text
+    "<p>#{object.text}</p>"
   end
 
   def action_url(action, controller)

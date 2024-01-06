@@ -203,6 +203,8 @@ class Status < ApplicationRecord
       recipients << mention.account unless recipients.include?(mention.account)
     end
 
+    marked_up_text = "<p>#{text}</p>"
+
     recipients.each do |recipient|
       Rails.logger.info "#{__method__} sending to [#{recipient.id}] #{recipient.webfinger_to_s}"
       activity = {}
@@ -222,7 +224,10 @@ class Status < ApplicationRecord
         "type" => "Note",
         "published" => created_at.iso8601,
         "attributedTo" => account.user.actor_url,
-        "content" => text,
+        "contentMap" => {
+          language => marked_up_text
+        },
+        "content" => marked_up_text,
         "to" => [
           direct_recipient.present? ? direct_recipient.identifier : "https://www.w3.org/ns/activitystreams#Public"
         ]
