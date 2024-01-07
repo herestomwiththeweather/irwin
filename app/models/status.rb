@@ -184,6 +184,20 @@ class Status < ApplicationRecord
     true
   end
 
+  def text_with_linked_mentions
+    output = text
+    mentions.each do |mention|
+      webfinger_id = "@#{mention.account.webfinger_to_s}"
+      output.gsub!( /#{webfinger_id}/i, mention.account.mention_markup)
+    end
+
+    output
+  end
+
+  def marked_up_text
+    "<p>#{text_with_linked_mentions}</p>"
+  end
+
   def notify_cc
     recipients = []
 
@@ -202,8 +216,6 @@ class Status < ApplicationRecord
     mentions.each do |mention|
       recipients << mention.account unless recipients.include?(mention.account)
     end
-
-    marked_up_text = "<p>#{text}</p>"
 
     recipients.each do |recipient|
       Rails.logger.info "#{__method__} sending to [#{recipient.id}] #{recipient.webfinger_to_s}"

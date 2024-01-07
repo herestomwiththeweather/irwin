@@ -1,4 +1,6 @@
 class Account < ApplicationRecord
+  include ERB::Util
+
   has_many :active_relationships, class_name: 'Follow', foreign_key: 'account_id', dependent: :destroy
   has_many :account_following, -> { order('follows.id desc') }, through: :active_relationships, source: :target_account
 
@@ -122,6 +124,10 @@ class Account < ApplicationRecord
   rescue ActiveRecord::RecordNotUnique => e
     Rails.logger.info "#{__method__} error actor exists: #{actor['id']}"
     find_by(identifier: actor['id'])
+  end
+
+  def mention_markup
+    "<span class=\"h-card\"><a href=\"#{h(url)}\" class=\"u-url mention\">@<span>#{h(preferred_username)}</span></a></span>"
   end
 
   def verify(signature, comparison_string)

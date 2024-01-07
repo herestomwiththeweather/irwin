@@ -31,12 +31,12 @@ class StatusSerializer < ApplicationSerializer
 
   def content_map
     {
-      language => marked_up_text
+      language => object.marked_up_text
     }
   end
 
   def content
-    marked_up_text
+    object.marked_up_text
   end
 
   def attributed_to 
@@ -80,10 +80,6 @@ class StatusSerializer < ApplicationSerializer
         items: []
       }
     }
-  end
-
-  def marked_up_text
-    "<p>#{object.text}</p>"
   end
 
   def action_url(action, controller)
