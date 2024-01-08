@@ -184,8 +184,8 @@ class Status < ApplicationRecord
     true
   end
 
-  def text_with_linked_mentions
-    output = text
+  def text_with_linked_urls_and_mentions
+    output = ActionController::Base.helpers.auto_link(text, html: { translate: 'no', target: '_blank', rel: 'nofollow noopener noreferrer' }, link: :urls)
     mentions.each do |mention|
       webfinger_id = "@#{mention.account.webfinger_to_s}"
       output.gsub!( /#{webfinger_id}/i, mention.account.mention_markup)
@@ -195,7 +195,7 @@ class Status < ApplicationRecord
   end
 
   def marked_up_text
-    "<p>#{text_with_linked_mentions}</p>"
+    "<p>#{text_with_linked_urls_and_mentions}</p>"
   end
 
   def notify_cc

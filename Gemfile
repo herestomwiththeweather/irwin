@@ -59,6 +59,7 @@ gem 'webfinger'
 gem 'cancancan'
 gem 'kaminari'
 gem 'exception_notification'
+gem 'rails_autolink'
 
 gem 'json-ld'
 gem 'json-ld-preloaded', '~> 3.2'
