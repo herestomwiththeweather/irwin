@@ -80,7 +80,7 @@ class User < ApplicationRecord
       return false
     end
     if json_response['error'].present?
-      Rails.logger.info "User#post error: #{json_status['error']}"
+      Rails.logger.info "User#post error: #{json_response['error']}"
       return false
     end
 
