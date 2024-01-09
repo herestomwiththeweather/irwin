@@ -11,7 +11,7 @@
 <% end %>
 <div class="m-2 px-5">
   <% @account.statuses.each do |status| %>
-    <%= render partial: status, locals: { child_view: false } %>
+    <%= render partial: status.reblog || status, locals: { child_view: false } %>
     <hr />
   <% end %>
 </div>
