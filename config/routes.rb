@@ -15,10 +15,11 @@ Rails.application.routes.draw do
     end
     collection do
       get :private_mentions
+      get :mentions
     end
   end
   resources :follows, only: [:destroy]
-  resources :likes, only: [:create, :show, :destroy]
+  resources :likes, only: [:create, :index, :destroy]
   resources :sessions
   resources :searches, only: [:new, :create]
   resources :authorizations, only: [:index, :show]

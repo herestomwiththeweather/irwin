@@ -1,0 +1,8 @@
+<h1 class="px-3 my-3 text-2xl text-gray-700 font-bold">Likes</h1>
+
+<div id="likes" class="px-2">
+  <% @likes.each do |like| %>
+    <%= render like %>
+  <% end %>
+  <%= paginate @likes %>
+</div>

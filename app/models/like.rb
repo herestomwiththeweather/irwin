@@ -4,6 +4,8 @@ class Like < ApplicationRecord
 
   validates :status, uniqueness: { scope: :account }
 
+  default_scope { order(created_at: :desc) }
+
   def local_uri
     Rails.application.routes.url_helpers.like_url(self, host: URI(ENV['INDIEAUTH_HOST']).host, protocol: 'https')
   end

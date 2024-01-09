@@ -1,6 +1,10 @@
 class LikesController < ApplicationController
   before_action :login_required, except: [:show]
 
+  def index
+    @likes = current_user.account.likes_received.page(params[:page])
+  end
+
   def create
     status = Status.find(params[:status_id])
     @like = Like.new(status: status, account: current_user.account)
@@ -18,12 +22,6 @@ class LikesController < ApplicationController
           render partial: status, locals: { child_view: false }
         end
       end
-    end
-  end
-
-  def show
-    respond_to do |format|
-      format.json { render json: {} }
     end
   end
 

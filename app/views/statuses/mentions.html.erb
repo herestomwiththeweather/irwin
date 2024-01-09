@@ -1,0 +1,7 @@
+<div class="m-2 px-5">
+  <% @mentions.each do |mention| %>
+    <%= render partial: mention.status, locals: { child_view: false } %>
+    <hr />
+  <% end %>
+  <%= paginate @mentions %>
+</div>

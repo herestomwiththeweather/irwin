@@ -9,6 +9,7 @@ class Account < ApplicationRecord
 
   has_many :statuses, dependent: :destroy
   has_many :likes
+  has_many :mentions
 
   has_one :user
 
@@ -21,6 +22,8 @@ class Account < ApplicationRecord
   validates :outbox, uniqueness: true
   validates :url, uniqueness: true
 =end
+
+  default_scope { order(created_at: :desc) }
 
   CONTEXT = 'https://w3id.org/identity/v1'
 
@@ -128,6 +131,10 @@ class Account < ApplicationRecord
 
   def mention_markup
     "<span class=\"h-card\"><a href=\"#{h(url)}\" class=\"u-url mention\">@<span>#{h(preferred_username)}</span></a></span>"
+  end
+
+  def likes_received
+    Like.joins(status: :account).where(accounts: { id: id })
   end
 
   def verify(signature, comparison_string)

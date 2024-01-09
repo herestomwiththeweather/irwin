@@ -13,6 +13,10 @@ class StatusesController < ApplicationController
     @statuses = Status.where(direct_recipient: current_user.account).or(@current_user.account.statuses.where('direct_recipient_id IS NOT NULL'))
   end
 
+  def mentions
+    @mentions = current_user.account.mentions.page(params[:page])
+  end
+
   def replies
     @status.current_replies_page = params[:page]
     respond_to do |format|
