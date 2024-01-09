@@ -99,6 +99,10 @@ class Account < ApplicationRecord
   end
 
   def self.log_json(actor)
+    if !actor.is_a?(Hash)
+      Rails.logger.info "#{__method__} error not a hash"
+      return
+    end
     Rails.logger.info "mastodon_identifier: #{actor['id']}"
     Rails.logger.info "also_known_as: #{actor['alsoKnownAs']}"
     Rails.logger.info "following: #{actor['following']}"
