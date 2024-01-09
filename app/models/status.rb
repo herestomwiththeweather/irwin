@@ -27,6 +27,7 @@ class Status < ApplicationRecord
     status = Status.find_by(uri: uri)
     return status unless status.nil?
 
+    Rails.logger.info "#{__method__} fetching status: #{uri}"
     json_status = User.representative.get(uri)
     if nil == json_status
       Rails.logger.info "#{__method__} error fetching status"
