@@ -17,7 +17,7 @@ class AccountsController < ApplicationController
   end
 
   def index
-    @accounts = Account.all
+    @accounts = Account.page(params[:page])
   end
 
   def show
