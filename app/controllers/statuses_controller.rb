@@ -47,6 +47,7 @@ class StatusesController < ApplicationController
         @new_status = Status.new
         @new_status.in_reply_to_id = @status.id
 
+        @boosts = Status.where(reblog_of_id: @status.id)
         # XXX d'oh! what if recipient was only mentioned in a private mention and not the direct recipient?
         @direct_recipient_id = nil
         if @status.private_mention?
