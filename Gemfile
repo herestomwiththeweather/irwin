@@ -6,8 +6,7 @@ ruby "3.1.0"
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "~> 7.0.3", ">= 7.0.3.1"
 
-# The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
-gem "sprockets-rails"
+gem "propshaft"
 
 # Use postgresql as the database for Active Record
 gem "pg", "~> 1.1"
@@ -50,7 +49,7 @@ gem "bootsnap", require: false
 # gem "sassc-rails"
 
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
-# gem "image_processing", "~> 1.2"
+gem "image_processing", "~> 1.2"
 
 gem 'indieweb-endpoints'
 gem 'microformats'
@@ -60,6 +59,7 @@ gem 'cancancan'
 gem 'kaminari'
 gem 'exception_notification'
 gem 'rails_autolink'
+gem 'aws-sdk-s3'
 
 gem 'json-ld'
 gem 'json-ld-preloaded', '~> 3.2'

@@ -68,6 +68,7 @@ class StatusesController < ApplicationController
     @status = Status.new(status_params)
     @status.account = current_user.account
     @status.language = 'en'
+    @status.media_attachments.each { |media_attachment| media_attachment.account = current_user.account }
 
     if @status.save!
       @status.update_attribute(:uri, @status.local_uri)
@@ -83,6 +84,6 @@ class StatusesController < ApplicationController
   end
 
   def status_params
-    params.require(:status).permit(:text, :in_reply_to_id, :direct_recipient_id)
+    params.require(:status).permit(:text, :in_reply_to_id, :direct_recipient_id, media_attachments_attributes: [:file])
   end
 end

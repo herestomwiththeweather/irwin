@@ -9,6 +9,9 @@
     <%= sanitize status.local? ? status.marked_up_text : status.text, tags: %w(b i u p a) %>
   </p>
   <% if current_user %>
+  <% status.media_attachments.each do |media_attachment| %>
+    <%= render partial: media_attachment %>
+  <% end %>
   <% if status.account != current_user.account %>
     <div style="display: inline-block;">
     <% if like = Like.find_by(status: status, account: current_user.account) %>

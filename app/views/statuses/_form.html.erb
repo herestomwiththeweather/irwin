@@ -4,6 +4,23 @@
   <div class="px-3 ml-3">
     <%= form.text_area :text, value: @status.present? ? "@#{@status.account.webfinger_to_s} " : "" %>
   </div>
+  <% if direct_recipient_id.blank? %>
+    <h1>Attachments</h1>
+    <div data-controller="nested-form">
+      <template data-nested-form-target="template">
+        <% new_media_attachment = MediaAttachment.new %>
+        <%= form.fields_for :media_attachments, new_media_attachment, child_index: 'TEMPLATE_RECORD' do |media_attachment| %>
+          <%= render 'statuses/media_attachment_fields', form: media_attachment, media_attachment: new_media_attachment %>
+        <% end %>
+      </template>
+      <%= form.fields_for :media_attachments do |media_attachment| %>
+        <%= render 'media_attachment_fields', form: media_attachment %>
+      <% end %>
+      <div data-nested-form-target="addMediaAttachment">
+        <%= link_to "Add attachment", "#", data: { action: "click->nested-form#add_association" } %>
+      </div>
+    </div>
+  <% end %>
   <div style="width: 280px; height: 40px;">
     <button style="float: right" class="py-1 px-2 bg-blue-600 border-2 border-blue-700 hover:bg-blue-100 hover:text-blue-600 rounded-lg my-3 text-blue-100 transition-colors duration-300"><%= form.submit new_status_submit_text(@status, direct_recipient_id)%></button>
   </div>

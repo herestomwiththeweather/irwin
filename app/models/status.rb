@@ -7,6 +7,9 @@ class Status < ApplicationRecord
   has_many :replies, foreign_key: 'in_reply_to_id', class_name: 'Status', inverse_of: :thread
   has_many :mentions, dependent: :destroy
   has_many :likes, dependent: :destroy
+  has_many :media_attachments, dependent: :destroy
+
+  accepts_nested_attributes_for :media_attachments, allow_destroy: true
 
   attr_accessor :current_replies_page
 
@@ -245,6 +248,13 @@ class Status < ApplicationRecord
           direct_recipient.present? ? direct_recipient.identifier : "https://www.w3.org/ns/activitystreams#Public"
         ]
       }
+      attachments = []
+      if media_attachments.present?
+        media_attachments.each do |media_attachment|
+          attachments << media_attachment.info
+        end
+        activity['object']['attachment'] = attachments
+      end
       cc_list = [
       ]
       cc_list << account.user.followers_url unless direct_recipient.present?

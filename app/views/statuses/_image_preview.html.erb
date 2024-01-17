@@ -1,0 +1,10 @@
+<div data-controller="previews">
+  <%= form.label :file, style: "display: block" %>
+  <%= form.file_field :file, direct_upload: true, data: { previews_target: 'input', action: 'change->previews#preview' } %>
+
+  <% if media_attachment.file.attached? %>
+    <%= image_tag media_attachment.file, data: { previews_target: 'preview' }, style: "width: 300px; height: auto;" %>
+  <% else %>
+    <%= image_tag '', data: { previews_target: 'preview' }, style: "width: 300px; height: auto;" %>
+  <% end %>
+</div>

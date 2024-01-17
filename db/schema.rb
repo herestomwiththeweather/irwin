@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_01_10_225905) do
+ActiveRecord::Schema[7.0].define(version: 2024_01_11_053322) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -119,6 +119,16 @@ ActiveRecord::Schema[7.0].define(version: 2024_01_10_225905) do
     t.index ["status_id"], name: "index_likes_on_status_id"
   end
 
+  create_table "media_attachments", force: :cascade do |t|
+    t.string "remote_url", default: "", null: false
+    t.bigint "status_id", null: false
+    t.bigint "account_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_media_attachments_on_account_id"
+    t.index ["status_id"], name: "index_media_attachments_on_status_id"
+  end
+
   create_table "mentions", force: :cascade do |t|
     t.integer "account_id"
     t.integer "status_id"
@@ -175,5 +185,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_01_10_225905) do
   add_foreign_key "authorization_codes", "users"
   add_foreign_key "likes", "accounts"
   add_foreign_key "likes", "statuses"
+  add_foreign_key "media_attachments", "accounts"
+  add_foreign_key "media_attachments", "statuses"
   add_foreign_key "statuses", "accounts"
 end

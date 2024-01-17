@@ -7,6 +7,7 @@ class StatusSerializer < ApplicationSerializer
 
   attributes :id, :type, '@context', :in_reply_to, :published, :content_map, :content, :attributed_to, :language, :to, :cc, :replies
   attribute :tag, unless: -> { object.mentions.empty? }
+  attribute :attachment, unless: -> { object.media_attachments.empty? }
 
   def initialize(object, options={})
     super
@@ -67,6 +68,10 @@ class StatusSerializer < ApplicationSerializer
 
   def tag
     object.mentions.map {|mention| {"type": "Mention", "href": mention.account.identifier, "name": "@#{mention.account.webfinger_to_s}"}}
+  end
+
+  def attachment
+    object.media_attachments.map {|media_attachment| media_attachment.info}
   end
 
   def replies
