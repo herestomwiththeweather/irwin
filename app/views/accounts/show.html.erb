@@ -10,7 +10,7 @@
 </div>
 <% end %>
 <div class="m-2 px-5">
-  <% @account.statuses.each do |status| %>
+  <% @statuses.each do |status| %>
     <%= render partial: status.reblog || status, locals: { child_view: false } %>
     <hr />
   <% end %>
@@ -19,6 +19,6 @@
 </div>
 <% if current_user %>
 <div class="m-2 px-5">
-  <%= link_to "Back to accounts", accounts_path %>
+  <%= paginate @statuses %>
 </div>
 <% end %>

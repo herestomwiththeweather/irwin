@@ -22,6 +22,7 @@ class AccountsController < ApplicationController
 
   def show
     @new_status = Status.new
+    @statuses = @account.statuses.page(params[:page])
   end
 
   def edit
