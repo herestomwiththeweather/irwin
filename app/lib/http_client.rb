@@ -66,6 +66,9 @@ class HttpClient
   rescue JSON::ParserError
     Rails.logger.info "#{self.class}#{__method__} error: could not parse response: #{response.body}"
     nil
+  rescue SocketError => e
+    Rails.logger.info "#{self.class}#{__method__} socket error: #{e.message}"
+    nil
   end
 
   def build_request(method)
