@@ -1,3 +1,17 @@
 <div id="<%= dom_id media_attachment %>">
-  <%= image_tag(media_attachment.file, style: "width: 300px; height: auto") %>
+  <% if media_attachment.remote_url.blank? %>
+    <%= image_tag(media_attachment.file, style: "width: 300px; height: auto") if media_attachment.file.attached? %>
+  <% else %>
+    <% if media_attachment.image? %>
+      <img src='<%= media_attachment.remote_url %>' width=300 height=300>
+    <% elsif media_attachment.video? %>
+      <%= content_tag :video, controls: true do %>
+        <%= tag :source, src: media_attachment.remote_url, type: media_attachment.content_type %>
+      <% end %>
+    <% elsif media_attachment.audio? %>
+      <audio controls>
+        <source src="<%= media_attachment.remote_url %>">
+      </audio>
+    <% end %>
+  <% end %>
 </div>

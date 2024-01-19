@@ -258,6 +258,7 @@ class Account < ApplicationRecord
   def create_status!(status_object, thread = nil)
     Rails.logger.info "#{__method__} id: #{status_object['id']}"
     mentions = []
+    media_attachments = []
     direct_recipient = nil
 
     if status_object['to'].include?('https://www.w3.org/ns/activitystreams#Public')
@@ -294,6 +295,15 @@ class Account < ApplicationRecord
         end
       end
     end
+    if status_object['attachment'].present?
+      status_object['attachment'].each do |attachment|
+        remote_url = attachment['url']
+        content_type = attachment['mediaType']
+        description = attachment['name']
+        Rails.logger.info "#{__method__} found attachment (#{content_type}) url: #{remote_url}"
+        media_attachments << MediaAttachment.new(account: self, content_type: content_type, remote_url: remote_url, description: description)
+      end
+    end
 
     # if inReplyTo is present but there is no status with a matching uri, then we can use in_reply_to_uri to assign thread later
 
@@ -312,6 +322,11 @@ class Account < ApplicationRecord
     mentions.each do |m|
       m.status = status
       m.save
+    end
+
+    media_attachments.each do |a|
+      a.status = status
+      a.save
     end
 
     if status_object['inReplyTo'].present?
