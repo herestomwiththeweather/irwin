@@ -22,14 +22,12 @@ class User < ApplicationRecord
   before_validation :set_domain, on: :create
   before_validation :assign_account, on: :create
 
-  # INDIEAUTH_HOST env var
-  # e.g. https://heydude.example.com
   VALID_AUTH_HOSTS = [
-    URI(ENV['INDIEAUTH_HOST']).host
+    ENV['SERVER_NAME']
   ].freeze
 
   VALID_TOKEN_HOSTS = [
-    URI(ENV['INDIEAUTH_HOST']).host
+    ENV['SERVER_NAME']
   ].freeze
 
   validates :auth_endpoint_host, inclusion: { in: VALID_AUTH_HOSTS, message: "%{value} does not match the domain of this server." }
@@ -98,7 +96,7 @@ class User < ApplicationRecord
   end
 
   def actor_url
-    "#{ENV['INDIEAUTH_HOST']}/actor/#{to_short_webfinger_s}"
+    "https://#{ENV['SERVER_NAME']}/actor/#{to_short_webfinger_s}"
   end
 
   def main_key_url

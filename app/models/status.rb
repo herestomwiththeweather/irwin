@@ -21,7 +21,7 @@ class Status < ApplicationRecord
 
   def self.from_local_uri(uri)
     status_uri = URI(uri)
-    return nil unless URI(ENV['INDIEAUTH_HOST']).host == status_uri.host
+    return nil unless ENV['SERVER_NAME'] == status_uri.host
     id = status_uri.path.split('/').last
     Status.find_by(id: id)
   end
@@ -101,7 +101,7 @@ class Status < ApplicationRecord
   end
 
   def local_uri
-    Rails.application.routes.url_helpers.status_url(self, host: URI(ENV['INDIEAUTH_HOST']).host, protocol: 'https')
+    Rails.application.routes.url_helpers.status_url(self, host: ENV['SERVER_NAME'], protocol: 'https')
   end
 
   def refresh_replies

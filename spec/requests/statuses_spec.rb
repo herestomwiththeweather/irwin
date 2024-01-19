@@ -1,10 +1,11 @@
 require 'rails_helper'
 
 RSpec.describe "Statuses", type: :request do
-  let(:indieweb_info) { {:authorization_endpoint => "#{ENV['INDIEAUTH_HOST']}/auth", :token_endpoint => "#{ENV['INDIEAUTH_HOST']}/token"} }
+  let(:server_url) { "https://#{ENV['SERVER_NAME']}" }
+  let(:indieweb_info) { {:authorization_endpoint => "#{server_url}/auth", :token_endpoint => "#{server_url}/token"} }
   let(:user) { create :user }
   let(:status) { create :status, account: user.account }
-  let(:replies_url) { "#{ENV['INDIEAUTH_HOST']}/statuses/#{status.id}/replies" }
+  let(:replies_url) { "#{server_url}/statuses/#{status.id}/replies" }
 
   describe "GET /statuses/1" do
     before do
@@ -23,7 +24,7 @@ RSpec.describe "Statuses", type: :request do
     it 'returns camelcase keys' do
       get status_url(status, format: :json)
       json = JSON.parse(response.body)
-      expect(json['attributedTo']).to eql("#{ENV['INDIEAUTH_HOST']}/actor/#{user.to_short_webfinger_s}")
+      expect(json['attributedTo']).to eql("#{server_url}/actor/#{user.to_short_webfinger_s}")
     end
 
     it 'returns replies collection' do

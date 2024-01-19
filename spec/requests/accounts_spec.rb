@@ -1,7 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe "Accounts", type: :request do
-  let(:indieweb_info) { {:authorization_endpoint => "#{ENV['INDIEAUTH_HOST']}/auth", :token_endpoint => "#{ENV['INDIEAUTH_HOST']}/token"} }
+  let(:server_url) { "https://#{ENV['SERVER_NAME']}" }
+  let(:indieweb_info) { {:authorization_endpoint => "#{server_url}/auth", :token_endpoint => "#{server_url}/token"} }
   let(:origin_url) { "https://example.com/users/actor" }
   let(:target_url) { "https://example.com/users/target" }
   let(:origin_account) { create :account, identifier: origin_url, name: "Origin" }
@@ -9,7 +10,7 @@ RSpec.describe "Accounts", type: :request do
   let(:keypair) { OpenSSL::PKey::RSA.new(2048) }
   let(:private_key) { keypair.to_pem }
   let(:recipient_user) { create :user }
-  let(:recipient_url) { "#{ENV['INDIEAUTH_HOST']}/actor/#{recipient_user.to_short_webfinger_s}" }
+  let(:recipient_url) { "#{server_url}/actor/#{recipient_user.to_short_webfinger_s}" }
   let(:follow) { create :follow, target_account: origin_account, account: recipient_user.account }
   let(:target_status) { create :status, account_id: recipient_user.account.id, uri: nil }
   let(:valid_move_attributes) do

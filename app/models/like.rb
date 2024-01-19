@@ -7,7 +7,7 @@ class Like < ApplicationRecord
   default_scope { order(created_at: :desc) }
 
   def local_uri
-    Rails.application.routes.url_helpers.like_url(self, host: URI(ENV['INDIEAUTH_HOST']).host, protocol: 'https')
+    Rails.application.routes.url_helpers.like_url(self, host: ENV['SERVER_NAME'], protocol: 'https')
   end
 
   def request!

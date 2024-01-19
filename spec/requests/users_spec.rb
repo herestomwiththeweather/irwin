@@ -1,8 +1,9 @@
 require 'rails_helper'
 
 RSpec.describe "Users", type: :request do
-  let(:indieweb_info) { {:authorization_endpoint => "#{ENV['INDIEAUTH_HOST']}/auth", :token_endpoint => "#{ENV['INDIEAUTH_HOST']}/token"} }
-  let(:host) { ENV['INDIEAUTH_HOST'].sub('https://','') }
+  let(:server_url) { "https://#{ENV['SERVER_NAME']}" }
+  let(:indieweb_info) { {:authorization_endpoint => "#{server_url}/auth", :token_endpoint => "#{server_url}/token"} }
+  let(:host) { ENV['SERVER_NAME'] }
   let(:user) { create :user }
   let(:also_known_as_url) { "https://example.com/users/alice" }
 
@@ -18,7 +19,7 @@ RSpec.describe "Users", type: :request do
 
       expect(response).to have_http_status(200)
       expect(json['subject']).to eql(user.to_webfinger_s)
-      expect(json['links'].select {|link| link['rel'] == 'self'}.first['href']).to eql("#{ENV['INDIEAUTH_HOST']}/actor/#{user.to_short_webfinger_s}")
+      expect(json['links'].select {|link| link['rel'] == 'self'}.first['href']).to eql("#{server_url}/actor/#{user.to_short_webfinger_s}")
     end
   end
 
@@ -29,7 +30,7 @@ RSpec.describe "Users", type: :request do
 
     it "returns success" do
       headers = {'Accept': 'application/json'}
-      get "#{ENV['INDIEAUTH_HOST']}/actor/#{user.to_short_webfinger_s}", headers: headers
+      get "#{server_url}/actor/#{user.to_short_webfinger_s}", headers: headers
       puts response.body
       json = JSON.parse(response.body)
 
@@ -38,7 +39,7 @@ RSpec.describe "Users", type: :request do
 
     it 'returns camelcase keys' do
       headers = {'Accept': 'application/json'}
-      get "#{ENV['INDIEAUTH_HOST']}/actor/#{user.to_short_webfinger_s}", headers: headers
+      get "#{server_url}/actor/#{user.to_short_webfinger_s}", headers: headers
       puts response.body
       json = JSON.parse(response.body)
       expect(json['preferredUsername']).to eql("alice")
@@ -49,7 +50,7 @@ RSpec.describe "Users", type: :request do
       account.also_known_as = [ also_known_as_url ]
       account.save
       headers = {'Accept': 'application/json'}
-      get "#{ENV['INDIEAUTH_HOST']}/actor/#{user.to_short_webfinger_s}", headers: headers
+      get "#{server_url}/actor/#{user.to_short_webfinger_s}", headers: headers
       puts response.body
       json = JSON.parse(response.body)
       expect(json['alsoKnownAs'][0]).to eql(also_known_as_url)

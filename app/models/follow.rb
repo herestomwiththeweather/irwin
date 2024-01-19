@@ -41,11 +41,11 @@ class Follow < ApplicationRecord
 
   def object_id_url
     # the activity id for either a follow request or an accept request
-    "#{ENV['INDIEAUTH_HOST']}/activities/#{identifier}"
+    "https://#{ENV['SERVER_NAME']}/activities/#{identifier}"
   end
 
   def undo_id_url
-    "#{ENV['INDIEAUTH_HOST']}/activities/#{identifier}/undo"
+    "https://#{ENV['SERVER_NAME']}/activities/#{identifier}/undo"
   end
 
   def request!
