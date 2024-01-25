@@ -51,7 +51,21 @@ class User < ApplicationRecord
   end
 
   def assign_account
-    self.account = Account.create!(preferred_username: nil) if account.nil?
+    result = WebFinger.discover! "acct:#{username}@#{domain}"
+    webfinger_actor_url = result['links'].select {|link| link['rel'] == 'self'}.first['href']
+    if webfinger_actor_url != actor_url
+      Rails.logger.info "#{self.class}##{__method__} Error unexpected webfinger actor_url: #{webfinger_actor_url}"
+      errors.add :base, "Webfinger: Expected #{actor_url} but found #{webfinger_actor_url}"
+    end
+
+    self.account = Account.create!( preferred_username: nil,
+                                                   url: url,
+                                            identifier:    actor_url,
+                                                 inbox: "#{actor_url}/inbox",
+                                             followers: "#{actor_url}/followers",
+                                             following: "#{actor_url}/following" ) if account.nil?
+  rescue WebFinger::NotFound => e
+    Rails.logger.info "#{self.class}##{__method__} WebFinger::NotFound exception: #{e.message}"
   end
 
   def feed
@@ -128,5 +142,7 @@ class User < ApplicationRecord
     discovery_response = IndieWeb::Endpoints.get(url)
     self.auth_endpoint_host = URI(discovery_response[:authorization_endpoint]).host
     self.token_endpoint_host = URI(discovery_response[:token_endpoint]).host
+  rescue IndieWeb::Endpoints::HttpError => e
+    Rails.logger.info "#{self.class}##{__method__} IndieWeb::Endpoints::HttpError exception: #{e.message}"
   end
 end
