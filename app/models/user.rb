@@ -60,6 +60,7 @@ class User < ApplicationRecord
 
     self.account = Account.create!( preferred_username: nil,
                                                    url: url,
+                                                domain: domain,
                                             identifier:    actor_url,
                                                  inbox: "#{actor_url}/inbox",
                                              followers: "#{actor_url}/followers",
