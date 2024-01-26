@@ -3,6 +3,7 @@ require 'rails_helper'
 RSpec.describe "Accounts", type: :request do
   let(:server_url) { "https://#{ENV['SERVER_NAME']}" }
   let(:indieweb_info) { {:authorization_endpoint => "#{server_url}/auth", :token_endpoint => "#{server_url}/token"} }
+  let(:webfinger_info) { {"subject"=>"acct:alice@example.com", "links"=>[{"rel"=>"self", "type"=>"application/activity+json", "href"=>"#{ENV['INDIEAUTH_HOST']}/actor/alice@example.com" }]} }
   let(:origin_url) { "https://example.com/users/actor" }
   let(:target_url) { "https://example.com/users/target" }
   let(:origin_account) { create :account, identifier: origin_url, name: "Origin" }
@@ -31,6 +32,7 @@ RSpec.describe "Accounts", type: :request do
 
   before do
     allow(IndieWeb::Endpoints).to receive(:get).and_return(indieweb_info)
+    allow(WebFinger).to receive(:discover!).and_return(webfinger_info)
 
     # intended for recipient to fetch origin account
     allow(Account).to receive(:fetch_by_key).and_return(origin_account)

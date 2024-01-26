@@ -3,6 +3,7 @@ require 'rails_helper'
 RSpec.describe "Statuses", type: :request do
   let(:server_url) { "https://#{ENV['SERVER_NAME']}" }
   let(:indieweb_info) { {:authorization_endpoint => "#{server_url}/auth", :token_endpoint => "#{server_url}/token"} }
+  let(:webfinger_info) { {"subject"=>"acct:alice@example.com", "links"=>[{"rel"=>"self", "type"=>"application/activity+json", "href"=>"#{ENV['INDIEAUTH_HOST']}/actor/alice@example.com" }]} }
   let(:user) { create :user }
   let(:status) { create :status, account: user.account }
   let(:replies_url) { "#{server_url}/statuses/#{status.id}/replies" }
@@ -10,6 +11,7 @@ RSpec.describe "Statuses", type: :request do
   describe "GET /statuses/1" do
     before do
       allow(IndieWeb::Endpoints).to receive(:get).and_return(indieweb_info)
+      allow(WebFinger).to receive(:discover!).and_return(webfinger_info)
     end
 
     it 'returns success' do
@@ -41,6 +43,7 @@ RSpec.describe "Statuses", type: :request do
   describe "GET /statuses/1/replies" do
     before do
       allow(IndieWeb::Endpoints).to receive(:get).and_return(indieweb_info)
+      allow(WebFinger).to receive(:discover!).and_return(webfinger_info)
     end
 
     it 'returns replies collection' do
@@ -60,6 +63,7 @@ RSpec.describe "Statuses", type: :request do
   describe "GET /statuses/1/replies?page=1" do
     before do
       allow(IndieWeb::Endpoints).to receive(:get).and_return(indieweb_info)
+      allow(WebFinger).to receive(:discover!).and_return(webfinger_info)
     end
 
     it 'returns replies page' do
