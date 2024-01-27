@@ -3,8 +3,8 @@ require 'rails_helper'
 RSpec.describe User, type: :model do
   describe "when creating a new registered user" do
 
-    let(:indieweb_info) { {:authorization_endpoint => "#{ENV['INDIEAUTH_HOST']}/auth", :token_endpoint => "#{ENV['INDIEAUTH_HOST']}/token"} }
-    let(:webfinger_info) { {"subject"=>"acct:alice@example.com", "links"=>[{"rel"=>"self", "type"=>"application/activity+json", "href"=>"#{ENV['INDIEAUTH_HOST']}/actor/alice@example.com" }]} }
+    let(:indieweb_info) { {:authorization_endpoint => "https://#{ENV['SERVER_NAME']}/auth", :token_endpoint => "https://#{ENV['SERVER_NAME']}/token"} }
+    let(:webfinger_info) { {"subject"=>"acct:alice@example.com", "links"=>[{"rel"=>"self", "type"=>"application/activity+json", "href"=>"https://#{ENV['SERVER_NAME']}/actor/alice@example.com" }]} }
 
     before do
       allow(IndieWeb::Endpoints).to receive(:get).and_return(indieweb_info)

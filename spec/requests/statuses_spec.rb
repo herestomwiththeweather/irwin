@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe "Statuses", type: :request do
   let(:server_url) { "https://#{ENV['SERVER_NAME']}" }
   let(:indieweb_info) { {:authorization_endpoint => "#{server_url}/auth", :token_endpoint => "#{server_url}/token"} }
-  let(:webfinger_info) { {"subject"=>"acct:alice@example.com", "links"=>[{"rel"=>"self", "type"=>"application/activity+json", "href"=>"#{ENV['INDIEAUTH_HOST']}/actor/alice@example.com" }]} }
+  let(:webfinger_info) { {"subject"=>"acct:alice@example.com", "links"=>[{"rel"=>"self", "type"=>"application/activity+json", "href"=>"https://#{ENV['SERVER_NAME']}/actor/alice@example.com" }]} }
   let(:user) { create :user }
   let(:status) { create :status, account: user.account }
   let(:replies_url) { "#{server_url}/statuses/#{status.id}/replies" }
