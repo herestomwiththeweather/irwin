@@ -2,6 +2,10 @@ class LikesController < ApplicationController
   before_action :login_required, except: [:show]
 
   def index
+    @likes = current_user.account.likes.page(params[:page])
+  end
+
+  def received
     @likes = current_user.account.likes_received.page(params[:page])
   end
 

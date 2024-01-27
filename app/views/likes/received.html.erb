@@ -2,7 +2,7 @@
 
 <div id="likes" class="px-2">
   <% @likes.each do |like| %>
-    <%= render partial: like.status, locals: { child_view: false } %>
+    <%= render partial: 'like_received', locals: {like: like} %>
   <% end %>
   <%= paginate @likes %>
 </div>

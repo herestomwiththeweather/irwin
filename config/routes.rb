@@ -19,7 +19,11 @@ Rails.application.routes.draw do
     end
   end
   resources :follows, only: [:destroy]
-  resources :likes, only: [:create, :index, :destroy]
+  resources :likes, only: [:create, :index, :destroy] do
+    collection do
+      get :received
+    end
+  end
   resources :sessions
   resources :searches, only: [:new, :create]
   resources :authorizations, only: [:index, :show]
