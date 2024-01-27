@@ -26,5 +26,9 @@ RSpec.describe User, type: :model do
       expected_value = JSON.parse(serialization.to_json)['id']
       expect(@user.actor_url).to eq(expected_value)
     end
+
+    it "should have a unique url" do
+      expect { FactoryBot.create(:user, url: 'https://example.com') }.to raise_error(ActiveRecord::RecordInvalid).with_message('Validation failed: Url has already been taken')
+    end
   end
 end

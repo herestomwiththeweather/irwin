@@ -12,6 +12,7 @@ class User < ApplicationRecord
 
   validates :username, presence: true
   validates :domain, presence: true
+  validates :url, presence: true, uniqueness: true
 
   attr_accessor :auth_endpoint_host
   attr_accessor :token_endpoint_host
