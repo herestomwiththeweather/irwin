@@ -146,5 +146,7 @@ class User < ApplicationRecord
     self.token_endpoint_host = URI(discovery_response[:token_endpoint]).host
   rescue IndieWeb::Endpoints::HttpError => e
     Rails.logger.info "#{self.class}##{__method__} IndieWeb::Endpoints::HttpError exception: #{e.message}"
+    errors.add(:url, "Error: #{e.message}")
+    throw :abort
   end
 end
