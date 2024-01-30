@@ -1,7 +1,7 @@
 <%= turbo_frame_tag(dom_id status) do %>
   <% if !child_view %>
   <% if status.thread.present? %>
-    <%= link_to "replying to", status_path(status.thread), data: {'turbo-frame': '_top'} %> <%= status.thread.account.webfinger_to_s %>
+    <%= link_to "replying to", current_user.present? ? status_path(status.thread) : status.thread.uri, data: {'turbo-frame': '_top'} %> <%= status.thread.account.webfinger_to_s %>
   <% end %>
   <% end %>
   <div><%= image_tag status.account.icon_url_or_default, style: 'display: inline; padding: 2px; max-width: 50px; max-height: 50px;' %><b><%= link_to status.account.name, status.account, data: {'turbo-frame': '_top'} %></b> posted <%= link_to("#{ time_ago_in_words(status.created_at) } ago", status_path(status), data: {'turbo-frame': '_top'} ) %></div>
