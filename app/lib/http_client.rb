@@ -41,15 +41,31 @@ class HttpClient
 
   private
 
-  def request(method)
+  def request(method, redirects_left = 2)
+    return nil if 0 == redirects_left
+
     request = build_request(method)
     http = Net::HTTP.new(@url.host, @url.port)
     http.use_ssl = true
     response = http.request(request)
-    if !response.is_a?(Net::HTTPSuccess)
+    if response.is_a?(Net::HTTPRedirection)
+      Rails.logger.info "#{self.class}#{__method__} #{response.code} redirect to: #{response['location']}"
+      @url = URI(response['location'])
+      return request(method, redirects_left - 1)
+    elsif !response.is_a?(Net::HTTPSuccess)
       Rails.logger.info "#{self.class}#{__method__} error: #{response.code}: #{response.message}"
     end
-    response.body.blank? ? {} : JSON.parse(response.body)
+
+    return {} if response.body.blank?
+
+    content_type = response['Content-Type']
+
+    if content_type.present? && content_type.include?('text/html')
+      Rails.logger.info "#{self.class}#{__method__} error: received html from #{@url.host}"
+      nil
+    else
+      JSON.parse(response.body)
+    end
 
   rescue OpenSSL::SSL::SSLError => e
     Rails.logger.info "#{self.class}#{__method__} SSL error: #{e.message}"
@@ -64,7 +80,7 @@ class HttpClient
     Rails.logger.info "#{self.class}#{__method__} timeout error: #{e.message}"
     nil
   rescue JSON::ParserError
-    Rails.logger.info "#{self.class}#{__method__} error: could not parse response: #{response.body}"
+    Rails.logger.info "#{self.class}#{__method__} error: could not parse #{content_type || ''}: #{response.body}"
     nil
   rescue SocketError => e
     Rails.logger.info "#{self.class}#{__method__} socket error: #{e.message}"
