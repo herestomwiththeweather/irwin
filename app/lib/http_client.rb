@@ -73,6 +73,9 @@ class HttpClient
   rescue Errno::ENETUNREACH => e
     Rails.logger.info "#{self.class}#{__method__} unreachable error: #{e.message}"
     nil
+  rescue Errno::ECONNREFUSED => e
+    Rails.logger.info "#{self.class}#{__method__} connection refused error: #{e.message}"
+    nil
   rescue Errno::ECONNRESET => e
     Rails.logger.info "#{self.class}#{__method__} connection reset error: #{e.message}"
     nil
