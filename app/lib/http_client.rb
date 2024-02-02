@@ -50,7 +50,8 @@ class HttpClient
     response = http.request(request)
     if response.is_a?(Net::HTTPRedirection)
       Rails.logger.info "#{self.class}#{__method__} #{response.code} redirect to: #{response['location']}"
-      @url = URI(response['location'])
+      redirect_url = URI(response['location'])
+      @url = redirect_url.scheme.present? ? redirect_url : @url.merge(redirect_url)
       return request(method, redirects_left - 1)
     elsif !response.is_a?(Net::HTTPSuccess)
       Rails.logger.info "#{self.class}#{__method__} error: #{response.code}: #{response.message}"
