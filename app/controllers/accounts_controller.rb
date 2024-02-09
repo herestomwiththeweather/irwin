@@ -82,6 +82,10 @@ class AccountsController < ApplicationController
 
   private
 
+  def capitalized(text)
+    text.gsub(/(?:^|-)([a-z])/) { |m| m.upcase }
+  end
+
   def process_header
     Rails.logger.info "--- process_header ---"
     @current_mastodon_account = nil
@@ -103,11 +107,17 @@ class AccountsController < ApplicationController
 
     return false if @current_mastodon_account.nil?
 
-    comparison_string = "(request-target): post #{request.path}\nhost: #{request.headers['Host']}\ndate: #{request.headers['Date']}\ndigest: #{request.headers['Digest']}"
-    if request.headers['Content-Type'].present? && headers.split.include?('content-type')
-      Rails.logger.info "XXX including content type: #{request.headers['Content-Type']}"
-      comparison_string << "\ncontent-type: #{request.headers['Content-Type']}"
+    signed_headers_array = headers.split
+
+    signed_components = signed_headers_array.map do |signed_header|
+      if '(request-target)' == signed_header
+        "(request-target): post #{request.path}"
+      else
+        "#{signed_header}: #{request.headers[capitalized(signed_header)]}"
+      end
     end
+
+    comparison_string = signed_components.join("\n")
 
     @current_mastodon_account.verify(signature, comparison_string)
   end
