@@ -124,6 +124,8 @@ class Account < ApplicationRecord
       end
     end
     Rails.logger.info "public_key: #{actor['publicKey']['publicKeyPem']}" if actor['publicKey'].present?
+  rescue TypeError => e
+    Rails.logger.info "#{self.class}##{__method__} TypeError exception: #{e.message}"
   end
 
   def self.create_mastodon_account(actor)
