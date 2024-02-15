@@ -214,6 +214,8 @@ class Account < ApplicationRecord
     end
 
     self.summary = actor['summary']
+  rescue TypeError => e
+    Rails.logger.info "#{self.class}##{__method__} TypeError exception: #{e.message}"
   end
 
   def preferred_username
