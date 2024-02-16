@@ -101,16 +101,6 @@ class User < ApplicationRecord
     true
   end
 
-  def matches_activity_target?(target_uri)
-    # look up target by "object":"https://irwin.ngrok.io/actor/tom@backpawn.com"
-    uri = URI.parse(target_uri)
-    path = uri.request_uri
-    identifier = path.gsub(/^\/actor\//,'')
-    Rails.logger.info "target identifier: #{identifier}"
-    username, domain = identifier.split('@')
-    self.username == username && self.domain == domain
-  end
-
   def actor_url
     "https://#{ENV['SERVER_NAME']}/actor/#{to_short_webfinger_s}"
   end

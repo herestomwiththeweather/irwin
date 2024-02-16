@@ -72,7 +72,6 @@ class AccountsController < ApplicationController
         Rails.logger.info "*** inbox: Error: signature validation failed. ***"
         response_code = 400
       end
-    when 'Delete'
     else
       Rails.logger.info "no match: #{@json['type']}"
       #process_items [@json]
@@ -107,14 +106,9 @@ class AccountsController < ApplicationController
 
     return false if @current_mastodon_account.nil?
 
-    signed_headers_array = headers.split
-
-    signed_components = signed_headers_array.map do |signed_header|
-      if '(request-target)' == signed_header
-        "(request-target): post #{request.path}"
-      else
-        "#{signed_header}: #{request.headers[capitalized(signed_header)]}"
-      end
+    signed_components = headers.split.map do |signed_header|
+      header_value = '(request-target)' == signed_header ? "post #{request.path}" : request.headers[capitalized(signed_header)]
+      "#{signed_header}: #{header_value}"
     end
 
     comparison_string = signed_components.join("\n")
@@ -124,18 +118,6 @@ class AccountsController < ApplicationController
 
   def process_items(items)
     items.reverse_each.filter_map { |item| process_item(item) }
-  end
-
-  def validate_follow_params(item)
-    # sanity check that target actor url specified in item['object'] matches actor in the endpoint request url 
-    if !@target_user.matches_activity_target?(item['object'])
-      Rails.logger.info "Error: incoming target object #{item['object']} does not match expected target user id #{@target_user.id}"
-      raise StandardError
-    end
-    # sanity check that source actor url specified in item['actor'] matches actor making the request 
-    if !@current_mastodon_account.matches_activity_actor?(item['actor'])
-      raise StandardError
-    end
   end
 
   def log_item(item)
@@ -155,101 +137,10 @@ class AccountsController < ApplicationController
   def process_item(item)
     log_item(item)
 
+    activity = ActivityPub::Activity.factory(item, @current_mastodon_account, @target_account)
     response_code = case item['type']
-    when 'Follow'
-      validate_follow_params(item)
-      follow = @current_mastodon_account.follow!(@target_account, item['id'])
-      AcceptFollowJob.perform_later(follow.id)
-      follow.nil? ? 500 : 202
-    when 'Like'
-      like = @current_mastodon_account.like!(item['object'])
-      like.nil? ? 500 : 202
-    when 'Move'
-      return 401 unless @current_mastodon_account.matches_activity_actor?(item['object'])
-
-      target = Account.fetch_and_create_or_update_mastodon_account(item['target'])
-      return 500 if target.nil?
-
-      @current_mastodon_account.moved_to_account = target
-      @current_mastodon_account.save!
-
-      return 403 if !target.also_known_as.include?(@current_mastodon_account.identifier)
-
-      #
-      # unfollow origin account
-      #
-      old_follow = Follow.find_by(target_account: @current_mastodon_account, account: @target_account)
-      return 401 unless old_follow.present?
-
-      old_follow.destroy!
-
-      # follow target
-      new_follow = @target_account.follow!(target, item['id'])
-
-      202
-    when 'Accept'
-      Rails.logger.info "    actor: #{item['actor']}" # actor accepting the follow
-      Rails.logger.info "    follower: #{item['object']['actor']}"
-      follower = User.by_actor(item['object']['actor']).account
-      follow = Follow.where(target_account: @current_mastodon_account, account: follower).first
-      if follow.present?
-        follow.accept!
-      else
-        Rails.logger.info "#{__method__} Error finding follow to accept for: #{item['actor']}"
-      end
-      200
-    when 'Announce'
-      status = @current_mastodon_account.create_boost!(item)
-      202
-    when 'Delete'
-      202
-    when 'Create'
-      # since current account could be sending a received reply, we cannot assume current account created the status
-      actor = @current_mastodon_account
-      if item['actor'] != @current_mastodon_account.identifier
-        Rails.logger.info "#{__method__} validating signature for: #{item['actor']}"
-        account = Account.fetch_by_key(item['signature']['creator'])
-        if account.nil?
-          Rails.logger.info "#{self.class}##{__method__} Error No account for #{item['actor']}"
-          return 400
-        end
-
-        return 400 unless account.verify_signature(item)
-        actor = account
-
-        Rails.logger.info "#{__method__} *** signature verification succeeded *** for actor: #{actor.id}"
-      end
-
-      status = actor.create_status!(item['object'])
-      if !status
-        Rails.logger.info "#{__method__} Error creating status id: #{item['object']['id']} from account id: #{actor.id}"
-      elsif status.thread.present? && status.thread.account.local?
-        if !status.private_mention?
-          DistributeRawReplyJob.perform_later(JSON.dump(item), status.thread.account_id, actor.id)
-        end
-      end
-
-      202
-    when 'Undo'
-      if 'Follow' == item['object']['type']
-        target_account = User.by_actor(item['object']['object']).account
-        Rails.logger.info "undo follow [#{@current_mastodon_account.id}, #{target_account.id}, #{item['object']['id']}]"
-        follow = Follow.where(target_account: target_account, account: @current_mastodon_account).first
-        if follow.present?
-          Rails.logger.info "Deleting follow #{follow.id} [#{follow.account_id}, #{follow.target_account_id}, #{follow.created_at}, #{follow.uri}]"
-          follow.destroy!
-        else
-          Rails.logger.info "Error. Undo: follow lookup failed."
-        end
-      elsif 'Like' == item['object']['type']
-        Rails.logger.info "undo like [#{@current_mastodon_account.id}, #{item['object']['object']}]"
-        status = Status.from_local_uri(item['object']['object'])
-        like = Like.find_by(status: status, account: @current_mastodon_account)
-        like.destroy!
-      else
-        Rails.logger.info "Error. Unsupported type for undo: #{item['object']['type']}"
-      end
-      202
+    when 'Follow', 'Like', 'Move', 'Accept', 'Announce', 'Create', 'Undo'
+      activity&.perform
     else
       Rails.logger.info "process_item does not support item type: #{item['type']}"
       404
