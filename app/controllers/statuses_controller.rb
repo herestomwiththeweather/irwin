@@ -1,12 +1,19 @@
 class StatusesController < ApplicationController
   before_action :login_required, except: [:show, :replies]
-  before_action :set_status, only: [:show, :boost, :replies]
+  before_action :set_status, only: [:show, :boost, :replies, :translate]
 
   authorize_resource
 
   def index
     @statuses = current_user.feed.page(params[:page])
     @new_status = Status.new
+  end
+
+  def translate
+    @translation = DeepL.translate @status.text, @status.language.upcase, current_user.language.upcase
+    Rails.logger.info "#{self.class}##{__method__} #{@translation.text}"
+    @status.text = @translation.text
+    render partial: @status, locals: { child_view: false }
   end
 
   def private_mentions
@@ -67,7 +74,7 @@ class StatusesController < ApplicationController
   def create
     @status = Status.new(status_params)
     @status.account = current_user.account
-    @status.language = 'en'
+    @status.language = current_user.language
     @status.media_attachments.each { |media_attachment| media_attachment.account = current_user.account }
 
     if @status.save!

@@ -60,6 +60,7 @@ gem 'kaminari'
 gem 'exception_notification'
 gem 'rails_autolink'
 gem 'aws-sdk-s3'
+gem 'deepl-rb', require: 'deepl'
 
 gem 'json-ld'
 gem 'json-ld-preloaded', '~> 3.2'

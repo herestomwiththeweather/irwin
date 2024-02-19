@@ -19,6 +19,39 @@ class Status < ApplicationRecord
 
   after_create :create_mentions_for_local_account
 
+  # languages supported by DeepL gem
+  LANGUAGES = [
+    ["Bulgarian", "bg"],
+    ["Czech", "cs"],
+    ["Danish", "da"],
+    ["German", "de"],
+    ["Greek", "el"],
+    ["English", "en"],
+    ["Spanish", "es"],
+    ["Estonian", "et"],
+    ["Finnish", "fi"],
+    ["French", "fr"],
+    ["Hungarian", "hu"],
+    ["Indonesian", "id"],
+    ["Italian", "it"],
+    ["Japanese", "ja"],
+    ["Korean", "ko"],
+    ["Lithuanian", "lt"],
+    ["Latvian", "lv"],
+    ["Norwegian", "nb"],
+    ["Dutch", "nl"],
+    ["Polish", "pl"],
+    ["Portuguese", "pt"],
+    ["Romanian", "ro"],
+    ["Russian", "ru"],
+    ["Slovak", "sk"],
+    ["Slovenian", "sl"],
+    ["Swedish", "sv"],
+    ["Turkish", "tr"],
+    ["Ukrainian", "uk"],
+    ["Chinese", "zh"]
+  ]
+
   def self.from_local_uri(uri)
     status_uri = URI(uri)
     return nil unless ENV['SERVER_NAME'] == status_uri.host

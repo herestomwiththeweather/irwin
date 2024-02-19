@@ -12,6 +12,7 @@ Rails.application.routes.draw do
     member do
       post :boost
       get :replies
+      get :translate
     end
     collection do
       get :private_mentions

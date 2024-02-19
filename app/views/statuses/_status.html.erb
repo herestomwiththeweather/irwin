@@ -12,6 +12,11 @@
   <% status.media_attachments.each do |media_attachment| %>
     <%= render partial: media_attachment %>
   <% end %>
+  <% if status.language != current_user.language %>
+    <div style="display: inline-block;">
+      <%= link_to "Translate", translate_status_path(status) %>
+    </div>
+  <% end %>
   <% if status.account != current_user.account %>
     <div style="display: inline-block;">
     <% if like = Like.find_by(status: status, account: current_user.account) %>

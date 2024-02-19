@@ -10,6 +10,7 @@ Required environment variables:
 Optional environment variables:
 
 * INDIEAUTH_TIME_ZONE - timezone of your server (default: UTC) like: Central Time (US & Canada)
+* DEEPL_AUTH_KEY - authentication key for DeepL
 
 * EXCEPTION_NOTIFICATION - comma separated list of emails to receive exception notifications for troubleshooting
 * SMTP_DEFAULT_FROM - like support@example.com

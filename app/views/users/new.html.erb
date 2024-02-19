@@ -25,6 +25,10 @@
     <%= f.text_field :username %>
   </div>
   <div class="field">
+    <%= f.label :language, style: "display: block" %>
+    <%= f.select :language, Status::LANGUAGES %>
+  </div>
+  <div class="field">
     <%= f.label :password, style: "display: block" %>
     <%= f.password_field :password %>
   </div>
