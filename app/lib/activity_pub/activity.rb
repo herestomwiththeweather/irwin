@@ -29,6 +29,8 @@ class ActivityPub::Activity
         ActivityPub::Activity::Like
       when 'Move'
         ActivityPub::Activity::Move
+      when 'Undo'
+        ActivityPub::Activity::Undo
       end
     end
   end

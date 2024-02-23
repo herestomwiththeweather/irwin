@@ -1,6 +1,6 @@
 class StatusesController < ApplicationController
   before_action :login_required, except: [:show, :replies]
-  before_action :set_status, only: [:show, :boost, :replies, :translate]
+  before_action :set_status, only: [:show, :boost, :unboost, :replies, :translate]
 
   authorize_resource
 
@@ -41,6 +41,15 @@ class StatusesController < ApplicationController
     respond_to do |format|
       format.html do
         @status.boost!(current_user.account)
+        render partial: @status, locals: { child_view: false }
+      end
+    end
+  end
+
+  def unboost
+    respond_to do |format|
+      format.html do
+        @status.unboost!(current_user.account)
         render partial: @status, locals: { child_view: false }
       end
     end

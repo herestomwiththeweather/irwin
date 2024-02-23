@@ -11,6 +11,7 @@ Rails.application.routes.draw do
   resources :statuses, only: [:index, :show, :create] do
     member do
       post :boost
+      post :unboost
       get :replies
       get :translate
     end

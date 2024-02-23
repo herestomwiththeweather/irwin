@@ -116,6 +116,15 @@ class Status < ApplicationRecord
     status
   end
 
+  def unboost!(account)
+    Rails.logger.info "#{__method__} account #{account.id} unboosting #{id}"
+    raise StandardError if account.user.nil?
+    boost = Status.find_by(account: account, reblog_of_id: id)
+    boost.update_attribute(:text, 'revoked')
+    NotifyUndoAnnounceJob.perform_later(boost.id)
+    boost
+  end
+
   def create_mentions_for_local_account
     if account.local?
       find_mentions.each do |mention|
@@ -188,6 +197,43 @@ class Status < ApplicationRecord
     end until current_page.nil?
     Rails.logger.info "#{__method__} [status #{id}] fetched #{i} pages!"
     i # pages not replies
+  end
+
+  def notify_undo_announce
+    return false if (direct_recipient.present? || reblog.nil?)
+
+    recipients = [ reblog.account ]
+    recipients << account.account_followers
+    recipients.flatten!
+
+    cc_list = []
+    cc_list << account.user.followers_url
+    cc_list << reblog.account.identifier
+
+    activity = {}
+    activity['id'] = "#{account.user.actor_url}#announces/#{id}/undo"
+    activity['actor'] = account.user.actor_url
+    activity['type'] = 'Undo'
+    activity['to'] = [
+      "https://www.w3.org/ns/activitystreams#Public"
+    ]
+    activity['object'] = {
+      "id" => local_uri,
+      "type" => "Announce",
+      "published" => created_at.iso8601,
+      "actor" => account.identifier,
+      "to" => [
+        "https://www.w3.org/ns/activitystreams#Public"
+      ],
+      "cc" => cc_list,
+      "object" => reblog.uri
+    }
+
+    recipients.each do |recipient|
+      account.user.post(recipient, activity)
+    end
+
+    self.destroy!
   end
 
   def notify_announce
