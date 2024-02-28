@@ -300,6 +300,9 @@ class Account < ApplicationRecord
       end
     end
     if status_object['attachment'].present?
+      if status_object['attachment'].is_a?(Hash)
+        status_object['attachment'] = [ status_object['attachment'] ]
+      end
       status_object['attachment'].each do |attachment|
         remote_url = attachment['url']
         content_type = attachment['mediaType']
