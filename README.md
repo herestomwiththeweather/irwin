@@ -1,13 +1,19 @@
-# README
+## Irwin
 
-Required environment variables:
+Irwin is an activitypub and indieauth server. Users are known on the social web using their own domain rather than this server's domain.
+
+### Example blank-gh-site
+
+This [blank-gh-site](https://github.com/otisburgsocial/blank-gh-site) adds 3 small commits to show indieauth and webfinger config needed to register on [otisburg.social](https://otisburg.social) which is running the irwin server code.  The first commit is created automatically by github when you configure custom domain which appears after you select branch under "Pages" under "Code and automation" sidebar for the blank-gh-site project.
+
+### Irwin Required environment variables:
 
 * SERVER_NAME - hostname of your server like: example.herokuapp.com
 * S3_BUCKET_NAME - amazon s3 bucket to store media
 * AMAZON_ACCESS_KEY_ID - your id for amazon s3
 * AMAZON_SECRET_ACCESS_KEY - your secret for amazon s3
 
-Optional environment variables:
+### Irwin Optional environment variables:
 
 * INDIEAUTH_TIME_ZONE - timezone of your server (default: UTC) like: Central Time (US & Canada)
 * DEEPL_AUTH_KEY - authentication key for DeepL
