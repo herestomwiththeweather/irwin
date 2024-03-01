@@ -59,7 +59,7 @@ class User < ApplicationRecord
       errors.add :base, "Webfinger: Expected #{actor_url} but found #{webfinger_actor_url}"
     end
 
-    self.account = Account.create!( preferred_username: nil,
+    self.account = Account.create!( preferred_username: username,
                                                    url: url,
                                                 domain: domain,
                                             identifier:    actor_url,

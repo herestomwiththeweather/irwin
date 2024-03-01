@@ -218,10 +218,6 @@ class Account < ApplicationRecord
     Rails.logger.info "#{self.class}##{__method__} TypeError exception: #{e.message}"
   end
 
-  def preferred_username
-    self[:preferred_username] || user&.username
-  end
-
   def also_known_as
     self[:also_known_as] || []
   end
