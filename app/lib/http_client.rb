@@ -2,10 +2,13 @@ require 'net/https'
 
 class HttpClient
   def initialize(request_url, actor_url, private_key, body = '')
-    @url = URI(request_url)
     @actor_url = actor_url
     @private_key = private_key
     @body = body
+    @url = URI(request_url)
+  rescue URI::InvalidURIError => e
+    Rails.logger.info "#{self.class}##{__method__} invalid uri error: #{e.message}"
+    @url = URI(URI::Parser.new.escape(unescape_unicode(request_url)))
   end
 
   def get
@@ -40,6 +43,12 @@ class HttpClient
   end
 
   private
+
+  def unescape_unicode(request_url)
+    # https://stackoverflow.com/questions/7015778/is-this-the-best-way-to-unescape-unicode-escape-sequences-in-ruby
+    #
+    request_url.gsub(/\\u([\da-fA-F]{4})/) { [$1].pack("H*").unpack("n*").pack("U*") }
+  end
 
   def request(method, redirects_left = 2)
     return nil if 0 == redirects_left
