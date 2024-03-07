@@ -16,7 +16,7 @@ RSpec.describe "Users", type: :request do
 
     it "returns success" do
       headers = { 'Accept' => 'application/jrd+json' }
-      get "/.well-known/webfinger?resource=#{user.username}@#{host}", headers: headers
+      get "/.well-known/webfinger?resource=acct:#{user.username}@#{host}", headers: headers
       json = JSON.parse(response.body)
 
       expect(response).to have_http_status(200)
