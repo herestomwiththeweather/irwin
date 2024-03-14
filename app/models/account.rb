@@ -351,7 +351,8 @@ class Account < ApplicationRecord
   end
 
   def create_boost!(item)
-    original_status = Status.from_object_uri(item['object'])
+    original_url = item['object'].is_a?(Hash) ? item['object']['id'] : item['object']
+    original_status = Status.from_object_uri(original_url)
     # boost not expected to have a url
     status = self.statuses.create!( created_at: item['published']&.to_datetime,
                                     reblog: original_status,
