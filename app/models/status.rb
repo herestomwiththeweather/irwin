@@ -405,6 +405,9 @@ class Status < ApplicationRecord
     end
 
     doc.to_s
+  rescue => e
+    Rails.logger.info "#{self.class}##{__method__} rexml exception: #{e.message}"
+    text
   end
 
   def local?
