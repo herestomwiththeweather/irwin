@@ -8,6 +8,9 @@ Rails.application.routes.draw do
       post :follow
     end
   end
+  constraints(username_with_domain: /[^\/]+/) do
+    get '/@:username_with_domain', to: 'accounts#show', as: :social_account
+  end
   resources :statuses, only: [:index, :show, :create] do
     member do
       post :boost

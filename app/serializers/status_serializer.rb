@@ -32,12 +32,12 @@ class StatusSerializer < ApplicationSerializer
 
   def content_map
     {
-      language => object.marked_up_text
+      language => marked_up_text
     }
   end
 
   def content
-    object.marked_up_text
+    marked_up_text
   end
 
   def attributed_to 
@@ -85,6 +85,10 @@ class StatusSerializer < ApplicationSerializer
         items: []
       }
     }
+  end
+
+  def marked_up_text
+    @marked_up_text ||= StatusPresenter.new(object, @instance_options[:view_context]).marked_up_text
   end
 
   def action_url(action, controller)

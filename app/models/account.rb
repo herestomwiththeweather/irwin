@@ -20,8 +20,8 @@ class Account < ApplicationRecord
   validates :followers, uniqueness: true
   validates :inbox, uniqueness: true
   validates :outbox, uniqueness: true
-  validates :url, uniqueness: true
 =end
+  validates :url, uniqueness: true
 
   default_scope { order(created_at: :desc) }
 
@@ -141,10 +141,6 @@ class Account < ApplicationRecord
   rescue ActiveRecord::RecordNotUnique => e
     Rails.logger.info "#{__method__} error actor exists: #{actor['id']}"
     find_by(identifier: actor['id'])
-  end
-
-  def mention_markup
-    "<span class=\"h-card\"><a href=\"#{h(url)}\" class=\"u-url mention\">@<span>#{h(preferred_username)}</span></a></span>"
   end
 
   def likes_received

@@ -162,6 +162,11 @@ class AccountsController < ApplicationController
   end
 
   def set_account
-    @account = Account.find(params[:id])
+    if params[:username_with_domain].present?
+      username, domain = params[:username_with_domain].split('@')
+      @account = Account.find_by(preferred_username: username, domain: domain)
+    else
+      @account = Account.find(params[:id])
+    end
   end
 end

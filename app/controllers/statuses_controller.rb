@@ -72,7 +72,7 @@ class StatusesController < ApplicationController
       end
       format.all do
         if @status.local?
-          render json: @status, serializer: StatusSerializer, content_type: 'application/activity+json'
+          render json: @status, serializer: StatusSerializer, content_type: 'application/activity+json', view_context: view_context
         else
           render json: {}, status: :unprocessable_entity
         end

@@ -267,20 +267,6 @@ class Status < ApplicationRecord
     true
   end
 
-  def text_with_linked_urls_and_mentions
-    output = ActionController::Base.helpers.auto_link(text, html: { translate: 'no', target: '_blank', rel: 'nofollow noopener noreferrer' }, link: :urls)
-    mentions.each do |mention|
-      webfinger_id = "@#{mention.account.webfinger_to_s}"
-      output.gsub!( /#{webfinger_id}/i, mention.account.mention_markup)
-    end
-
-    output
-  end
-
-  def marked_up_text
-    "<p>#{text_with_linked_urls_and_mentions}</p>"
-  end
-
   def notify_cc
     recipients = []
 
@@ -299,6 +285,8 @@ class Status < ApplicationRecord
     mentions.each do |mention|
       recipients << mention.account unless recipients.include?(mention.account)
     end
+
+    marked_up_text = StatusPresenter.new(self, nil).marked_up_text
 
     recipients.each do |recipient|
       Rails.logger.info "#{__method__} sending to [#{recipient.id}] #{recipient.webfinger_to_s}"
@@ -395,6 +383,28 @@ class Status < ApplicationRecord
     email_regex = /\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b/
 
     matches = text.scan(email_regex)
+  end
+
+  def doc
+    # p tag to prevent more than 1 root element
+    @doc ||= REXML::Document.new("<p>#{text}</p>")
+  end
+
+  def mention_anchors_found
+    doc.elements.to_a('//a[contains(@class, "mention")]')
+  end
+
+  def text_with_modified_mentions
+    mention_anchors_found.each do |mention|
+      Rails.logger.info "#{__method__} status #{id}: #{mention.attributes['href']}"
+      mention_to_replace = mentions.find_by(account: Account.find_by(url: mention.attributes['href']))
+      if mention_to_replace
+        mention.attributes['href'] = Rails.application.routes.url_helpers.account_url(mention_to_replace.account, host: ENV['SERVER_NAME'], protocol: 'https')
+        mention.attributes['data-turbo-frame'] = '_top'
+      end
+    end
+
+    doc.to_s
   end
 
   def local?
