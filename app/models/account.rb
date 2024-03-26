@@ -55,6 +55,7 @@ class Account < ApplicationRecord
   end
 
   def self.fetch_and_create_mastodon_account_by_address(address)
+    address&.strip!
     preferred_username, domain = address.split('@')
     account = Account.find_by(preferred_username: preferred_username, domain: domain)
     return account if account.present?
