@@ -23,8 +23,6 @@ class Account < ApplicationRecord
 =end
   validates :url, uniqueness: true
 
-  default_scope { order(created_at: :desc) }
-
   CONTEXT = 'https://w3id.org/identity/v1'
 
   def self.fetch_by_key(key_url)

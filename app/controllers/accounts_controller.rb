@@ -17,7 +17,7 @@ class AccountsController < ApplicationController
   end
 
   def index
-    @accounts = Account.page(params[:page])
+    @accounts = Account.order('created_at DESC').page(params[:page])
   end
 
   def show
