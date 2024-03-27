@@ -64,6 +64,9 @@ class Account < ApplicationRecord
     actor = fetch_mastodon_account(actor_url)
 
     Account.create_mastodon_account(actor)
+  rescue WebFinger::NotFound => e
+    Rails.logger.info "#{self.class}##{__method__} WebFinger not found for #{address}: #{e.message}"
+    nil
   end
 
   def self.fetch_and_create_or_update_mastodon_account(actor_url)
