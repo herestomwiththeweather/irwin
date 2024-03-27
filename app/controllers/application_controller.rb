@@ -1,6 +1,13 @@
 class ApplicationController < ActionController::Base
 
+rescue_from ActionController::InvalidAuthenticityToken, with: :authenticity_token_required
+
   private
+
+  def authenticity_token_required
+    Rails.logger.info "#{__method__} InvalidAuthenticityToken exception from #{request.remote_ip} #{params[:controller]}##{params[:action]}"
+    redirect_to login_url, notice: "Invalid request. Please sign in"
+  end
 
   def require_oauth_user_token
     authorization_header = request.headers['Authorization']
