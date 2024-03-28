@@ -19,6 +19,34 @@ require "action_cable/engine"
 Bundler.require(*Rails.groups)
 
 module Irwin
+  module Version
+    module_function
+
+    def major
+      0
+    end
+
+    def minor
+      0
+    end
+
+    def patch
+      1
+    end
+
+    def to_a
+      [major, minor, patch]
+    end
+
+    def prerelease
+      ENV.fetch('IRWIN_VERSION_PRERELEASE', 'alpha.1')
+    end
+
+    def to_s
+      "#{to_a.join('.')}-#{prerelease}"
+    end
+  end
+
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.0
