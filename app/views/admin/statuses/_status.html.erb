@@ -1,0 +1,25 @@
+<div id="<%= dom_id status %>">
+  <p class="my-5">
+    <strong class="block font-medium mb-1">Text:</strong>
+    <%= status.text %>
+  </p>
+
+  <p class="my-5">
+    <strong class="block font-medium mb-1">Uri:</strong>
+    <%= link_to(status.uri, status.uri, target: '_blank') if status.uri.present? %>
+  </p>
+
+  <p class="my-5">
+    <strong class="block font-medium mb-1">Language:</strong>
+    <%= link_to(status.language, statuses_path(q: { language_cont: status.language })) if status.language.present? %>
+  </p>
+
+  <p class="my-5">
+    <strong class="block font-medium mb-1">Created:</strong>
+    <%= status.created_at %>
+  </p>
+
+  <%= link_to "Show", status, target: '_blank', class: "rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>
+  <%= button_to "Delete", admin_status_path(status), method: :delete, class: "mt-2 rounded-lg py-3 px-5 bg-gray-100 font-medium" %>
+  <hr class="mt-6">
+</div>

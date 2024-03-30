@@ -50,7 +50,7 @@ gem "bootsnap", require: false
 
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 gem "image_processing", "~> 1.2"
-
+gem "tailwindcss-rails"
 gem 'indieweb-endpoints'
 gem 'microformats'
 gem 'sidekiq', '6.5.9'
@@ -62,6 +62,7 @@ gem 'rails_autolink'
 gem 'aws-sdk-s3'
 gem 'deepl-rb', require: 'deepl'
 gem 'rexml'
+gem 'ransack'
 
 gem 'json-ld'
 gem 'json-ld-preloaded', '~> 3.2'

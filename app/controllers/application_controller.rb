@@ -18,6 +18,13 @@ rescue_from ActionController::InvalidAuthenticityToken, with: :authenticity_toke
     @current_user = @current_token.user
   end
 
+  def admin_login_required
+    if current_user && current_user.guest?
+      redirect_to root_url, notice: "Unauthorized"
+    end
+    login_required
+  end
+
   def login_required
     unless current_user
       store_location

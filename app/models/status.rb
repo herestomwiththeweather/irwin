@@ -19,6 +19,14 @@ class Status < ApplicationRecord
 
   after_create :create_mentions_for_local_account
 
+  def self.ransackable_attributes(auth_object = nil)
+    ["text", "language"]
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+    []
+  end
+
   # languages supported by DeepL gem
   LANGUAGES = [
     ["Bulgarian", "bg"],

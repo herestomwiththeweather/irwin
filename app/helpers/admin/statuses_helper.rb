@@ -1,0 +1,2 @@
+module Admin::StatusesHelper
+end

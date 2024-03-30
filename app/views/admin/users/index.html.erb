@@ -1,0 +1,22 @@
+<div class="mt-4 px-5">
+  <div class="flex justify-between items-center">
+    <h1 class="font-bold text-4xl">Users</h1>
+  </div>
+  <%= search_form_for @query, url: admin_users_path do |f| %>
+    <div class="inline">
+      <%= f.search_field :username_or_email_i_cont %>
+    </div>
+    <div class="inline">
+      <%= f.submit class: "rounded-lg py-3 px-5 bg-blue-600 text-white inline-block font-medium cursor-pointer" %>
+    </div>
+  <% end %>
+  <div id="users" class="min-w-full">
+    <% @users.each do |user| %>
+      <p>
+        <%= link_to user.to_short_webfinger_s, [:admin, user] %>
+      </p>
+      <%= render user %>
+      <hr>
+    <% end %>
+  </div>
+</div>

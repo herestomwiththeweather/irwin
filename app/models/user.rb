@@ -34,6 +34,14 @@ class User < ApplicationRecord
   validates :auth_endpoint_host, inclusion: { in: VALID_AUTH_HOSTS, message: "%{value} does not match the domain of this server." }
   validates :token_endpoint_host, inclusion: { in: VALID_TOKEN_HOSTS, message: "%{value} does not match the domain of this server." }
 
+  def self.ransackable_attributes(auth_object = nil)
+    ["username", "email"]
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+    []
+  end
+
   def self.by_actor(target_uri)
     uri = URI.parse(target_uri)
     path = uri.request_uri

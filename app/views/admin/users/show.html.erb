@@ -1,0 +1,35 @@
+<p style="color: green"><%= notice %></p>
+
+<div class="mt-4 px-5">
+  <div class="mx-auto">
+    <%= render @user %>
+    <p>
+      <strong>Username:</strong>
+      <%= @user.username %>
+    </p>
+
+    <p>
+      <strong>Domain:</strong>
+      <%= @user.domain %>
+    </p>
+    <p>
+      <strong>Url:</strong>
+      <%= link_to @user.url, @user.url, target: '_blank' %>
+    </p>
+    <p>
+      <strong>Language:</strong>
+      <%= @user.language %>
+    </p>
+    <p>
+      <strong>Public key:</strong>
+      <%= @user.public_key %>
+    </p>
+    <div>
+      <%= link_to 'Edit this user', edit_admin_user_path(@user), class: "mt-2 rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>
+      <div class="inline-block ml-2">
+        <%= button_to 'Delete this user', admin_user_path(@user), method: :delete, class: "mt-2 rounded-lg py-3 px-5 bg-gray-100 font-medium" %>
+      </div>
+      <%= link_to 'Back to users', admin_users_path, class: "ml-2 rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>
+    </div>
+  </div>
+</div>

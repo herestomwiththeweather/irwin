@@ -271,6 +271,10 @@ GEM
       thor (~> 1.0)
       zeitwerk (~> 2.5)
     rake (13.0.6)
+    ransack (4.1.1)
+      activerecord (>= 6.1.5)
+      activesupport (>= 6.1.5)
+      i18n
     rdf (3.3.1)
       bcp47_spec (~> 0.2)
       link_header (~> 0.0, >= 0.0.8)
@@ -307,6 +311,8 @@ GEM
     stimulus-rails (1.1.0)
       railties (>= 6.0.0)
     strscan (3.0.4)
+    tailwindcss-rails (2.3.0-x86_64-linux)
+      railties (>= 6.0.0)
     thor (1.2.1)
     timeout (0.3.0)
     turbo-rails (1.1.1)
@@ -360,12 +366,14 @@ DEPENDENCIES
   puma (~> 5.6.8)
   rails (~> 7.0.3, >= 7.0.3.1)
   rails_autolink
+  ransack
   rdf-normalize (~> 0.5)
   redis (~> 4.0)
   rexml
   rspec-rails
   sidekiq (= 6.5.9)
   stimulus-rails
+  tailwindcss-rails
   turbo-rails
   tzinfo-data
   web-console
