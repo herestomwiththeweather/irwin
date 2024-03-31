@@ -5,7 +5,7 @@ class Admin::UsersController < ApplicationController
   # GET /admin/users or /admin/users.json
   def index
     @query = User.ransack(params[:query])
-    @users = @query.result(distinct: true)
+    @users = @query.result
   end
 
   # GET /admin/users/1 or /admin/users/1.json
@@ -21,10 +21,8 @@ class Admin::UsersController < ApplicationController
     respond_to do |format|
       if @user.update(user_params)
         format.html { redirect_to admin_user_url(@user), notice: "User was successfully updated." }
-        format.json { render :show, status: :ok, location: @user }
       else
         format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @user.errors, status: :unprocessable_entity }
       end
     end
   end
@@ -35,7 +33,6 @@ class Admin::UsersController < ApplicationController
 
     respond_to do |format|
       format.html { redirect_to admin_users_url, notice: "User was successfully destroyed." }
-      format.json { head :no_content }
     end
   end
 

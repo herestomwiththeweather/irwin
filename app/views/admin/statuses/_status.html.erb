@@ -11,7 +11,7 @@
 
   <p class="my-5">
     <strong class="block font-medium mb-1">Language:</strong>
-    <%= link_to(status.language, statuses_path(q: { language_cont: status.language })) if status.language.present? %>
+    <%= link_to(status.language, admin_statuses_path(query: { language_eq: status.language })) if status.language.present? %>
   </p>
 
   <p class="my-5">

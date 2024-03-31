@@ -4,8 +4,8 @@ class Admin::StatusesController < ApplicationController
 
   # GET /admin/statuses or /admin/statuses.json
   def index
-    @query = Status.ransack(params[:query])
-    @statuses = @query.result(distinct: true).page(params[:page])
+    @query = Status.ransack_search(params[:query])
+    @statuses = @query.result.page(params[:page])
   end
 
   # DELETE /admin/statuses/1 or /admin/statuses/1.json
@@ -14,7 +14,6 @@ class Admin::StatusesController < ApplicationController
 
     respond_to do |format|
       format.html { redirect_to admin_statuses_url, notice: "Status was successfully destroyed." }
-      format.json { head :no_content }
     end
   end
 
@@ -22,10 +21,5 @@ class Admin::StatusesController < ApplicationController
     # Use callbacks to share common setup or constraints between actions.
     def set_status
       @status = Status.find(params[:id])
-    end
-
-    # Only allow a list of trusted parameters through.
-    def status_params
-      params.require(:status).permit(:uri, :language, :text)
     end
 end

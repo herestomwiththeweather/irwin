@@ -20,11 +20,16 @@ class Status < ApplicationRecord
   after_create :create_mentions_for_local_account
 
   def self.ransackable_attributes(auth_object = nil)
-    ["text", "language"]
+    ["text", "language", "direct_recipient_id"]
   end
 
   def self.ransackable_associations(auth_object = nil)
     []
+  end
+
+  def self.ransack_search(query_params)
+    permitted_params = query_params.permit(:text_i_cont, :language_eq) if query_params.present?
+    ransack({direct_recipient_id_null: true}.merge(permitted_params || {}))
   end
 
   # languages supported by DeepL gem
