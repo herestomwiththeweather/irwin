@@ -1,8 +1,8 @@
 class AccountsController < ApplicationController
-  before_action :set_target_account, only: [:inbox]
+  before_action :set_target_account, only: [:inbox, :outbox]
   before_action :set_account, only: [:show, :edit, :update, :follow]
   skip_before_action :verify_authenticity_token, only: [:inbox]
-  before_action :login_required, except: [:inbox]
+  before_action :login_required, except: [:inbox, :outbox]
 
   authorize_resource
 
@@ -48,6 +48,10 @@ class AccountsController < ApplicationController
     end
   end
 
+  def outbox
+    render json: {}, status: 200
+  end
+
   def inbox
     response_code = 200
     raise StandardError unless request.headers['Signature'].present?
@@ -57,7 +61,7 @@ class AccountsController < ApplicationController
     
     @json = JSON.parse(@body)
 
-    Rails.logger.info "-> type: 😂#{@json['type']}😂, actor: #{@json['actor']}, from: #{request.remote_ip}"
+    Rails.logger.info "-> type: 😂#{@json['type']}😂, actor: #{@json['actor']}, agent: #{request.user_agent}, from: #{request.remote_ip}"
 
     case @json['type']
     when 'Collection', 'CollectionPage'

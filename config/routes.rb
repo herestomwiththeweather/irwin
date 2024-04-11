@@ -57,6 +57,7 @@ Rails.application.routes.draw do
   get '/nodeinfo/2.0' => 'well_known/nodeinfo#show', as: :nodeinfo_schema
   get '/actor/:id' => 'users#actor', as: :actor, id: /[^\/]+/
   post '/actor/:id/inbox' => 'accounts#inbox', as: :inbox, id: /[^\/]+/
+  get '/actor/:id/outbox' => 'accounts#outbox', as: :outbox, id: /[^\/]+/
   get '/actor/:id/followers' => 'users#followers', as: :api_followers, id: /[^\/]+/
   get '/actor/:id/following' => 'users#following', as: :api_following, id: /[^\/]+/
 

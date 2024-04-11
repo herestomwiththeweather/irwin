@@ -72,6 +72,7 @@ class User < ApplicationRecord
                                                 domain: domain,
                                             identifier:    actor_url,
                                                  inbox: "#{actor_url}/inbox",
+                                                 outbox: "#{actor_url}/outbox",
                                              followers: "#{actor_url}/followers",
                                              following: "#{actor_url}/following" ) if account.nil?
   rescue WebFinger::NotFound => e
