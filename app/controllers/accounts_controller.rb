@@ -2,7 +2,7 @@ class AccountsController < ApplicationController
   before_action :set_target_account, only: [:inbox, :outbox]
   before_action :set_account, only: [:show, :edit, :update, :follow]
   skip_before_action :verify_authenticity_token, only: [:inbox]
-  before_action :login_required, except: [:inbox, :outbox]
+  before_action :login_required, except: [:inbox, :outbox, :show]
 
   authorize_resource
 
@@ -21,6 +21,7 @@ class AccountsController < ApplicationController
   end
 
   def show
+    redirect_to(@account.url, allow_other_host: true) unless current_user
     @new_status = Status.new
     @statuses = @account.statuses.page(params[:page])
   end
