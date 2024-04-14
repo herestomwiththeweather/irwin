@@ -83,7 +83,7 @@ class Status < ApplicationRecord
       return nil
     end
     if json_status['error'].present?
-      Rails.logger.info "error fetching original status: #{json_status['error']}"
+      Rails.logger.info "#{__method__} error fetching original status: #{json_status['error']}"
       return nil
     end
 

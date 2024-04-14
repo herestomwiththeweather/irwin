@@ -31,6 +31,7 @@ class HttpClient
     end
     date = Time.now.utc.httpdate
     headers['Date'] = date
+    headers['User-Agent'] = "Ruby (Irwin/#{Irwin::Version.to_s}; +https://#{ENV['SERVER_NAME']}/)"
 
     signed_string = "(request-target): #{method_string} #{@url.path}\nhost: #{@url.host}\ndate: #{date}"
     signed_string += "\ndigest: #{digest}" if @body.present?
