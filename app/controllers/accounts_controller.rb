@@ -162,8 +162,8 @@ class AccountsController < ApplicationController
     identifier = params[:id].gsub(/^@/,'')
     username, domain = identifier.split('@')
     @target_user = User.where(username: username, domain: domain).first
-    @target_account = @target_user.account
     raise ActiveRecord::RecordNotFound if @target_user.nil?
+    @target_account = @target_user.account
   end
 
   def set_account

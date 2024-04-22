@@ -86,7 +86,7 @@ class User < ApplicationRecord
   end
 
   def get(url)
-    HttpClient.new(url, actor_url, private_key).get
+    HttpClient.new(url, main_key_url, private_key).get
   end
 
   def post(receiver, body)
@@ -98,7 +98,7 @@ class User < ApplicationRecord
       body['signature']['signatureValue'] = json_signature
     end
 
-    json_response = HttpClient.new(receiver.inbox, actor_url, private_key, body.to_json).post
+    json_response = HttpClient.new(receiver.inbox, main_key_url, private_key, body.to_json).post
     if nil == json_response
       return false
     end

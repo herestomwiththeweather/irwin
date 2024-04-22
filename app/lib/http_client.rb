@@ -1,8 +1,8 @@
 require 'net/https'
 
 class HttpClient
-  def initialize(request_url, actor_url, private_key, body = '')
-    @actor_url = actor_url
+  def initialize(request_url, main_key_url, private_key, body = '')
+    @main_key_url = main_key_url
     @private_key = private_key
     @body = body
     @url = URI(request_url)
@@ -38,7 +38,7 @@ class HttpClient
     keypair=OpenSSL::PKey::RSA.new(@private_key)
     signature = Base64.strict_encode64(keypair.sign(OpenSSL::Digest::SHA256.new, signed_string))
     digest_option = @body.present? ? ' digest' : ''
-    headers['Signature'] = "keyId=\"#{@actor_url}\",signature=\"#{signature}\",headers=\"(request-target) host date#{digest_option}\""
+    headers['Signature'] = "keyId=\"#{@main_key_url}\",signature=\"#{signature}\",headers=\"(request-target) host date#{digest_option}\""
 
     headers
   end
