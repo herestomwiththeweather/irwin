@@ -4,7 +4,7 @@
     <%= link_to "replying to", current_user.present? ? status_path(status.thread) : status.thread.uri, data: {'turbo-frame': '_top'} %> <%= status.thread.account.webfinger_to_s %>
   <% end %>
   <% end %>
-  <div><%= image_tag status.account.icon_url_or_default, style: 'display: inline; padding: 2px; max-width: 50px; max-height: 50px;' %><b><%= link_to status.account.name, status.account, data: {'turbo-frame': '_top'} %></b> posted <%= link_to("#{ time_ago_in_words(status.created_at) } ago", status_path(status), data: {'turbo-frame': '_top'} ) %></div>
+  <div><%= image_tag status.account.icon_url_or_default, style: 'display: inline; padding: 2px; max-width: 50px; max-height: 50px;' %><b><%= link_to status.account.name, status.account, data: {'turbo-frame': '_top'} %></b> posted <%= local_or_origin_link(status) %></div>
   <p class="text-gray-800">
     <%= sanitize status.local? ? StatusPresenter.new(status, self).marked_up_text : status.text_with_modified_mentions, tags: %w(b i u p a span), attributes: %w(href data-turbo data-turbo-frame translate class) %>
   </p>
