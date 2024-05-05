@@ -27,7 +27,7 @@ class HttpClient
       digest = "SHA-256=#{Digest::SHA256.base64digest(@body)}"
       headers['Digest'] = digest
     else
-      headers = {'Accept': 'application/json'}
+      headers = {'Accept': 'application/activity+json, application/json, application/ld+json'}
     end
     date = Time.now.utc.httpdate
     headers['Date'] = date
