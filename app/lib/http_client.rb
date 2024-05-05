@@ -75,7 +75,7 @@ class HttpClient
       Rails.logger.info "#{self.class}#{__method__} error from #{@url.host}: received html"
       nil
     else
-      JSON.parse(response.body)
+      JSON.parse(response.body).presence || {}
     end
 
   rescue OpenSSL::SSL::SSLError => e
