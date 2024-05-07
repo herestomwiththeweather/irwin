@@ -14,7 +14,7 @@ module StatusesHelper
   def local_or_origin_link(status)
     link_text = "#{time_ago_in_words(status.created_at)} ago"
 
-    if "show" == action_name && status.uri.present?
+    if "statuses" == controller_name && "show" == action_name && status.uri.present?
       link_to(link_text, status.uri, target: '_blank')
     else
       link_to(link_text, status_path(status), data: {'turbo-frame': '_top'} )
