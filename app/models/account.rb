@@ -308,17 +308,25 @@ class Account < ApplicationRecord
 
     # if inReplyTo is present but there is no status with a matching uri, then we can use in_reply_to_uri to assign thread later
 
-    status = self.statuses.create!( created_at: status_object['published']&.to_datetime,
-                                    language: language,
-                                    thread: thread,
-                                    in_reply_to_uri: status_object['inReplyTo'],
-                                    text: status_object['content'],
-                                    direct_recipient: direct_recipient,
-                                    uri: status_object['id'],
-                                    url: status_object['url']
-    )
+    status = self.statuses.find_or_create_by(uri: status_object['id']) do |s|
+      s.created_at = status_object['published']&.to_datetime
+      s.language = language
+      s.thread = thread
+      s.in_reply_to_uri = status_object['inReplyTo']
+      s.text = status_object['content']
+      s.direct_recipient = direct_recipient
+      s.url = status_object['url']
+    end
 
-    Rails.logger.info "#{__method__} created status #{status.id}"
+    if status.errors.any?
+      status.errors.full_messages.each do |m|
+        Rails.logger.info "#{self.class}##{__method__} #{m}"
+      end
+
+      return nil
+    end
+
+    Rails.logger.info "#{self.class}##{__method__} created status #{status.id}"
 
     mentions.each do |m|
       m.status = status
