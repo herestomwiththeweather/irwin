@@ -205,12 +205,12 @@ class Account < ApplicationRecord
     self.followers = actor['followers']
     self.inbox = actor['inbox']
     self.outbox = actor['outbox']
-    self.url = actor['url']
+    self.url = actor['url'].present? ? actor['url'] : actor['id']
+
     self.icon = actor['icon']['url'] if actor['icon'].present?
     if actor['image'].present?
       self.image = actor['image'].is_a?(Array) ? actor['image'][0]['url'] : actor['image']['url']
     end
-
     self.summary = actor['summary']
   rescue TypeError => e
     Rails.logger.info "#{self.class}##{__method__} TypeError exception: #{e.message}"
