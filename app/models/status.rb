@@ -87,7 +87,7 @@ class Status < ApplicationRecord
       return nil
     end
 
-    original_actor_url = json_status['attributedTo']
+    original_actor_url = json_status['attributedTo'].is_a?(Array) ? json_status['attributedTo'].select {|i| i['type'] == 'Person'}.first['id'] : json_status['attributedTo']
 
     if thread
       if json_status['inReplyTo'] != thread.uri
