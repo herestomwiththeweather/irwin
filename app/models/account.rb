@@ -100,6 +100,20 @@ class Account < ApplicationRecord
     actor
   end
 
+  def self.log_icon_and_image(actor)
+    ['icon', 'image'].each do |i|
+      if actor[i].present?
+        if actor[i].is_a?(Hash)
+          Rails.logger.info "#{i} url: #{actor[i]['url']}"
+        elsif actor[i].is_a?(Array)
+          actor[i].each do |icon_or_image|
+            Rails.logger.info "#{i} url: #{icon_or_image['url']}"
+          end
+        end
+      end
+    end
+  end
+
   def self.log_json(actor)
     if !actor.is_a?(Hash)
       Rails.logger.info "#{__method__} error not a hash"
@@ -115,16 +129,7 @@ class Account < ApplicationRecord
     Rails.logger.info "name: #{actor['name']}"
     Rails.logger.info "summary: #{actor['summary']}"
     Rails.logger.info "mastodon_url: #{actor['url']}"
-    Rails.logger.info "icon_url: #{actor['icon']['url']}" if actor['icon'].present?
-    if actor['image'].present?
-      if actor['image'].is_a?(Hash)
-        Rails.logger.info "image_url: #{actor['image']['url']}"
-      elsif actor['image'].is_a?(Array)
-        actor['image'].each do |image|
-          Rails.logger.info "image_url: #{image['url']}"
-        end
-      end
-    end
+    log_icon_and_image(actor)
     Rails.logger.info "public_key: #{actor['publicKey']['publicKeyPem']}" if actor['publicKey'].present?
   rescue TypeError => e
     Rails.logger.info "#{self.class}##{__method__} TypeError exception: #{e.message}"
@@ -207,7 +212,9 @@ class Account < ApplicationRecord
     self.outbox = actor['outbox']
     self.url = actor['url'].present? ? actor['url'] : actor['id']
 
-    self.icon = actor['icon']['url'] if actor['icon'].present?
+    if actor['icon'].present?
+      self.icon = actor['icon'].is_a?(Array) ? actor['icon'][0]['url'] : actor['icon']['url']
+    end
     if actor['image'].present?
       self.image = actor['image'].is_a?(Array) ? actor['image'][0]['url'] : actor['image']['url']
     end
