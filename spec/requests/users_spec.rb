@@ -24,6 +24,14 @@ RSpec.describe "Users", type: :request do
       expect(json['subject']).to eql(user.to_webfinger_s)
       expect(json['links'].select {|link| link['rel'] == 'self'}.first['href']).to eql(actor_url)
     end
+
+    it "returns 400 for missing resource" do
+      headers = { 'Accept' => 'application/jrd+json' }
+      get "/.well-known/webfinger", headers: headers
+      json = JSON.parse(response.body)
+
+      expect(response).to have_http_status(400)
+    end
   end
 
   describe "GET /actor/alice@example.com" do

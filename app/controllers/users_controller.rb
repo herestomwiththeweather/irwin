@@ -64,12 +64,15 @@ class UsersController < ApplicationController
 
   def webfinger
     Rails.logger.info "webfinger: #{params[:resource]}"
-    identifier = params[:resource].sub('acct:','')
-    username, domain = identifier.split('@')
-    # domain will be this server
-    @target_user = User.find_by(username: username)
-    Rails.logger.info "user id: #{@target_user.id}"
-    render json: @target_user, serializer: WebfingerSerializer, content_type: 'application/jrd+json'
+    if params[:resource].present?
+      identifier = params[:resource].sub('acct:','')
+      username, domain = identifier.split('@')
+      # domain will be this server
+      @target_user = User.find_by(username: username)
+      render json: @target_user, serializer: WebfingerSerializer, content_type: 'application/jrd+json'
+    else
+      render json: {}, status: 400
+    end
   rescue => e
     Rails.logger.info "#{__method__} error: #{e.class} : #{e.message}"
     render json: {}, status: 404
