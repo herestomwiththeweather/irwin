@@ -71,7 +71,7 @@ class UsersController < ApplicationController
       @target_user = User.find_by(username: username)
       render json: @target_user, serializer: WebfingerSerializer, content_type: 'application/jrd+json'
     else
-      render json: {}, status: 400
+      render plain: '', status: 400
     end
   rescue => e
     Rails.logger.info "#{__method__} error: #{e.class} : #{e.message}"

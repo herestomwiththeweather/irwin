@@ -28,7 +28,6 @@ RSpec.describe "Users", type: :request do
     it "returns 400 for missing resource" do
       headers = { 'Accept' => 'application/jrd+json' }
       get "/.well-known/webfinger", headers: headers
-      json = JSON.parse(response.body)
 
       expect(response).to have_http_status(400)
     end
