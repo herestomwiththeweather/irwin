@@ -63,6 +63,7 @@ gem 'aws-sdk-s3'
 gem 'deepl-rb', require: 'deepl'
 gem 'rexml'
 gem 'ransack'
+gem 'rack-cors'
 
 gem 'json-ld'
 gem 'json-ld-preloaded', '~> 3.2'
