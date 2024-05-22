@@ -17,7 +17,8 @@ RSpec.describe "Users", type: :request do
 
     it "returns success" do
       headers = { 'Accept' => 'application/jrd+json' }
-      get "/.well-known/webfinger?resource=acct:#{user.username}@#{host}", headers: headers
+      url_encoded_resource = CGI.escape("acct:#{user.username}@#{host}")
+      get "/.well-known/webfinger?resource=#{url_encoded_resource}", headers: headers
       json = JSON.parse(response.body)
 
       expect(response).to have_http_status(200)
@@ -28,6 +29,21 @@ RSpec.describe "Users", type: :request do
     it "returns 400 for missing resource" do
       headers = { 'Accept' => 'application/jrd+json' }
       get "/.well-known/webfinger", headers: headers
+
+      expect(response).to have_http_status(400)
+    end
+
+    it "returns 400 for malformed resource with double equals" do
+      headers = { 'Accept' => 'application/jrd+json' }
+      url_encoded_resource = CGI.escape("acct:#{user.username}@#{host}")
+      get "/.well-known/webfinger?resource==#{url_encoded_resource}", headers: headers
+
+      expect(response).to have_http_status(400)
+    end
+
+    it "returns 400 for malformed resource not percent encoded" do
+      headers = { 'Accept' => 'application/jrd+json' }
+      get "/.well-known/webfinger?resource=acct:#{user.username}@#{host}", headers: headers
 
       expect(response).to have_http_status(400)
     end

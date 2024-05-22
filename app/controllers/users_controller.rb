@@ -63,8 +63,10 @@ class UsersController < ApplicationController
   end
 
   def webfinger
+    match = request.query_string.match(/resource=([^&]*)/)
+    raw_resource = match ? match[1] : ""
     Rails.logger.info "webfinger: #{params[:resource]}"
-    if params[:resource].present?
+    if (CGI.escape(params[:resource] || '') == raw_resource) && (params[:resource] =~ /\Aacct:[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\z/)
       identifier = params[:resource].sub('acct:','')
       username, domain = identifier.split('@')
       # domain will be this server
