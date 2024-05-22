@@ -65,12 +65,13 @@ class UsersController < ApplicationController
   def webfinger
     match = request.query_string.match(/resource=([^&]*)/)
     raw_resource = match ? match[1] : ""
-    Rails.logger.info "webfinger: #{params[:resource]}"
-    if (CGI.escape(params[:resource] || '') == raw_resource) && (params[:resource] =~ /\Aacct:[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\z/)
+    # python testing framework does not encode forward slashes
+    if params[:resource].present? && (CGI.escape(params[:resource] || '').gsub('%2F','/') == raw_resource) && (params[:resource] =~ /\A[a-zA-Z]*:\/?\/?[a-zA-Z0-9._%+-]+@?[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\z/)
+      raise StandardError if !(params[:resource] =~ /^acct:/)
       identifier = params[:resource].sub('acct:','')
       username, domain = identifier.split('@')
       # domain will be this server
-      @target_user = User.find_by(username: username)
+      @target_user = User.find_by!(username: username)
       render json: @target_user, serializer: WebfingerSerializer, content_type: 'application/jrd+json'
     else
       render plain: '', status: 400
