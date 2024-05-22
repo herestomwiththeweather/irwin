@@ -74,6 +74,7 @@ class UsersController < ApplicationController
       @target_user = User.find_by!(username: username)
       render json: @target_user, serializer: WebfingerSerializer, content_type: 'application/jrd+json'
     else
+      Rails.logger.info "#{__method__} error raw resource: #{raw_resource}"
       render plain: '', status: 400
     end
   rescue => e
