@@ -290,6 +290,9 @@ class Account < ApplicationRecord
     end
 
     if status_object['tag'].present?
+      if status_object['tag'].is_a?(Hash)
+        status_object['tag'] = [ status_object['tag'] ]
+      end
       status_object['tag'].each do |tag|
         if 'Mention' == tag['type']
           Rails.logger.info "#{__method__} found mention: looking up #{tag['name']} : #{tag['href']}"
