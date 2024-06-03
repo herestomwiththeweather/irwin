@@ -12,6 +12,11 @@ rescue_from ActionController::InvalidAuthenticityToken, with: :authenticity_toke
   def require_oauth_user_token
     authorization_header = request.headers['Authorization']
     Rails.logger.info "authorization header: #{authorization_header}"
+    if authorization_header.blank?
+      Rails.logger.info "#{__method__} Error: no authorization header"
+      render json: { error: 'Missing Authorization header' }, status: :unauthorized
+      return
+    end
     request_token = authorization_header.gsub(/^Bearer /,'')
     @current_token = AccessToken.where(token: request_token).first
     raise StandardError unless @current_token
