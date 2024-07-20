@@ -323,7 +323,7 @@ class Account < ApplicationRecord
       s.language = language
       s.thread = thread
       s.in_reply_to_uri = status_object['inReplyTo']
-      s.text = status_object['content']
+      s.text = status_object['content'] || ''
       s.direct_recipient = direct_recipient
       s.url = status_object['url']
     end
