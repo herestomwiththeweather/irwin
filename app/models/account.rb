@@ -286,7 +286,8 @@ class Account < ApplicationRecord
     language = status_object['contentMap']&.keys&.first
 
     if !thread.present? && status_object['inReplyTo'].present?
-      thread = Status.find_by(uri: status_object['inReplyTo'])
+      in_reply_to_id = status_object['inReplyTo'].is_a?(Hash) ? status_object['inReplyTo']['id'] : status_object['inReplyTo']
+      thread = Status.find_by(uri: in_reply_to_id)
     end
 
     if status_object['tag'].present?
