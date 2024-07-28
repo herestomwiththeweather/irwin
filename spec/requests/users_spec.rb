@@ -41,11 +41,12 @@ RSpec.describe "Users", type: :request do
       expect(response).to have_http_status(400)
     end
 
-    it "returns 400 for malformed resource not percent encoded" do
+    it "returns 200 for malformed resource not percent encoded" do
+      # mastodon does not percent encode resource so cannot return 400
       headers = { 'Accept' => 'application/jrd+json' }
       get "/.well-known/webfinger?resource=acct:#{user.username}@#{host}", headers: headers
 
-      expect(response).to have_http_status(400)
+      expect(response).to have_http_status(200)
     end
   end
 

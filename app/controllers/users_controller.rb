@@ -66,7 +66,7 @@ class UsersController < ApplicationController
     match = request.query_string.match(/resource=([^&]*)/)
     raw_resource = match ? match[1] : ""
     # python testing framework does not encode forward slashes
-    if params[:resource].present? && (CGI.escape(params[:resource] || '').gsub('%2F','/') == raw_resource) && (params[:resource] =~ /\A[a-zA-Z]*:\/?\/?[a-zA-Z0-9._%+-]+@?[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\z/)
+    if params[:resource].present? && (params[:resource] =~ /\A[a-zA-Z]*:\/?\/?[a-zA-Z0-9._%+-]+@?[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\z/)
       raise StandardError if !(params[:resource] =~ /^acct:/)
       identifier = params[:resource].sub('acct:','')
       username, domain = identifier.split('@')
