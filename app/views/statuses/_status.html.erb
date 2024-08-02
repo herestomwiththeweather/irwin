@@ -6,26 +6,26 @@
   <% end %>
   <div><%= image_tag status.account.icon_url_or_default, style: 'display: inline; padding: 2px; max-width: 50px; max-height: 50px;' %><b><%= link_to status.account.name, status.account, data: {'turbo-frame': '_top'} %></b> posted <%= local_or_origin_link(status) %></div>
   <p class="text-gray-800">
-    <%= sanitize status.local? ? StatusPresenter.new(status, self).marked_up_text : status.text_with_modified_mentions, tags: %w(b i u p a span), attributes: %w(href data-turbo data-turbo-frame translate class) %>
+    <%= sanitize status.local? ? StatusPresenter.new(status, self).marked_up_text : status.text_with_modified_mentions, tags: %w(b i u p a span blockquote), attributes: %w(href data-turbo data-turbo-frame translate class) %>
   </p>
   <% if current_user %>
   <% status.media_attachments.each do |media_attachment| %>
     <%= render partial: media_attachment %>
   <% end %>
   <% if status.language != current_user.language %>
-    <div style="display: inline-block;">
+    <div style="display: inline-block; padding: 0 8px 4px 8px;">
       <%= link_to "Translate", translate_status_path(status) %>
     </div>
   <% end %>
   <% if status.account != current_user.account %>
-    <div style="display: inline-block;">
+    <div style="display: inline-block; padding: 0 8px 4px 8px;">
     <% if like = Like.find_by(status: status, account: current_user.account) %>
       <%= button_to('Unlike', like_path(like), method: 'delete', style: 'text-decoration: underline') %>
     <% else %>
       <%= button_to('Like', likes_path(status_id: status.id), method: 'post', style: 'text-decoration: underline') %>
     <% end %>
     </div>
-    <div style="display: inline-block;">
+    <div style="display: inline-block; padding: 0 8px 4px 8px;">
     <% if boost = Status.find_by(account: current_user.account, reblog_of_id: status.id, text: '') %>
       <%= button_to('Unboost', unboost_status_path(status), method: 'post', style: 'text-decoration: underline') %>
     <% else %>

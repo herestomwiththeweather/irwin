@@ -6,4 +6,12 @@
   a {
      @apply underline;
   }
+
+  blockquote {
+    @apply pl-4 italic text-gray-400;
+  }
+
+  p {
+    @apply p-1;
+  }
 }
