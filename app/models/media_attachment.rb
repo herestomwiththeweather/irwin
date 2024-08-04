@@ -14,8 +14,13 @@ class MediaAttachment < ApplicationRecord
       "height" => file.metadata['height'],
       "type" => "Document",
       "url" => file.url,
-      "mediaType" => "image/jpeg"
+      "mediaType" => content_type
     }.compact
+  end
+
+  def content_type
+    return self[:content_type] if self[:content_type].present?
+    file.attached? ? file.content_type : ''
   end
 
   def image?
