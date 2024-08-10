@@ -6,7 +6,7 @@
   <% end %>
   <div><%= image_tag status.account.icon_url_or_default, style: 'display: inline; padding: 2px; max-width: 50px; max-height: 50px;' %><b><%= link_to status.account.name, status.account, data: {'turbo-frame': '_top'} %></b> posted <%= local_or_origin_link(status) %></div>
   <p class="text-gray-800">
-    <%= sanitize status.local? ? StatusPresenter.new(status, self).marked_up_text : status.text_with_modified_mentions, tags: %w(b i u p a span blockquote), attributes: %w(href data-turbo data-turbo-frame translate class) %>
+    <%= sanitize status.local? ? StatusPresenter.new(status, self).marked_up_text : status.text_with_modified_mentions, tags: %w(b i u p a span blockquote br), attributes: %w(href data-turbo data-turbo-frame translate class) %>
   </p>
   <% if current_user %>
   <% status.media_attachments.each do |media_attachment| %>
