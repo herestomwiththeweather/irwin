@@ -1,4 +1,4 @@
 <div id="<%= dom_id authorization_code %>" class="m-2 px-50" style="background-color: rgb(241 245 249);">
   <%= image_tag authorization_code.logo_url_or_default, style: 'display: inline; padding: 2px; max-width: 100px; max-height: 100px;' %>
-  <span class="mr-3"><%= link_to authorization_code.created_at.to_s(:rfc822), authorization_path(authorization_code) %></span><span class="mr-3"><a href="<%= authorization_code.client_id %>"><%= authorization_code.client_id %></a></span><span class="font-bold"><%= authorization_code.scope %></span>
+  <span class="mr-3"><%= link_to authorization_code.created_at.to_fs(:rfc822), authorization_path(authorization_code) %></span><span class="mr-3"><a href="<%= authorization_code.client_id %>"><%= authorization_code.client_id %></a></span><span class="font-bold"><%= authorization_code.scope %></span>
 </div>
