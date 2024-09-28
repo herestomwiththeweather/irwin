@@ -53,7 +53,7 @@ gem "image_processing", "~> 1.2"
 gem "tailwindcss-rails"
 gem 'indieweb-endpoints'
 gem 'microformats'
-gem 'sidekiq', '6.5.9'
+gem 'sidekiq', '7.2.4'
 gem 'webfinger'
 gem 'cancancan'
 gem 'kaminari'
