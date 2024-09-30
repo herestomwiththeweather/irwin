@@ -266,19 +266,21 @@ class Account < ApplicationRecord
     media_attachments = []
     direct_recipient = nil
 
-    if status_object['to'].include?('https://www.w3.org/ns/activitystreams#Public')
-      Rails.logger.info "#{__method__} received public post"
-    else
-      status_object['to'].each do |recipient|
-        Rails.logger.info "#{__method__} to: recipient: #{recipient}"
-        account = Account.find_by(identifier: recipient)
-        direct_recipient = account if account.present? && account.local?
-      end
+    if status_object['to'].present?
+      if status_object['to'].include?('https://www.w3.org/ns/activitystreams#Public')
+        Rails.logger.info "#{__method__} received public post"
+      else
+        status_object['to'].each do |recipient|
+          Rails.logger.info "#{__method__} to: recipient: #{recipient}"
+          account = Account.find_by(identifier: recipient)
+          direct_recipient = account if account.present? && account.local?
+        end
 
-      if direct_recipient.nil?
-        Rails.logger.info "#{__method__} direct message recipient not found"
-        status_object['cc'].each do |cc_recipient|
-          Rails.logger.info "#{__method__} cc: recipient: #{cc_recipient}"
+        if direct_recipient.nil?
+          Rails.logger.info "#{__method__} direct message recipient not found"
+          status_object['cc'].each do |cc_recipient|
+            Rails.logger.info "#{__method__} cc: recipient: #{cc_recipient}"
+          end
         end
       end
     end
