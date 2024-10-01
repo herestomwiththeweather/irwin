@@ -173,5 +173,9 @@ class AccountsController < ApplicationController
     else
       @account = Account.find(params[:id])
     end
+
+    if @account.nil?
+      head :not_found
+    end
   end
 end
