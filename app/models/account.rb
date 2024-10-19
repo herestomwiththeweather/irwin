@@ -87,12 +87,12 @@ class Account < ApplicationRecord
   def self.fetch_mastodon_account(actor_url)
     actor = User.representative.get(actor_url)
     if nil == actor
-      Rails.logger.info "#{__method__} error fetching actor"
+      Rails.logger.info "#{__method__} error fetching actor #{actor_url}"
       return nil
     end
 
     if actor['error'].present?
-      Rails.logger.info "#{__method__} error: #{actor['error']}"
+      Rails.logger.info "#{__method__} error message fetching actor #{actor_url}: #{actor['error']}"
       return nil
     end
 

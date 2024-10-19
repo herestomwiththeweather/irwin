@@ -99,6 +99,9 @@ class HttpClient
   rescue SocketError => e
     Rails.logger.info "#{self.class}#{__method__} socket error from #{@url.host}: #{e.message}"
     nil
+  rescue EOFError => e
+    Rails.logger.info "#{self.class}#{__method__} EOF error from #{@url.host}: #{e.message}"
+    nil
   end
 
   def build_request(method)
