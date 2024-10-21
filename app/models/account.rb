@@ -49,6 +49,31 @@ class Account < ApplicationRecord
     actor = fetch_mastodon_account(actor_url)
     return nil if actor.nil?
 
+    # make a webfinger request to the activitypub server in case custom domain
+    ap_server_domain = URI.parse(actor_url).hostname
+    result = WebFinger.discover! "acct:#{actor['preferredUsername']}@#{ap_server_domain}"
+    preferred_username, domain = result['subject'].split('@')
+
+    if 0 != domain.casecmp(ap_server_domain)
+      Rails.logger.info "#{__method__} verifying webfinger as #{domain} does not match #{ap_server_domain}"
+      Rails.logger.info "#{__method__} sending webfinger request to #{result['subject']}"
+
+      # check that custom domain agrees with activitypub server
+      # but only log if there is a discrepancy
+      result2 = WebFinger.discover! result['subject']
+
+      authoritative_webfinger_subject = result2['subject']
+      actor_url2 = result['links'].select {|link| link['rel'] == 'self'}.first['href']
+
+      if 0 != authoritative_webfinger_subject.casecmp(result['subject'])
+        Rails.logger.info "#{__method__} Error: subject #{authoritative_webfinger_subject} did not match #{result['subject']}"
+      elsif actor_url2 != actor_url
+        Rails.logger.info "#{__method__} Error: actor url #{actor_url2} did not match #{actor_url}"
+      else
+        actor['domain'] = domain
+      end
+    end
+
     Account.create_mastodon_account(actor)
   end
 
@@ -59,9 +84,27 @@ class Account < ApplicationRecord
     return account if account.present?
 
     result = WebFinger.discover! "acct:#{address}"
+    webfinger_subject = result['subject']
+
     actor_url = result['links'].select {|link| link['rel'] == 'self'}.first['href']
 
+    ap_server_domain = URI.parse(actor_url).hostname
     actor = fetch_mastodon_account(actor_url)
+
+    # domain is returned by webfinger server
+    if 0 != domain.casecmp(ap_server_domain)
+      Rails.logger.info "#{__method__} verifying webfinger as #{domain} does not match #{ap_server_domain}"
+      result2 = WebFinger.discover! "acct:#{actor['preferredUsername']}@#{ap_server_domain}"
+
+      final_webfinger_subject = result2['subject']
+      if 0 != final_webfinger_subject.casecmp(webfinger_subject)
+        Rails.logger.info "#{__method__} Error: subject #{final_webfinger_subject} did not match #{webfinger_subject}"
+        return nil
+      end
+
+      # normally domain is not present unless domain is verified by webfinger to be different than activitypub server
+      actor['domain'] = domain
+    end
 
     Account.create_mastodon_account(actor)
   rescue WebFinger::NotFound => e
@@ -201,7 +244,7 @@ class Account < ApplicationRecord
 
     self.public_key = actor['publicKey']['publicKeyPem']
     self.identifier = actor['id']
-    self.domain = URI.parse(identifier).hostname
+    self.domain = actor['domain'].present? ? actor['domain'] : URI.parse(identifier).hostname
     self.preferred_username = actor['preferredUsername']
     self.name = actor['name']
     self.also_known_as = actor['alsoKnownAs']
