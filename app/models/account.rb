@@ -47,7 +47,7 @@ class Account < ApplicationRecord
     Rails.logger.info "#{__method__} fetching account: #{actor_url}"
 
     actor = fetch_mastodon_account(actor_url)
-    return nil if actor.nil?
+    return nil if actor.blank?
 
     # make a webfinger request to the activitypub server in case custom domain
     ap_server_domain = URI.parse(actor_url).hostname
