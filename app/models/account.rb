@@ -51,7 +51,14 @@ class Account < ApplicationRecord
 
     # make a webfinger request to the activitypub server in case custom domain
     ap_server_domain = URI.parse(actor_url).hostname
-    result = WebFinger.discover! "acct:#{actor['preferredUsername']}@#{ap_server_domain}"
+
+    if actor['preferredUsername'].present?
+      result = WebFinger.discover! "acct:#{actor['preferredUsername']}@#{ap_server_domain}"
+    else
+      Rails.logger.info "#{__method__} Error: preferredUsername missing for actor url: #{actor_url}"
+      return nil
+    end
+
     preferred_username, domain = result['subject'].split('@')
 
     if 0 != domain.casecmp(ap_server_domain)
