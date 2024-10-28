@@ -59,25 +59,34 @@ class Account < ApplicationRecord
       return nil
     end
 
-    preferred_username, domain = result['subject'].split('@')
+    webfinger_address_from_ap_server = result['subject']
+
+    preferred_username, domain = webfinger_address_from_ap_server.split('@')
 
     if 0 != domain.casecmp(ap_server_domain)
       Rails.logger.info "#{__method__} verifying webfinger as #{domain} does not match #{ap_server_domain}"
-      Rails.logger.info "#{__method__} sending webfinger request to #{result['subject']}"
+      Rails.logger.info "#{__method__} sending webfinger request to #{webfinger_address_from_ap_server}"
 
       # check that custom domain agrees with activitypub server
       # but only log if there is a discrepancy
-      result2 = WebFinger.discover! result['subject']
-
-      authoritative_webfinger_subject = result2['subject']
-      actor_url2 = result['links'].select {|link| link['rel'] == 'self'}.first['href']
-
-      if 0 != authoritative_webfinger_subject.casecmp(result['subject'])
-        Rails.logger.info "#{__method__} Error: subject #{authoritative_webfinger_subject} did not match #{result['subject']}"
-      elsif actor_url2 != actor_url
-        Rails.logger.info "#{__method__} Error: actor url #{actor_url2} did not match #{actor_url}"
+      begin
+        result2 = WebFinger.discover! webfinger_address_from_ap_server
+      rescue WebFinger::NotFound => e
+        Rails.logger.info "#{__method__} WebFinger not found for #{webfinger_address_from_ap_server}: #{e.message}"
       else
-        actor['domain'] = domain
+        authoritative_webfinger_subject = result2['subject']
+        actor_url2 = result['links'].select {|link| link['rel'] == 'self'}.first['href']
+
+        if 0 != authoritative_webfinger_subject.casecmp(webfinger_address_from_ap_server)
+          Rails.logger.info "#{__method__} Error: subject #{authoritative_webfinger_subject} did not match #{webfinger_address_from_ap_server}"
+        elsif actor_url2 != actor_url
+          Rails.logger.info "#{__method__} Error: actor url #{actor_url2} did not match #{actor_url}"
+        else
+          Rails.logger.info "#{__method__} Verified custom domain for #{authoritative_webfinger_subject}"
+          actor['domain'] = domain
+        end
+      ensure
+        Rails.logger.info "#{__method__} finished webfinger verification"
       end
     end
 
