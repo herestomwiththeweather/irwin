@@ -9,7 +9,7 @@
     <% end %>
   <% else %>
     <% if media_attachment.image? %>
-      <img src='<%= media_attachment.remote_url %>' width=300 height=300>
+      <img src='<%= media_attachment.remote_url %>' alt='<%= media_attachment.description || "" %>' width=300 height=300>
     <% elsif media_attachment.video? %>
       <%= content_tag :video, controls: true do %>
         <%= tag :source, src: media_attachment.remote_url, type: media_attachment.content_type %>

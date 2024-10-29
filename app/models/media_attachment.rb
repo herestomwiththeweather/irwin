@@ -24,7 +24,7 @@ class MediaAttachment < ApplicationRecord
   end
 
   def image?
-    IMAGE_MIME_TYPES.include? content_type
+    content_type.blank? || IMAGE_MIME_TYPES.include?(content_type)
   end
 
   def video?
