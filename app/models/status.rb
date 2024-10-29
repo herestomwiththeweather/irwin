@@ -298,7 +298,7 @@ class Status < ApplicationRecord
       end
     end
 
-    if thread.present?
+    if thread.present? && (thread.account != account)
       recipients << thread.account unless recipients.include?(thread.account)
     end
 
