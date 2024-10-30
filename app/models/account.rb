@@ -53,7 +53,13 @@ class Account < ApplicationRecord
     ap_server_domain = URI.parse(actor_url).hostname
 
     if actor['preferredUsername'].present?
-      result = WebFinger.discover! "acct:#{actor['preferredUsername']}@#{ap_server_domain}"
+      webfinger_address = "#{actor['preferredUsername']}@#{ap_server_domain}"
+      begin
+        result = WebFinger.discover! "acct:#{webfinger_address}"
+      rescue WebFinger::BadRequest => e
+        Rails.logger.info "#{__method__} Error: Bad request for webfinger: #{webfinger_address}: #{e.message}"
+        return nil
+      end
     else
       Rails.logger.info "#{__method__} Error: preferredUsername missing for actor url: #{actor_url}"
       return nil
