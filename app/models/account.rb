@@ -82,6 +82,9 @@ class Account < ApplicationRecord
       rescue WebFinger::BadRequest => e
         # see https://github.com/swicg/activitypub-webfinger/issues/28
         Rails.logger.info "#{__method__} WebFinger verification failed. Server may only have host-meta: #{webfinger_address_from_ap_server}: #{e.message}"
+      rescue WebFinger::Exception => e
+        # e.g. "Failed to open TCP connection"
+        Rails.logger.info "#{__method__} WebFinger exception for #{webfinger_address_from_ap_server}: #{e.message}"
       else
         authoritative_webfinger_subject = result2['subject']
         actor_url2 = result['links'].select {|link| link['rel'] == 'self'}.first['href']
