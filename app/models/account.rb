@@ -56,6 +56,9 @@ class Account < ApplicationRecord
       webfinger_address = "#{actor['preferredUsername']}@#{ap_server_domain}"
       begin
         result = WebFinger.discover! "acct:#{webfinger_address}"
+      rescue WebFinger::NotFound => e
+        Rails.logger.info "#{__method__} WebFinger unexpectedly not found for #{webfinger_address}: #{e.message}"
+        return nil
       rescue WebFinger::BadRequest => e
         Rails.logger.info "#{__method__} Error: Bad request for webfinger: #{webfinger_address}: #{e.message}"
         return nil
