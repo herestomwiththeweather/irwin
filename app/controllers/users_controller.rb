@@ -16,6 +16,9 @@ class UsersController < ApplicationController
     else
       render 'new'
     end
+  rescue ActionController::ParameterMissing => e
+    Rails.logger.info "#{self.class}##{__method__} ActionController::ParameterMissing exception: #{e.message}"
+    redirect_to login_url
   end
 
   def actor
