@@ -90,6 +90,11 @@ class User < ApplicationRecord
   end
 
   def post(receiver, body)
+    if receiver.local?
+      Rails.logger.info "#{self.class}##{__method__} receiver is local: [#{receiver.id}] #{receiver.webfinger_to_s}"
+      return true
+    end
+
     body["@context"] = ["https://www.w3.org/ns/activitystreams"]
 
     if 'Create' == body['type'] && body['signature'].present?

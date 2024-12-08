@@ -15,12 +15,12 @@ class Account < ApplicationRecord
 
   belongs_to :moved_to_account, class_name: 'Account', optional: true
 =begin
-  validates :identifier, uniqueness: true
   validates :following, uniqueness: true
   validates :followers, uniqueness: true
   validates :inbox, uniqueness: true
   validates :outbox, uniqueness: true
 =end
+  validates :identifier, uniqueness: true
   validates :url, uniqueness: true
 
   CONTEXT = 'https://w3id.org/identity/v1'
