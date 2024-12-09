@@ -23,6 +23,14 @@ class Account < ApplicationRecord
   validates :identifier, uniqueness: true
   validates :url, uniqueness: true
 
+  def self.ransackable_attributes(auth_object = nil)
+    ["name", "preferred_username"]
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+    []
+  end
+
   CONTEXT = 'https://w3id.org/identity/v1'
 
   def self.fetch_by_key(key_url)

@@ -1,0 +1,18 @@
+<div class="mt-4 px-5">
+
+  <div class="flex justify-between items-center">
+    <h1 class="font-bold text-4xl">Accounts</h1>
+  </div>
+  <%= search_form_for @query, url: admin_accounts_path do |f| %>
+    <div class="inline">
+      <%= f.search_field :name_or_preferred_username_i_cont %>
+    </div>
+    <div class="inline">
+      <%= f.submit class: "rounded-lg py-3 px-5 bg-blue-600 text-white inline-block font-medium cursor-pointer" %>
+    </div>
+  <% end %>
+  <div id="admin_accounts" class="min-w-full">
+    <%= render @admin_accounts %>
+  </div>
+  <%= paginate(@admin_accounts) %>
+</div>

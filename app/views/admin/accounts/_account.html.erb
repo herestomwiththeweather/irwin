@@ -1,0 +1,31 @@
+<div id="<%= dom_id account %>">
+  <p>
+    <%= link_to account.webfinger_to_s, account %>
+  </p>
+
+  <p>
+    <strong>Name:</strong>
+    <%= account.name %>
+  </p>
+
+  <p>
+    <strong>Identifier:</strong>
+    <%= account.identifier %>
+  </p>
+
+  <p>
+    <a href="<%= account.url %>"><%= account.url %></a>
+  </p>
+
+  <p>
+    <strong>Public key:</strong>
+    <%= account.public_key %>
+  </p>
+
+  <p>
+    <strong>Summary:</strong>
+    <%= account.summary %>
+  </p>
+
+</div>
+<hr />

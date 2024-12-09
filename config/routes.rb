@@ -2,6 +2,7 @@ Rails.application.routes.draw do
   get '/admin' => 'admin/dashboard#index', as: :admin
   namespace :admin do
     resources :statuses, only: [:index, :show, :destroy]
+    resources :accounts, only: [:index]
     resources :users, except: [:new, :create]
   end
   require 'sidekiq/web'
