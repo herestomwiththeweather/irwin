@@ -24,11 +24,15 @@ class UsersController < ApplicationController
   def actor
     respond_to do |format|
       format.html do
-        @account = @target_user.account
-        if @account.url.present?
-          redirect_to @account.url, allow_other_host: true
+        if 'Bridgy Fed (https://fed.brid.gy/)' == request.user_agent
+          render json: @target_user, serializer: UserSerializer, content_type: 'application/activity+json'
         else
-          render 'accounts/show'
+          @account = @target_user.account
+          if @account.url.present?
+            redirect_to @account.url, allow_other_host: true
+          else
+            render 'accounts/show'
+          end
         end
       end
       format.all do

@@ -38,7 +38,7 @@ class HttpClient
     keypair=OpenSSL::PKey::RSA.new(@private_key)
     signature = Base64.strict_encode64(keypair.sign(OpenSSL::Digest::SHA256.new, signed_string))
     digest_option = @body.present? ? ' digest' : ''
-    headers['Signature'] = "keyId=\"#{@main_key_url}\",signature=\"#{signature}\",headers=\"(request-target) host date#{digest_option}\""
+    headers['Signature'] = "keyId=\"#{@main_key_url}\",signature=\"#{signature}\",algorithm=\"rsa-sha256\",headers=\"(request-target) host date#{digest_option}\""
 
     headers
   end
@@ -73,7 +73,7 @@ class HttpClient
 
     if content_type.present? && content_type.include?('text/html')
       Rails.logger.info "#{self.class}#{__method__} error from #{@url.host}: received html"
-      nil
+      { html_response: response.body }
     else
       JSON.parse(response.body).presence || {}
     end
