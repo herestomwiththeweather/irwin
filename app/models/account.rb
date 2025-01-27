@@ -24,7 +24,7 @@ class Account < ApplicationRecord
   validates :url, uniqueness: true
 
   def self.ransackable_attributes(auth_object = nil)
-    ["name", "preferred_username"]
+    ["name", "preferred_username", "domain"]
   end
 
   def self.ransackable_associations(auth_object = nil)
