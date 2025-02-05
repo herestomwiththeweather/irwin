@@ -329,6 +329,10 @@ class Account < ApplicationRecord
     user.present?
   end
 
+  def bsky?
+    "bsky.brid.gy" == domain
+  end
+
   def webfinger_to_s
     "#{preferred_username}@#{domain}"
   end

@@ -1,7 +1,9 @@
 <div id="<%= dom_id account %>" class="m-2 px-5">
   <p class="font-bold">
-    <img src = "<%= account.icon %>"><%= link_to name(account), 'show' == action_name ? account.url : account, target: '_blank' %> <%= follows_you(account) %>
-  </p>
+    <img style = "width: 200px" src = "<%= account.icon %>"><%= link_to name(account), 'show' == action_name ? first_url(account) : account, target: '_blank' %> <%= follows_you(account) %>
+</p>
+
+
 
   <p class="text-gray-800">
     @<%= account.webfinger_to_s %>
