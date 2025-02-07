@@ -4,7 +4,7 @@ module AccountsHelper
   end
 
   def first_url(account)
-    account.bsky? ? JSON.parse(account.url)[0] : account.url
+    account.bsky? ? account.bsky_url : account.url
   end
 
   def follows_you(account)

@@ -329,6 +329,10 @@ class Account < ApplicationRecord
     user.present?
   end
 
+  def bsky_url
+    (JSON.parse(url).is_a?(Array) rescue false) ? JSON.parse(url)[0] : url
+  end
+
   def bsky?
     "bsky.brid.gy" == domain
   end
