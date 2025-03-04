@@ -201,7 +201,6 @@ class Account < ApplicationRecord
     end
 
     if HttpClient.urls_equal?(actor['id'], actor_url)
-      Rails.logger.info "#{__method__} actor does match requested url #{actor_url}: #{actor['id']}"
       actor
     else
       Rails.logger.info "#{__method__} error actor id does not match requested url #{actor_url}: #{actor['id']}"
