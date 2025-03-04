@@ -11,6 +11,16 @@ class HttpClient
     @url = URI(URI::Parser.new.escape(unescape_unicode(request_url)))
   end
 
+  def self.urls_equal?(url1, url2)
+    uri1 = URI.parse(url1).normalize
+    uri2 = URI.parse(url2).normalize
+    uri1.path = uri1.path.chomp('/') if uri1.path
+    uri2.path = uri2.path.chomp('/') if uri2.path
+    uri1 == uri2
+  rescue URI::InvalidURIError
+    false
+  end
+
   def get
     @headers = request_headers('get')
     request(:get)

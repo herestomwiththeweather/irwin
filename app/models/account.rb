@@ -54,7 +54,7 @@ class Account < ApplicationRecord
 
     Rails.logger.info "#{__method__} fetching account: #{actor_url}"
 
-    actor = fetch_mastodon_account(actor_url)
+    actor = fetch_actor(actor_url)
     return nil if actor.blank?
 
     # make a webfinger request to the activitypub server in case custom domain
@@ -122,13 +122,22 @@ class Account < ApplicationRecord
     account = Account.find_by(preferred_username: preferred_username, domain: domain)
     return account if account.present?
 
-    result = WebFinger.discover! "acct:#{address}"
+    full_address = "acct:#{address}"
+    result = WebFinger.discover! full_address
     webfinger_subject = result['subject']
+    if 0 != webfinger_subject.casecmp(full_address)
+      # webfinger spec allows subject to be different
+      Rails.logger.info "#{__method__} subject #{webfinger_subject} did not match forward #{full_address}"
+    end
 
     actor_url = result['links'].select {|link| link['rel'] == 'self'}.first['href']
 
-    ap_server_domain = URI.parse(actor_url).hostname
-    actor = fetch_mastodon_account(actor_url)
+    actor = strict_fetch_actor(actor_url)
+    if nil == actor
+      Rails.logger.info "#{self.class}##{__method__} Error: Actor url for #{address} failed: #{actor_url}"
+      return nil
+    end
+    ap_server_domain = URI.parse(actor['id']).hostname
 
     # domain is returned by webfinger server
     if 0 != domain.casecmp(ap_server_domain)
@@ -137,8 +146,8 @@ class Account < ApplicationRecord
 
       final_webfinger_subject = result2['subject']
       if 0 != final_webfinger_subject.casecmp(webfinger_subject)
-        Rails.logger.info "#{__method__} Error: subject #{final_webfinger_subject} did not match #{webfinger_subject}"
-        return nil
+        # webfinger spec allows subject to be different
+        Rails.logger.info "#{__method__} Error: subject #{final_webfinger_subject} did not match reverse #{webfinger_subject}"
       end
 
       # normally domain is not present unless domain is verified by webfinger to be different than activitypub server
@@ -154,7 +163,10 @@ class Account < ApplicationRecord
   def self.fetch_and_create_or_update_mastodon_account(actor_url)
     account = find_by(identifier: actor_url)
 
-    actor = fetch_mastodon_account(actor_url)
+    actor = fetch_actor(actor_url)
+    if nil == actor
+      return nil
+    end
 
     if account.present?
       account.update_mastodon_account(actor)
@@ -166,7 +178,7 @@ class Account < ApplicationRecord
     account
   end
 
-  def self.fetch_mastodon_account(actor_url)
+  def self.fetch_actor(actor_url)
     actor = User.representative.get(actor_url)
     if nil == actor
       Rails.logger.info "#{__method__} error fetching actor #{actor_url}"
@@ -180,6 +192,21 @@ class Account < ApplicationRecord
 
     log_json(actor)
     actor
+  end
+
+  def self.strict_fetch_actor(actor_url)
+    actor = fetch_actor(actor_url)
+    if nil == actor
+      return nil
+    end
+
+    if HttpClient.urls_equal?(actor['id'], actor_url)
+      Rails.logger.info "#{__method__} actor does match requested url #{actor_url}: #{actor['id']}"
+      actor
+    else
+      Rails.logger.info "#{__method__} error actor id does not match requested url #{actor_url}: #{actor['id']}"
+      nil
+    end
   end
 
   def self.log_icon_and_image(actor)
