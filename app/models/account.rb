@@ -54,8 +54,11 @@ class Account < ApplicationRecord
 
     Rails.logger.info "#{__method__} fetching account: #{actor_url}"
 
-    actor = fetch_actor(actor_url)
-    return nil if actor.blank?
+    actor = strict_fetch_actor(actor_url)
+    if nil == actor
+      Rails.logger.info "#{__method__} error fetching actor #{actor_url}"
+      return nil
+    end
 
     # make a webfinger request to the activitypub server in case custom domain
     ap_server_domain = URI.parse(actor_url).hostname
@@ -163,8 +166,9 @@ class Account < ApplicationRecord
   def self.fetch_and_create_or_update_mastodon_account(actor_url)
     account = find_by(identifier: actor_url)
 
-    actor = fetch_actor(actor_url)
+    actor = strict_fetch_actor(actor_url)
     if nil == actor
+      Rails.logger.info "#{__method__} error fetching actor #{actor_url}"
       return nil
     end
 
