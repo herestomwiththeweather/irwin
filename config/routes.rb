@@ -6,7 +6,8 @@ Rails.application.routes.draw do
     resources :users, except: [:new, :create]
   end
   require 'sidekiq/web'
-  mount Sidekiq::Web => '/sidekiq'
+  require 'admin_constraint'
+  mount Sidekiq::Web => '/sidekiq', :constraints => AdminConstraint.new
 
   resources :users
   resources :accounts, only: [:index, :show, :edit, :update] do
