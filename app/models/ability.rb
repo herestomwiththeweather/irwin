@@ -36,7 +36,7 @@ class Ability
       end
     end
     can [:create, :replies, :translate], Status
-    can [:read, :index, :inbox, :outbox, :follow, :following, :followers], Account
+    can [:read, :index, :inbox, :outbox, :follow, :following, :followers, :create], Account
     can :update, Account, user: user
   end
 end

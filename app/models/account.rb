@@ -20,6 +20,8 @@ class Account < ApplicationRecord
   validates :inbox, uniqueness: true
   validates :outbox, uniqueness: true
 =end
+  before_validation :check_configuration, on: :create
+
   validates :identifier, uniqueness: true
   validates :url, uniqueness: true
 
@@ -260,6 +262,28 @@ class Account < ApplicationRecord
   rescue ActiveRecord::RecordNotUnique => e
     Rails.logger.info "#{__method__} error actor exists: #{actor['id']}"
     find_by(identifier: actor['id'])
+  end
+
+  def check_configuration
+    # just for creating this account for local users
+    return if !local?
+
+    result = WebFinger.discover! "acct:#{webfinger_to_s}"
+    webfinger_actor_url = result['links'].select {|link| link['rel'] == 'self'}.first['href']
+    if webfinger_actor_url != user.actor_url
+      Rails.logger.info "#{self.class}##{__method__} Error unexpected webfinger actor_url: #{webfinger_actor_url}"
+      errors.add :base, "Webfinger: Expected #{user.actor_url} but found #{webfinger_actor_url}"
+      return
+    end
+
+    self.identifier = user.actor_url
+    self.inbox = "#{user.actor_url}/inbox"
+    self.outbox = "#{user.actor_url}/outbox"
+    self.followers = "#{user.actor_url}/followers"
+    self.following = "#{user.actor_url}/following"
+  rescue WebFinger::NotFound => e
+    Rails.logger.info "#{self.class}##{__method__} WebFinger::NotFound exception: #{e.message}"
+    errors.add :base, "Webfinger: not found"
   end
 
   def likes_received

@@ -26,6 +26,23 @@ class AccountsController < ApplicationController
     @statuses = @account.statuses.page(params[:page])
   end
 
+  def new
+    redirect_to root_url if current_user.account.present?
+    @account = Account.new
+  end
+
+  def create
+    @account = Account.new(account_params)
+    @account.user = current_user
+    respond_to do |format|
+      if @account.save
+        format.html { redirect_to root_url, notice: "Account was successfully created." }
+      else
+        format.html { render :new, status: :unprocessable_entity }
+      end
+    end
+  end
+
   def edit
   end
 
@@ -155,13 +172,13 @@ class AccountsController < ApplicationController
   private
 
   def account_params
-    params.require(:account).permit(:name, :summary, :url, :icon, :image)
+    params.require(:account).permit(:name, :preferred_username, :domain, :summary, :url, :icon, :image)
   end
 
   def set_target_account
     identifier = params[:id].gsub(/^@/,'')
     username, domain = identifier.split('@')
-    @target_user = User.where(username: username, domain: domain).first
+    @target_user = User.by_username(username)
     raise ActiveRecord::RecordNotFound if @target_user.nil?
     @target_account = @target_user.account
   end

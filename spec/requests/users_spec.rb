@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe "Users", type: :request do
   let(:server_url) { "https://#{ENV['SERVER_NAME']}" }
   let(:indieweb_info) { {:authorization_endpoint => "#{server_url}/auth", :token_endpoint => "#{server_url}/token"} }
-  let(:webfinger_info) { {"subject"=>"acct:alice@example.com", "links"=>[{"rel"=>"self", "type"=>"application/activity+json", "href"=>"https://#{ENV['SERVER_NAME']}/actor/alice@example.com" }]} }
+  let(:webfinger_info) { {"subject"=>"acct:alice@example.com", "links"=>[{"rel"=>"self", "type"=>"application/activity+json", "href"=>"#{server_url}/actor/alice@example.com" }]} }
   let(:host) { ENV['SERVER_NAME'] }
   let(:user) { create :user }
   let(:actor_url) { "#{server_url}/actor/#{user.to_short_webfinger_s}" }
@@ -13,11 +13,12 @@ RSpec.describe "Users", type: :request do
     before do
       allow(IndieWeb::Endpoints).to receive(:get).and_return(indieweb_info)
       allow(WebFinger).to receive(:discover!).and_return(webfinger_info)
+      account = Account.create!(user: user, preferred_username: 'alice', domain: 'example.com')
     end
 
     it "returns success" do
       headers = { 'Accept' => 'application/jrd+json' }
-      url_encoded_resource = CGI.escape("acct:#{user.username}@#{host}")
+      url_encoded_resource = CGI.escape("acct:#{user.account.preferred_username}@#{host}")
       get "/.well-known/webfinger?resource=#{url_encoded_resource}", headers: headers
       json = JSON.parse(response.body)
 
@@ -35,7 +36,7 @@ RSpec.describe "Users", type: :request do
 
     it "returns 400 for malformed resource with double equals" do
       headers = { 'Accept' => 'application/jrd+json' }
-      url_encoded_resource = CGI.escape("acct:#{user.username}@#{host}")
+      url_encoded_resource = CGI.escape("acct:#{user.account.preferred_username}@#{host}")
       get "/.well-known/webfinger?resource==#{url_encoded_resource}", headers: headers
 
       expect(response).to have_http_status(400)
@@ -44,7 +45,7 @@ RSpec.describe "Users", type: :request do
     it "returns 200 for malformed resource not percent encoded" do
       # mastodon does not percent encode resource so cannot return 400
       headers = { 'Accept' => 'application/jrd+json' }
-      get "/.well-known/webfinger?resource=acct:#{user.username}@#{host}", headers: headers
+      get "/.well-known/webfinger?resource=acct:#{user.account.preferred_username}@#{host}", headers: headers
 
       expect(response).to have_http_status(200)
     end
@@ -54,6 +55,7 @@ RSpec.describe "Users", type: :request do
     before do
       allow(IndieWeb::Endpoints).to receive(:get).and_return(indieweb_info)
       allow(WebFinger).to receive(:discover!).and_return(webfinger_info)
+      account = Account.create!(user: user, preferred_username: 'alice', domain: 'example.com')
     end
 
     it "returns success" do
@@ -93,6 +95,7 @@ RSpec.describe "Users", type: :request do
     before do
       allow(IndieWeb::Endpoints).to receive(:get).and_return(indieweb_info)
       allow(WebFinger).to receive(:discover!).and_return(webfinger_info)
+      account = Account.create!(user: user, preferred_username: 'alice', domain: 'example.com')
     end
 
     it "returns success" do

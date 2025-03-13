@@ -10,7 +10,7 @@ Rails.application.routes.draw do
   mount Sidekiq::Web => '/sidekiq', :constraints => AdminConstraint.new
 
   resources :users
-  resources :accounts, only: [:index, :show, :edit, :update] do
+  resources :accounts, only: [:index, :new, :create, :show, :edit, :update] do
     member do
       post :follow
     end

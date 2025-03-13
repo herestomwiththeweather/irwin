@@ -17,13 +17,23 @@
   </div>
 
   <div class='pt-5'>
+    <%= form.label :preferred_username %><br />
+    <%= form.text_field :preferred_username %>
+  </div>
+
+  <div class='pt-5'>
     <%= form.label :summary %><br />
     <%= form.text_field :summary %>
   </div>
 
   <div class='py-5'>
+    <%= form.label :domain %><br />
+    <%= form.text_field :domain, value: account.url.presence || current_user.domain %>
+  </div>
+
+  <div class='py-5'>
     <%= form.label :url %><br />
-    <%= form.text_field :url %>
+    <%= form.text_field :url, value: account.url.presence || current_user.url %>
   </div>
 
   <div class='pt-5'>

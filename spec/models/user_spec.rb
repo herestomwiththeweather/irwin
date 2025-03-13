@@ -11,11 +11,17 @@ RSpec.describe User, type: :model do
       allow(IndieWeb::Endpoints).to receive(:get).and_return(indieweb_info)
       allow(WebFinger).to receive(:discover!).with('acct:alice@example.com').and_return(webfinger_info)
       allow(WebFinger).to receive(:discover!).with('acct:bob@example.com').and_return(webfinger_info_bob)
-      @user = FactoryBot.create(:user)
+      account = Account.create(preferred_username: 'alice', domain: 'example.com', url: 'https://example.com', identifier: 'https://example.com')
+      @user = FactoryBot.create(:user, account: account)
+      @user_without_account = FactoryBot.create(:user, url: 'https://example2.com')
     end
 
     it "should be valid" do
       expect(@user).to be_valid
+    end
+
+    it "should be valid without an account" do
+      expect(@user_without_account).to be_valid
     end
 
     it "should have a valid short webfinger name" do
@@ -30,7 +36,12 @@ RSpec.describe User, type: :model do
     end
 
     it "should have a unique url" do
-      expect { FactoryBot.create(:user, username: 'bob', url: 'https://example.com') }.to raise_error(ActiveRecord::RecordInvalid).with_message('Validation failed: Url has already been taken')
+      expect { FactoryBot.create(:user, url: 'https://example.com') }.to raise_error(ActiveRecord::RecordInvalid).with_message('Validation failed: Url has already been taken')
+    end
+
+    it "should have a unique account preferred_username" do
+      new_account = Account.create(preferred_username: 'alice', domain: 'test.com', url: 'https://test.com', identifier: 'https://test.com')
+      expect { FactoryBot.create(:user, url: 'https://test.com', account: new_account) }.to raise_error(ActiveRecord::RecordInvalid).with_message('Validation failed: Account another user has an account with that preferred_username')
     end
   end
 end

@@ -14,7 +14,7 @@ class UserSerializer < ApplicationSerializer
   end
 
   def preferred_username
-    object.username
+    object.account.preferred_username
   end
 
   def public_key

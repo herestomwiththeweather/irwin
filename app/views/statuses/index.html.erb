@@ -1,4 +1,5 @@
 <div class="m-2 px-5">
+  What's up?
   <%= render partial: 'form', locals: { direct_recipient_id: nil } %>
   <% @statuses.each do |status| %>
     <div class="m-2 px-5 <%= status.reblog.present? ? 'border-2 border-blue-700' : '' %>">

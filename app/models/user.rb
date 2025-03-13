@@ -6,11 +6,10 @@ class User < ApplicationRecord
   has_many :access_tokens
 
 
-  belongs_to :account
+  belongs_to :account, optional: true
 
   validates :public_key, uniqueness: true
 
-  validates :username, presence: true
   validates :domain, presence: true
   validates :url, presence: true, uniqueness: true
 
@@ -21,7 +20,8 @@ class User < ApplicationRecord
   before_validation :generate_keys, on: :create
   before_validation :discover_indieauth
   before_validation :set_domain, on: :create
-  before_validation :assign_account, on: :create
+
+  validate :unique_preferred_username
 
   VALID_AUTH_HOSTS = [
     ENV['SERVER_NAME']
@@ -35,7 +35,7 @@ class User < ApplicationRecord
   validates :token_endpoint_host, inclusion: { in: VALID_TOKEN_HOSTS, message: "%{value} does not match the domain of this server." }
 
   def self.ransackable_attributes(auth_object = nil)
-    ["username", "email"]
+    ["email"]
   end
 
   def self.ransackable_associations(auth_object = nil)
@@ -48,35 +48,29 @@ class User < ApplicationRecord
     identifier = path.gsub(/^\/actor\//,'')
     Rails.logger.info "by_actor target identifier: #{identifier}"
     username, domain = identifier.split('@')
-    User.where(username: username, domain: domain).first
+    by_username(username)
+  end
+
+  def self.by_username(username)
+    User.includes(:account).where(accounts: { preferred_username: username }).first
   end
 
   def self.representative
     Preference.first.user || User.first
   end
 
-  def set_domain
-    self.domain = URI.parse(url).hostname
+  def unique_preferred_username
+    if account.present?
+      candidate_username = account.preferred_username
+      users = User.includes(:account).where(accounts: { preferred_username: candidate_username }).where.not(id: id)
+      if users.length > 0
+        errors.add(:account, "another user has an account with that preferred_username")
+      end
+    end
   end
 
-  def assign_account
-    result = WebFinger.discover! "acct:#{username}@#{domain}"
-    webfinger_actor_url = result['links'].select {|link| link['rel'] == 'self'}.first['href']
-    if webfinger_actor_url != actor_url
-      Rails.logger.info "#{self.class}##{__method__} Error unexpected webfinger actor_url: #{webfinger_actor_url}"
-      errors.add :base, "Webfinger: Expected #{actor_url} but found #{webfinger_actor_url}"
-    end
-
-    self.account = Account.create!( preferred_username: username,
-                                                   url: url,
-                                                domain: domain,
-                                            identifier:    actor_url,
-                                                 inbox: "#{actor_url}/inbox",
-                                                 outbox: "#{actor_url}/outbox",
-                                             followers: "#{actor_url}/followers",
-                                             following: "#{actor_url}/following" ) if account.nil?
-  rescue WebFinger::NotFound => e
-    Rails.logger.info "#{self.class}##{__method__} WebFinger::NotFound exception: #{e.message}"
+  def set_domain
+    self.domain = URI.parse(url).hostname
   end
 
   def feed
@@ -140,14 +134,18 @@ class User < ApplicationRecord
   end
 
   def to_short_webfinger_s
-    "#{username}@#{domain}"
+    account&.webfinger_to_s
   end
 
   def discover_indieauth
     self.url = URI(url).normalize.to_s
     discovery_response = IndieWeb::Endpoints.get(url)
-    self.auth_endpoint_host = URI(discovery_response[:authorization_endpoint]).host
-    self.token_endpoint_host = URI(discovery_response[:token_endpoint]).host
+    if nil != discovery_response[:authorization_endpoint]
+      self.auth_endpoint_host = URI(discovery_response[:authorization_endpoint]).host
+    end
+    if nil != discovery_response[:token_endpoint]
+      self.token_endpoint_host = URI(discovery_response[:token_endpoint]).host
+    end
   rescue IndieWeb::Endpoints::HttpError => e
     Rails.logger.info "#{self.class}##{__method__} IndieWeb::Endpoints::HttpError exception: #{e.message}"
     errors.add(:url, "Error: #{e.message}")

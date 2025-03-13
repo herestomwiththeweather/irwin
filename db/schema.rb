@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_08_23_184813) do
+ActiveRecord::Schema[7.1].define(version: 2025_03_13_022407) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -146,6 +146,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_23_184813) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id"
+    t.bigint "client_app_id"
   end
 
   create_table "statuses", force: :cascade do |t|
@@ -176,7 +177,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_23_184813) do
     t.text "public_key", default: "", null: false
     t.text "private_key"
     t.bigint "account_id"
-    t.string "username"
     t.string "language", default: "en"
     t.boolean "guest", default: true
     t.index ["account_id"], name: "index_users_on_account_id"

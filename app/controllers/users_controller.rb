@@ -78,7 +78,7 @@ class UsersController < ApplicationController
       identifier = params[:resource].sub('acct:','')
       username, domain = identifier.split('@')
       # domain will be this server
-      @target_user = User.find_by!(username: username)
+      @target_user = User.by_username(username)
       render json: @target_user, serializer: WebfingerSerializer, content_type: 'application/jrd+json'
     else
       Rails.logger.info "#{__method__} error raw resource: #{raw_resource}"
@@ -94,11 +94,11 @@ class UsersController < ApplicationController
   def set_user
     identifier = params[:id].gsub(/^@/,'')
     username, domain = identifier.split('@')
-    @target_user = User.find_by(username: username, domain: domain)
+    @target_user = User.by_username(username)
     raise ActiveRecord::RecordNotFound if @target_user.nil?
   end
 
   def user_params
-    params.require(:user).permit(:email, :url, :password, :password_confirmation, :username, :language)
+    params.require(:user).permit(:email, :url, :password, :password_confirmation, :language)
   end
 end

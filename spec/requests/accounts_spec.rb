@@ -10,9 +10,10 @@ RSpec.describe "Accounts", type: :request do
   let(:target_account) { create :account, identifier: target_url, name: "Target" }
   let(:keypair) { OpenSSL::PKey::RSA.new(2048) }
   let(:private_key) { keypair.to_pem }
-  let(:recipient_user) { create :user }
+  let(:alice_account) { create :account, preferred_username: 'alice', domain: 'example.com' }
+  let(:recipient_user) { create :user, account_id: alice_account.id }
   let(:recipient_url) { "#{server_url}/actor/#{recipient_user.to_short_webfinger_s}" }
-  let(:follow) { create :follow, target_account: origin_account, account: recipient_user.account }
+  let(:follow) { create :follow, target_account: origin_account, account: alice_account }
   let(:target_status) { create :status, account_id: recipient_user.account.id, uri: nil }
   let(:valid_move_attributes) do
     { id: 'https://example.com/users/actor#moves/123',

@@ -12,6 +12,7 @@ RSpec.describe "Statuses", type: :request do
     before do
       allow(IndieWeb::Endpoints).to receive(:get).and_return(indieweb_info)
       allow(WebFinger).to receive(:discover!).and_return(webfinger_info)
+      account = Account.create(user: user, preferred_username: 'alice', domain: 'example.com')
     end
 
     it 'returns success' do
@@ -44,6 +45,7 @@ RSpec.describe "Statuses", type: :request do
     before do
       allow(IndieWeb::Endpoints).to receive(:get).and_return(indieweb_info)
       allow(WebFinger).to receive(:discover!).and_return(webfinger_info)
+      account = Account.create(user: user, preferred_username: 'alice', domain: 'example.com')
     end
 
     it 'returns replies collection' do
@@ -64,6 +66,7 @@ RSpec.describe "Statuses", type: :request do
     before do
       allow(IndieWeb::Endpoints).to receive(:get).and_return(indieweb_info)
       allow(WebFinger).to receive(:discover!).and_return(webfinger_info)
+      account = Account.create(user: user, preferred_username: 'alice', domain: 'example.com')
     end
 
     it 'returns replies page' do

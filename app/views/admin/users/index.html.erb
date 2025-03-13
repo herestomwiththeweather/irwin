@@ -4,7 +4,7 @@
   </div>
   <%= search_form_for @query, url: admin_users_path do |f| %>
     <div class="inline">
-      <%= f.search_field :username_or_email_i_cont %>
+      <%= f.search_field :email_i_cont %>
     </div>
     <div class="inline">
       <%= f.submit class: "rounded-lg py-3 px-5 bg-blue-600 text-white inline-block font-medium cursor-pointer" %>

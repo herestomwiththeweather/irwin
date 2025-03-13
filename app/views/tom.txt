@@ -1,0 +1,12 @@
+./users/new.html.erb:  <% if @user.errors.any? %>
+./users/new.html.erb:    <div class="error_messages">
+./users/new.html.erb:        <% @user.errors.full_messages.each do |message| %>
+./accounts/_form.html.erb:  <% if account.errors.any? %>
+./accounts/_form.html.erb:    <div id="error_explanation" class="bg-red-50 text-red-500 px-3 py-2 font-medium rounded-lg mt-3">
+./accounts/_form.html.erb:      <h2><%= pluralize(account.errors.count, "error") %> prohibited this account from being saved:</h2>
+./accounts/_form.html.erb:        <% account.errors.each do |error| %>
+./accounts/_form.html.erb:          <li><%= error.full_message %></li>
+./admin/users/_form.html.erb:  <% if user.errors.any? %>
+./admin/users/_form.html.erb:      <h2><%= pluralize(user.errors.count, "error") %> prohibited this user from being saved:</h2>
+./admin/users/_form.html.erb:        <% user.errors.each do |error| %>
+./admin/users/_form.html.erb:          <li><%= error.full_message %></li>

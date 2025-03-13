@@ -1,6 +1,7 @@
 class StatusesController < ApplicationController
   before_action :login_required, except: [:show, :replies]
   before_action :set_status, only: [:show, :boost, :unboost, :replies, :translate]
+  before_action :check_account, only: [:index]
 
   authorize_resource
 
@@ -94,6 +95,10 @@ class StatusesController < ApplicationController
   end
 
   private
+
+  def check_account
+    redirect_to authorizations_url if current_user.account.blank?
+  end
 
   def set_status
     @status = Status.find(params[:id])
