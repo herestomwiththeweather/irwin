@@ -4,7 +4,9 @@ Irwin is an activitypub and indieauth server. Users are known on the social web 
 
 ### Example blank-gh-site
 
-This [blank-gh-site](https://github.com/otisburgsocial/blank-gh-site) adds 3 small commits to show indieauth and webfinger config needed to register on [otisburg.social](https://otisburg.social) which is running the irwin server code.  The first commit is created automatically by github when you configure custom domain which appears after you select branch under "Pages" under "Code and automation" sidebar for the blank-gh-site project.
+This [blank-gh-site](https://github.com/otisburgsocial/blank-gh-site) adds 3 small commits to show indieauth and webfinger config needed to use these features on [otisburg.social](https://otisburg.social) which is running the irwin server code.  The first commit is created automatically by github when you configure custom domain which appears after you select branch under "Pages" under "Code and automation" sidebar for the blank-gh-site project.
+
+The third commit is not required to register as it is for webfinger configuration and can be done later when creating the optional fediverse account to be associated with the user.
 
 ### Irwin Required environment variables:
 
