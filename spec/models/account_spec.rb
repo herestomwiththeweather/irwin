@@ -11,6 +11,25 @@ RSpec.describe Account, type: :model do
     end
   end
 
+  describe "when creating a new local account" do
+    let(:misconfigured_actor_url) { "https://activitypub.test/user/bob" }
+    let(:bob_webfinger_info) { {"subject" => "acct:bob@example.com", "links"=>[{"rel"=>"self", "type"=>"application/activity+json", "href"=>"#{misconfigured_actor_url}" }]} }
+    let(:indieweb_info) { {:authorization_endpoint => "https://#{ENV['SERVER_NAME']}/auth", :token_endpoint => "https://#{ENV['SERVER_NAME']}/token"} }
+
+    before do
+      allow(IndieWeb::Endpoints).to receive(:get).and_return(indieweb_info)
+      allow(WebFinger).to receive(:discover!).with('acct:bob@example.com').and_return(bob_webfinger_info)
+      @user_without_account = FactoryBot.create(:user, url: 'https://example.com')
+    end
+
+    it "should be invalid if the actor url returned by webfinger is different than the expected actor url" do
+      account = Account.new(preferred_username: 'bob', domain: 'example.com')
+      account.user = @user_without_account
+      account.save
+      expect(account.errors[:base]).to include("Webfinger: Expected #{account.user.actor_url} but found #{misconfigured_actor_url}")
+    end
+  end
+
   describe "when creating a new account via webfinger" do
     let(:bob_webfinger_info) { {"subject" => "acct:bob@example.com", "links"=>[{"rel"=>"self", "type"=>"application/activity+json", "href"=>"https://activitypub.test/users/bob" }]} }
     let(:empty_webfinger_info) { {"subject" => "acct:empty@example.com", "links"=>[{"rel"=>"self", "type"=>"application/activity+json", "href"=>"https://activitypub.test/users/empty" }]} }
