@@ -75,6 +75,9 @@ class Account < ApplicationRecord
       rescue WebFinger::BadRequest => e
         Rails.logger.info "#{__method__} Error: Bad request for webfinger: #{webfinger_address}: #{e.message}"
         return nil
+      rescue NoMethodError => e
+        Rails.logger.info "#{__method__} Error: Bad webfinger response: #{webfinger_address}: #{e.message}"
+        return nil
       end
     else
       Rails.logger.info "#{__method__} Error: preferredUsername missing for actor url: #{actor_url}"
