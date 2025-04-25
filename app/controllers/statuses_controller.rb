@@ -105,6 +105,6 @@ class StatusesController < ApplicationController
   end
 
   def status_params
-    params.require(:status).permit(:text, :in_reply_to_id, :direct_recipient_id, media_attachments_attributes: [:file])
+    params.require(:status).permit(:text, :in_reply_to_id, :direct_recipient_id, media_attachments_attributes: [:file, :description])
   end
 end

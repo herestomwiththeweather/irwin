@@ -14,6 +14,7 @@ class MediaAttachment < ApplicationRecord
       "height" => file.metadata['height'],
       "type" => "Document",
       "url" => file.url,
+      "name" => description,
       "mediaType" => content_type
     }.compact
   end
