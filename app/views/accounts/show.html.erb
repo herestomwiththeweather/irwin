@@ -11,7 +11,9 @@
 <% end %>
 <div class="m-2 px-5">
   <% @statuses.each do |status| %>
-    <%= render partial: status.reblog || status, locals: { child_view: false } %>
+    <div class="m-2 px-5 <%= classes_for_type(status) %>">
+      <%= render partial: status.reblog || status, locals: { child_view: false } %>
+    </div>
     <hr />
   <% end %>
 </div>

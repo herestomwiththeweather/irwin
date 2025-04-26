@@ -20,4 +20,11 @@ module StatusesHelper
       link_to(link_text, status_path(status), data: {'turbo-frame': '_top'} )
     end
   end
+
+  def classes_for_type(status)
+    classes = ''
+    classes << ' border-2 border-blue-700' if status.reblog.present?
+    classes << ' bg-slate-100' if status.private_mention?
+    classes
+  end
 end
