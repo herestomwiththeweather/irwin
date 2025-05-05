@@ -1,23 +1,24 @@
 <div id="<%= dom_id media_attachment %>">
-  <% if media_attachment.remote_url.blank? %>
-    <% if media_attachment.image? %>
-      <%= image_tag(media_attachment.file, style: "width: 300px; height: auto") if media_attachment.file.attached? %>
-    <% elsif media_attachment.video? %>
-      <%= content_tag :video, controls: true do %>
-        <%= tag :source, src: media_attachment.file.url, type: media_attachment.content_type %>
+  <% remote_url_or_file = media_attachment.remote_url.presence || media_attachment.file %>
+  <% if media_attachment.image? %>
+    <div data-controller="alt-toggle" class="relative inline-block">
+      <% if media_attachment.remote_url.present? || media_attachment.file.attached? %>
+        <%= image_tag(remote_url_or_file, style: "width: 300px; height: auto", alt: "#{media_attachment.description || ''}") %>
       <% end %>
-    <% end %>
-  <% else %>
-    <% if media_attachment.image? %>
-      <img src='<%= media_attachment.remote_url %>' alt='<%= media_attachment.description || "" %>' width=300 height=300>
-    <% elsif media_attachment.video? %>
-      <%= content_tag :video, controls: true do %>
-        <%= tag :source, src: media_attachment.remote_url, type: media_attachment.content_type %>
+      <% if media_attachment.description.present? %>
+        <a href="#" class="ml-2" data-action="click->alt-toggle#toggle">ALT</a>
+        <div data-alt-toggle-target="description" class="absolute z-10 mt-1 px-2 py-1 bg-gray-800 text-white text-sm rounded hidden">
+          <%= media_attachment.description %>
+        </div>
       <% end %>
-    <% elsif media_attachment.audio? %>
-      <audio controls>
-        <source src="<%= media_attachment.remote_url %>">
-      </audio>
+    </div>
+  <% elsif media_attachment.video? %>
+    <%= content_tag :video, controls: true do %>
+      <%= tag :source, src: remote_url_or_file, type: media_attachment.content_type %>
     <% end %>
+  <% elsif media_attachment.audio? %>
+    <audio controls>
+      <source src="<%= remote_url_or_file %>">
+    </audio>
   <% end %>
 </div>

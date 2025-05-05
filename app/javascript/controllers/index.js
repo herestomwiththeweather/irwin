@@ -4,6 +4,9 @@
 
 import { application } from "./application"
 
+import AltToggleController from "./alt_toggle_controller"
+application.register("alt-toggle", AltToggleController)
+
 import HelloController from "./hello_controller"
 application.register("hello", HelloController)
 

@@ -8,10 +8,10 @@
   <p class="text-gray-800">
     <%= sanitize status.local? ? StatusPresenter.new(status, self).marked_up_text : status.text_with_modified_mentions, tags: %w(b i u p a span blockquote br), attributes: %w(href data-turbo data-turbo-frame translate class) %>
   </p>
-  <% if current_user %>
   <% status.media_attachments.each do |media_attachment| %>
     <%= render partial: media_attachment %>
   <% end %>
+  <% if current_user %>
   <% if status.language != current_user.language %>
     <div style="display: inline-block; padding: 0 8px 4px 8px;">
       <%= link_to "Translate", translate_status_path(status) %>
