@@ -241,6 +241,9 @@ GEM
     nio4r (2.7.3)
     nokogiri (1.16.7-x86_64-linux)
       racc (~> 1.4)
+    paper_trail (16.0.0)
+      activerecord (>= 6.1)
+      request_store (~> 1.4)
     pg (1.5.7)
     propshaft (0.9.1)
       actionpack (>= 7.0.0)
@@ -314,6 +317,8 @@ GEM
       connection_pool
     reline (0.5.9)
       io-console (~> 0.5)
+    request_store (1.7.0)
+      rack (>= 1.4)
     rexml (3.3.6)
       strscan
     rspec-core (3.13.0)
@@ -394,6 +399,7 @@ DEPENDENCIES
   json-ld-preloaded (~> 3.2)
   kaminari
   microformats
+  paper_trail
   pg (~> 1.1)
   propshaft
   puma (~> 5.6.8)

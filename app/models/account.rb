@@ -534,6 +534,19 @@ class Account < ApplicationRecord
     Status.find_by(uri: item['id'])
   end
 
+  def update_status!(item)
+    status_url = item['object']['id']
+    status = Status.from_object_uri(status_url)
+    if nil == status
+      err_msg = "#{self.class}##{__method__} error updating: #{status_url}"
+      Rails.logger.info err_msg
+      raise StandardError, err_msg
+    end
+
+    status.text = item['object']['content']
+    status.save!
+  end
+
   def matches_activity_actor?(actor_identifier)
     self.identifier == actor_identifier
   end

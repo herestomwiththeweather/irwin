@@ -21,6 +21,8 @@ class ActivityPub::Activity
         ActivityPub::Activity::Announce
       when 'Create'
         ActivityPub::Activity::Create
+      when 'Update'
+        ActivityPub::Activity::Update
       when 'Delete'
         ActivityPub::Activity::Delete
       when 'Follow'

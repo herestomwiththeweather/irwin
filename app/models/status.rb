@@ -9,6 +9,8 @@ class Status < ApplicationRecord
   has_many :likes, dependent: :destroy
   has_many :media_attachments, dependent: :destroy
 
+  has_paper_trail on: [:update], only: [:text]
+
   accepts_nested_attributes_for :media_attachments, allow_destroy: true
 
   attr_accessor :current_replies_page

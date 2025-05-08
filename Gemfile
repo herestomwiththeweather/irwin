@@ -64,6 +64,7 @@ gem 'deepl-rb', require: 'deepl'
 gem 'rexml'
 gem 'ransack'
 gem 'rack-cors'
+gem 'paper_trail'
 
 gem 'json-ld'
 gem 'json-ld-preloaded', '~> 3.2'
