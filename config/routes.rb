@@ -24,6 +24,7 @@ Rails.application.routes.draw do
       post :unboost
       get :replies
       get :translate
+      get :history
     end
     collection do
       get :private_mentions

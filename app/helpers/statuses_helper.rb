@@ -1,4 +1,8 @@
 module StatusesHelper
+  def sanitized(status, view_context)
+    sanitize status.local? ? StatusPresenter.new(status, view_context).marked_up_text : status.text_with_modified_mentions, tags: %w(b i u p a span blockquote br), attributes: %w(href data-turbo data-turbo-frame translate class)
+  end
+
   def new_status_submit_text(status, direct_recipient_id)
     prefix = direct_recipient_id.present? ? 'DM ' : ''
     "#{prefix}#{status.present? ? 'Reply' : 'Post'}"

@@ -1,6 +1,6 @@
 class StatusesController < ApplicationController
   before_action :login_required, except: [:show, :replies]
-  before_action :set_status, only: [:show, :boost, :unboost, :replies, :translate]
+  before_action :set_status, only: [:show, :boost, :unboost, :replies, :translate, :history]
   before_action :check_account, only: [:index]
 
   authorize_resource
@@ -14,6 +14,10 @@ class StatusesController < ApplicationController
     @translation = DeepL.translate @status.text, @status.language.upcase, current_user.language.upcase
     Rails.logger.info "#{self.class}##{__method__} #{@translation.text}"
     @status.text = @translation.text
+    render partial: @status, locals: { child_view: false }
+  end
+
+  def history
     render partial: @status, locals: { child_view: false }
   end
 

@@ -6,33 +6,46 @@
   <% end %>
   <div><%= image_tag status.account.icon_url_or_default, style: 'display: inline; padding: 2px; max-width: 50px; max-height: 50px;' %><b><%= link_to status.account.name, status.account, data: {'turbo-frame': '_top'} %></b> posted <%= local_or_origin_link(status) %></div>
   <p class="text-gray-800">
-    <%= sanitize status.local? ? StatusPresenter.new(status, self).marked_up_text : status.text_with_modified_mentions, tags: %w(b i u p a span blockquote br), attributes: %w(href data-turbo data-turbo-frame translate class) %>
+    <%= sanitized(status, self) %>
+    <% if 'history' == action_name %>
+      <% status.versions.each do |v| %>
+        <hr />
+        <% old_status_hash = JSON.parse(v.object).transform_keys(&:to_sym) %>
+        <% old_status = Status.new(old_status_hash) %>
+        <%= sanitized(old_status, self) %>
+      <% end %>
+    <% end %>
   </p>
   <% status.media_attachments.each do |media_attachment| %>
     <%= render partial: media_attachment %>
   <% end %>
   <% if current_user %>
-  <% if status.language != current_user.language %>
-    <div style="display: inline-block; padding: 0 8px 4px 8px;">
-      <%= link_to "Translate", translate_status_path(status) %>
-    </div>
-  <% end %>
-  <% if status.account != current_user.account %>
-    <div style="display: inline-block; padding: 0 8px 4px 8px;">
-    <% if like = Like.find_by(status: status, account: current_user.account) %>
-      <%= button_to('Unlike', like_path(like), method: 'delete', style: 'text-decoration: underline') %>
-    <% else %>
-      <%= button_to('Like', likes_path(status_id: status.id), method: 'post', style: 'text-decoration: underline') %>
+    <% if status.language != current_user.language %>
+      <div style="display: inline-block; padding: 0 8px 4px 8px;">
+        <%= link_to "Translate", translate_status_path(status) %>
+      </div>
     <% end %>
-    </div>
-    <div style="display: inline-block; padding: 0 8px 4px 8px;">
-    <% if boost = Status.find_by(account: current_user.account, reblog_of_id: status.id, text: '') %>
-      <%= button_to('Unboost', unboost_status_path(status), method: 'post', style: 'text-decoration: underline') %>
-    <% else %>
-      <%= button_to('Boost', boost_status_path(status), method: 'post', style: 'text-decoration: underline') %>
+    <% if status.versions.any? %>
+      <div style="display: inline-block; padding: 0 8px 4px 8px;">
+        <%= link_to "History", history_status_path(status) %>
+      </div>
     <% end %>
-    </div>
-  <% end %>
+    <% if status.account != current_user.account %>
+      <div style="display: inline-block; padding: 0 8px 4px 8px;">
+      <% if like = Like.find_by(status: status, account: current_user.account) %>
+        <%= button_to('Unlike', like_path(like), method: 'delete', style: 'text-decoration: underline') %>
+      <% else %>
+        <%= button_to('Like', likes_path(status_id: status.id), method: 'post', style: 'text-decoration: underline') %>
+      <% end %>
+      </div>
+      <div style="display: inline-block; padding: 0 8px 4px 8px;">
+      <% if boost = Status.find_by(account: current_user.account, reblog_of_id: status.id, text: '') %>
+        <%= button_to('Unboost', unboost_status_path(status), method: 'post', style: 'text-decoration: underline') %>
+      <% else %>
+        <%= button_to('Boost', boost_status_path(status), method: 'post', style: 'text-decoration: underline') %>
+      <% end %>
+      </div>
+    <% end %>
   <% end %>
   <% if child_view %>
   <div class="px-3">
