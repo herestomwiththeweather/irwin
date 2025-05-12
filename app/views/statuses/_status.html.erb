@@ -8,11 +8,14 @@
   <p class="text-gray-800">
     <%= sanitized(status, self) %>
     <% if 'history' == action_name %>
-      <% status.versions.each do |v| %>
+      <% parent_status = nil %>
+      <% status.versions.unscope(:order).order(created_at: :desc).each do |v| %>
         <hr />
         <% old_status_hash = JSON.parse(v.object).transform_keys(&:to_sym) %>
         <% old_status = Status.new(old_status_hash) %>
-        <%= sanitized(old_status, self) %>
+        <%= v.created_at %>:
+        <%= diff_text(old_status.text, parent_status.present? ? parent_status.text : status.text) %>
+        <% parent_status = old_status %>
       <% end %>
     <% end %>
   </p>

@@ -1,6 +1,30 @@
 module StatusesHelper
+  REMOVED = 'bg-red-100 text-red-600 font-bold'
+  ADDED = 'bg-green-100 text-green-600 font-bold'
+
   def sanitized(status, view_context)
     sanitize status.local? ? StatusPresenter.new(status, view_context).marked_up_text : status.text_with_modified_mentions, tags: %w(b i u p a span blockquote br), attributes: %w(href data-turbo data-turbo-frame translate class)
+  end
+
+  def diff_text(old, new)
+    old_words = old.split
+    new_words = new.split
+
+    diffs = Diff::LCS.sdiff(old_words, new_words)
+
+    diffs.map do |change|
+      case change.action
+      when '='
+        ERB::Util.html_escape(change.old_element)
+      when '!'
+        "<span class='#{REMOVED}'>#{ERB::Util.html_escape(change.old_element)}</span> " \
+        "<span class='#{ADDED}'>#{ERB::Util.html_escape(change.new_element)}</span>"
+      when '+'
+        "<span class='#{ADDED}'>#{ERB::Util.html_escape(change.new_element)}</span>"
+      when '-'
+        "<span class='#{REMOVED}'>#{ERB::Util.html_escape(change.old_element)}</span>"
+      end
+    end.join(' ').html_safe
   end
 
   def new_status_submit_text(status, direct_recipient_id)

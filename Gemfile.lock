@@ -388,6 +388,7 @@ DEPENDENCIES
   cssbundling-rails
   debug
   deepl-rb
+  diff-lcs
   dotenv-rails
   exception_notification
   factory_bot_rails
