@@ -14,6 +14,8 @@ class Account < ApplicationRecord
   has_one :user
 
   belongs_to :moved_to_account, class_name: 'Account', optional: true
+
+  has_paper_trail on: [:update]
 =begin
   validates :following, uniqueness: true
   validates :followers, uniqueness: true
@@ -543,8 +545,20 @@ class Account < ApplicationRecord
       raise StandardError, err_msg
     end
 
+    if status.account_id != id
+      err_msg = "#{self.class}##{__method__} error unauthorized update for: #{status_url}"
+      Rails.logger.info err_msg
+      raise StandardError, err_msg
+    end
+
     status.text = item['object']['content']
     status.save!
+  end
+
+  def update_profile!(item)
+    Rails.logger.info "#{self.class}##{__method__} id: #{id}"
+    update_mastodon_account(item['object'])
+    self.save!
   end
 
   def matches_activity_actor?(actor_identifier)
