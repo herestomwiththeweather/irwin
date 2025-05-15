@@ -5,7 +5,7 @@
   <% end %>
   <% end %>
   <div><%= image_tag status.account.icon_url_or_default, style: 'display: inline; padding: 2px; max-width: 50px; max-height: 50px;' %><b><%= link_to status.account.name, status.account, data: {'turbo-frame': '_top'} %></b> posted <%= local_or_origin_link(status) %></div>
-  <p class="text-gray-800">
+  <div class="m-2">
     <%= sanitized(status, self) %>
     <% if 'history' == action_name %>
       <% parent_status = nil %>
@@ -13,12 +13,12 @@
         <hr />
         <% old_status_hash = JSON.parse(v.object).transform_keys(&:to_sym) %>
         <% old_status = Status.new(old_status_hash) %>
-        <%= v.created_at %>:
+        <%= v.created_at.to_fs(:rfc822) %>:
         <%= diff_text(old_status.text, parent_status.present? ? parent_status.text : status.text) %>
         <% parent_status = old_status %>
       <% end %>
     <% end %>
-  </p>
+  </div>
   <% status.media_attachments.each do |media_attachment| %>
     <%= render partial: media_attachment %>
   <% end %>
