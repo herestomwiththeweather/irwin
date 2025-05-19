@@ -156,12 +156,11 @@ class Account < ApplicationRecord
 
       final_webfinger_subject = result2['subject']
       if 0 != final_webfinger_subject.casecmp(webfinger_subject)
-        # webfinger spec allows subject to be different
         Rails.logger.info "#{__method__} Error: subject #{final_webfinger_subject} did not match reverse #{webfinger_subject}"
+      else
+        # normally domain is not present unless domain is verified by webfinger to be different than activitypub server
+        actor['domain'] = domain
       end
-
-      # normally domain is not present unless domain is verified by webfinger to be different than activitypub server
-      actor['domain'] = domain
     end
 
     Account.create_mastodon_account(actor)
