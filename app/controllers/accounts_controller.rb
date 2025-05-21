@@ -6,7 +6,7 @@ class AccountsController < ApplicationController
 
   authorize_resource
 
-  ACTIVITIES = ['Follow', 'Undo', 'Accept', 'Create', 'Announce', 'Move', 'Like']
+  ACTIVITIES = ['Follow', 'Undo', 'Accept', 'Create', 'Update', 'Announce', 'Move', 'Like']
 
   def followers
     @followers = current_user.account.account_followers.page(params[:page])
@@ -147,7 +147,7 @@ class AccountsController < ApplicationController
       info = case item['type']
       when 'Follow'
         "for #{item['object']}"
-      when 'Create', 'Undo'
+      when 'Create', 'Undo', 'Update'
         "for type #{item['object']['type']}"
       else
         ""

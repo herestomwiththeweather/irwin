@@ -545,7 +545,7 @@ class Account < ApplicationRecord
     end
 
     if status.account_id != id
-      err_msg = "#{self.class}##{__method__} error unauthorized update for: #{status_url}"
+      err_msg = "#{self.class}##{__method__} error [id: #{id}] unauthorized update for: #{status_url}"
       Rails.logger.info err_msg
       raise StandardError, err_msg
     end
