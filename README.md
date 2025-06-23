@@ -21,7 +21,7 @@ The third commit is not required to register as it is for webfinger configuratio
 * DEEPL_AUTH_KEY - authentication key for DeepL
 
 * EXCEPTION_NOTIFICATION - comma separated list of emails to receive exception notifications for troubleshooting
-* SMTP_DEFAULT_FROM - like support@example.com
+* EXCEPTION_MAILBOX - mailbox (like support) of from address for exception notifications (default: app.error)
 * SMTP_DOMAIN - like example.com
 * SMTP_PASSWORD - your smtp password
 * SMTP_PORT - default is 587

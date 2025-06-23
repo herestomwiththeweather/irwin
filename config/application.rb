@@ -72,7 +72,7 @@ module Irwin
     if ENV['EXCEPTION_NOTIFICATION']
       config.middleware.use ExceptionNotification::Rack,
         email: {
-          sender_address: %("Application Error" <app.error@#{ENV['SMTP_DOMAIN']}>),
+          sender_address: %("Application Error" <#{ENV['EXCEPTION_MAILBOX'] || 'app.error'}@#{ENV['SMTP_DOMAIN']}>),
           exception_recipients: ENV['EXCEPTION_NOTIFICATION'].split,
           email_prefix: "[Irwin] "
         }
