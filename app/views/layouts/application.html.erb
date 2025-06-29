@@ -21,14 +21,14 @@
     <% if current_user %>
       <% if current_user.account.present? %>
       <span class="mr-3"><a href="<%= current_user.url %>"><%= current_user.url %></a></span> |
-      <span class="mr-3 ml-3"><%= link_to "Home", root_path %></a></span> |
-      <span class="mr-3 ml-3"><%= link_to "Search", new_search_path %></a></span> |
-      <span class="mr-3 ml-3"><%= link_to "DMs", private_mentions_statuses_path %></a></span> |
-      <span class="mr-3 ml-3"><%= link_to "Settings", edit_account_path(current_user.account) %></a></span> |
-      <span class="mr-3 ml-3"><%= link_to "Followers", followers_path %></a></span> |
-      <span class="mr-3 ml-3"><%= link_to "Following", following_path %></a></span> |
+      <span class="mr-3 ml-3"><%= link_to "Home", root_path %></span> |
+      <span class="mr-3 ml-3"><%= link_to "Search", new_search_path %></span> |
+      <span class="mr-3 ml-3"><%= link_to "DMs", private_mentions_statuses_path %></span> |
+      <span class="mr-3 ml-3"><%= link_to "Settings", edit_account_path(current_user.account) %></span> |
+      <span class="mr-3 ml-3"><%= link_to "Followers", followers_path %></span> |
+      <span class="mr-3 ml-3"><%= link_to "Following", following_path %></span> |
       <% unless current_user.guest? %>
-        <span class="mr-3 ml-3"><%= link_to "Admin", admin_path %></a></span> |
+        <span class="mr-3 ml-3"><%= link_to "Admin", admin_path %></span> |
       <% end %>
       <% else %>
         <span class="mr-3 ml-3"><%= link_to "Create Fediverse Account", new_account_path %></a></span> |
