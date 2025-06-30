@@ -14,7 +14,7 @@ class ActivityPub::Activity::Undo < ActivityPub::Activity
     elsif 'Like' == @json['object']['type']
       Rails.logger.info "#{self.class}##{__method__} undo like [#{@account.id}, #{@json['object']['object']}]"
       status = Status.from_local_uri(@json['object']['object'])
-      like = Like.find_by(status: status, account: @account)
+      like = ::Like.find_by(status: status, account: @account)
       like.destroy!
     elsif 'Announce' == @json['object']['type']
       uri = @json['object']['id']

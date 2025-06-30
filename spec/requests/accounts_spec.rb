@@ -31,6 +31,19 @@ RSpec.describe "Accounts", type: :request do
     }
   end
 
+  let(:valid_undo_attributes) do
+    { id: 'https://example.com/users/actor#likes/123',
+      type: 'Undo',
+      actor: origin_url,
+      object: {
+        id: target_status.local_uri,
+        type: "Like",
+        actor: origin_url,
+        object: target_status.local_uri
+      }
+    }
+  end
+
   before do
     allow(IndieWeb::Endpoints).to receive(:get).and_return(indieweb_info)
     allow(WebFinger).to receive(:discover!).and_return(webfinger_info)
@@ -44,12 +57,18 @@ RSpec.describe "Accounts", type: :request do
   end
 
   describe "like" do
-    it "returns success" do
+    it "returns success for both creating a like and then undoing it" do
       receiver_inbox = "#{recipient_url}/inbox"
 
       activity = Activity.new(receiver_inbox, valid_like_attributes.to_json, origin_url, private_key)
 
       post receiver_inbox, params: valid_like_attributes.to_json, headers: activity.request_headers
+
+      expect(response).to have_http_status(202)
+
+      undo_activity = Activity.new(receiver_inbox, valid_undo_attributes.to_json, origin_url, private_key)
+
+      post receiver_inbox, params: valid_undo_attributes.to_json, headers: undo_activity.request_headers
 
       expect(response).to have_http_status(202)
     end
