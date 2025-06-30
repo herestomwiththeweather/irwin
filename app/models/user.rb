@@ -4,7 +4,10 @@ class User < ApplicationRecord
   has_secure_password
   has_many :authorization_codes
   has_many :access_tokens
-
+  has_many :notifications
+  has_many :like_notifications
+  has_many :mention_notifications
+  has_many :follow_notifications
 
   belongs_to :account, optional: true
 

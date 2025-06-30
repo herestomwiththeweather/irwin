@@ -1,0 +1,2 @@
+class FollowNotification < Notification
+end

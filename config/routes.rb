@@ -41,6 +41,7 @@ Rails.application.routes.draw do
   resources :searches, only: [:new, :create]
   resources :authorizations, only: [:index, :show]
   resources :access_tokens, only: [:destroy]
+  resources :notifications, only: [:index]
 
   namespace :api do
     namespace :v1 do

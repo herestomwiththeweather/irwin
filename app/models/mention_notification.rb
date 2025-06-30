@@ -1,0 +1,2 @@
+class MentionNotification < Notification
+end

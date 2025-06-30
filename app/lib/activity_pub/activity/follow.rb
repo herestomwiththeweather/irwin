@@ -17,6 +17,7 @@ class ActivityPub::Activity::Follow < ActivityPub::Activity
     end
 
     follow = @account.follow!(@target_account, @json['id'])
+    @target_account.user.follow_notifications.create(read_at: nil, account: @account, message: '') if follow.present?
     AcceptFollowJob.perform_later(follow.id)
     follow.nil? ? 500 : 202
   end

@@ -1,0 +1,8 @@
+<h1 class="px-3 my-3 text-2xl text-gray-700 font-bold">Notifications</h1>
+
+<div id="notifications" class="px-2">
+  <% @notifications.each do |notification| %>
+    <%= render notification %>
+  <% end %>
+  <%= paginate @notifications %>
+</div>

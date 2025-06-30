@@ -1,0 +1,3 @@
+<span id="notification_count" class="inline-block px-2 py-0.5 text-xs font-semibold text-white bg-blue-600 rounded-full">
+  <%= user.notifications.where(read_at: nil).count %>
+</span>

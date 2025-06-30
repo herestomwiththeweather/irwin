@@ -405,7 +405,9 @@ class Account < ApplicationRecord
 
   def like!(status_uri)
     status = Status.from_local_uri(status_uri)
-    status.like!(self)
+    like = status.like!(self)
+    status.account.user.like_notifications.create(read_at: nil, account: self, status: status, message: '')
+    like
   end
 
   def create_status!(status_object, thread = nil)

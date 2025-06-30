@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_05_07_212536) do
+ActiveRecord::Schema[7.1].define(version: 2025_06_29_225642) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -141,6 +141,20 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_07_212536) do
     t.index ["status_id"], name: "index_mentions_on_status_id"
   end
 
+  create_table "notifications", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "account_id"
+    t.bigint "status_id"
+    t.datetime "read_at"
+    t.string "message"
+    t.string "type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_notifications_on_account_id"
+    t.index ["status_id"], name: "index_notifications_on_status_id"
+    t.index ["user_id"], name: "index_notifications_on_user_id"
+  end
+
   create_table "preferences", force: :cascade do |t|
     t.boolean "enable_registrations", default: true
     t.datetime "created_at", null: false
@@ -201,5 +215,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_07_212536) do
   add_foreign_key "likes", "statuses"
   add_foreign_key "media_attachments", "accounts"
   add_foreign_key "media_attachments", "statuses"
+  add_foreign_key "notifications", "accounts"
+  add_foreign_key "notifications", "statuses"
+  add_foreign_key "notifications", "users"
   add_foreign_key "statuses", "accounts"
 end
