@@ -45,7 +45,7 @@
       <% if boost = Status.find_by(account: current_user.account, reblog_of_id: status.id, text: '') %>
         <%= button_to('Unboost', unboost_status_path(status), method: 'post', style: 'text-decoration: underline') %>
       <% else %>
-        <%= button_to('Boost', boost_status_path(status), method: 'post', style: 'text-decoration: underline') %>
+        <%= button_to('Boost', boost_status_path(status), method: 'post', form: { data: { 'turbo-confirm': 'Are you sure?' } }, style: 'text-decoration: underline') %>
       <% end %>
       </div>
     <% end %>
