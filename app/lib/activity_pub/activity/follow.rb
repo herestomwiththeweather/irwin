@@ -1,7 +1,8 @@
 class ActivityPub::Activity::Follow < ActivityPub::Activity
   def perform
     Rails.logger.info "#{self.class}##{__method__}"
-    @target_account = Account.find_by(identifier: @json['object'])
+    target_object_id = @json['object'].is_a?(Hash) ? @json['object']['id'] : @json['object']
+    @target_account = Account.find_by(identifier: target_object_id)
     return 500 if @target_account.user.nil?
 
     # check that recipient_account and target_account are the same
