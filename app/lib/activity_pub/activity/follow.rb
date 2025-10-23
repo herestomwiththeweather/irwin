@@ -3,7 +3,10 @@ class ActivityPub::Activity::Follow < ActivityPub::Activity
     Rails.logger.info "#{self.class}##{__method__}"
     target_object_id = @json['object'].is_a?(Hash) ? @json['object']['id'] : @json['object']
     @target_account = Account.find_by(identifier: target_object_id)
-    return 500 if @target_account.user.nil?
+    if (@target_account.nil? || @target_account.user.nil?)
+      Rails.logger.info "#{self.class}##{__method__} Error: target_object_id: #{target_object_id}"
+      return 500
+    end
 
     # check that recipient_account and target_account are the same
     if @recipient_account.id != @target_account.id
