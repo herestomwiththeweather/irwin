@@ -11,7 +11,7 @@ class Like < ApplicationRecord
   end
 
   def request!
-    return false if account.mastodon?
+    return false if account.remote?
 
     activity = {}
     activity['actor'] = account.user.actor_url
@@ -22,7 +22,7 @@ class Like < ApplicationRecord
   end
 
   def remove!
-    return false if account.mastodon?
+    return false if account.remote?
 
     activity = {}
     activity['id'] = local_uri

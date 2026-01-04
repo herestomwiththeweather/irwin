@@ -379,7 +379,7 @@ class Account < ApplicationRecord
     account_followers.merge(User.all.map(&:account)).any?
   end
 
-  def mastodon?
+  def remote?
     user.nil?
   end
 

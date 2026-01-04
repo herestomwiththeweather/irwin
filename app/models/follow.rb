@@ -49,7 +49,7 @@ class Follow < ApplicationRecord
   end
 
   def request!
-    return false if account.mastodon?
+    return false if account.remote?
 
     activity = {}
     activity['actor'] = account.user.actor_url
@@ -78,7 +78,7 @@ class Follow < ApplicationRecord
   end
 
   def remove!
-    if target_account.mastodon?
+    if target_account.remote?
       activity = {}
       activity['actor'] = account.user.actor_url
       activity['type'] = 'Undo'
