@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
   get '/admin' => 'admin/dashboard#index', as: :admin
   namespace :admin do
+    resources :rules
     resources :statuses, only: [:index, :show, :destroy]
     resources :accounts, only: [:index]
     resources :users, except: [:new, :create]
@@ -48,6 +49,9 @@ Rails.application.routes.draw do
       namespace :timelines do
         resource :public, only: [:show], controller: :public
       end
+    end
+    namespace :v2 do
+      resource :instance, only: [:show]
     end
   end
 
