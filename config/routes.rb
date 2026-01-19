@@ -10,6 +10,7 @@ Rails.application.routes.draw do
   require 'admin_constraint'
   mount Sidekiq::Web => '/sidekiq', :constraints => AdminConstraint.new
 
+  resources :rules, only: [:index]
   resources :users
   resources :accounts, only: [:index, :new, :create, :show, :edit, :update] do
     member do
