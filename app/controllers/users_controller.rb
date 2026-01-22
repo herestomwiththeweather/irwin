@@ -35,6 +35,15 @@ class UsersController < ApplicationController
           end
         end
       end
+      format.rss do
+        @account = @target_user.account
+        @statuses = @account.statuses.where(direct_recipient_id: nil, reblog_of_id: nil).limit(20)
+      end
+      format.xml do
+        @account = @target_user.account
+        @statuses = @account.statuses.where(direct_recipient_id: nil, reblog_of_id: nil).limit(20)
+        render template: 'users/actor', formats: [:rss]
+      end
       format.all do
         render json: @target_user, serializer: UserSerializer, content_type: 'application/activity+json'
       end
