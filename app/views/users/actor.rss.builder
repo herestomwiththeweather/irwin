@@ -8,10 +8,27 @@ xml.rss version: "2.0" do
     @statuses.each do |status|
       xml.item do
         xml.title status.text.truncate(100)
-        xml.description status.text
+
+        description_html = status.text
+        status.media_attachments.select(&:image?).each do |media|
+          url = media.remote_url.presence || (media.file.attached? ? media.file.url : nil)
+          if url
+            alt = media.description.present? ? " alt=\"#{media.description}\"" : ""
+            description_html += "<br/><img src=\"#{url}\"#{alt}/>"
+          end
+        end
+        xml.description description_html
+
         xml.pubDate status.created_at.to_fs(:rfc822)
         xml.link status.uri.presence || status.local_uri
         xml.guid status.uri.presence || status.local_uri
+
+        status.media_attachments.select { |m| m.audio? || m.video? }.each do |media|
+          url = media.remote_url.presence || (media.file.attached? ? media.file.url : nil)
+          if url
+            xml.enclosure url: url, type: media.content_type
+          end
+        end
       end
     end
   end
