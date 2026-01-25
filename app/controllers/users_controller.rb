@@ -42,6 +42,7 @@ class UsersController < ApplicationController
       format.xml do
         @account = @target_user.account
         @statuses = @account.statuses.where(direct_recipient_id: nil, reblog_of_id: nil).limit(20)
+        response.headers['Access-Control-Allow-Origin'] = '*'
         render template: 'users/actor', formats: [:rss]
       end
       format.all do
