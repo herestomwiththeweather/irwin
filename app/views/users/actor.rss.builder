@@ -9,12 +9,12 @@ xml.rss version: "2.0" do
       xml.item do
         xml.title status.text.truncate(100)
 
-        description_html = status.text
+        description_html = ActionController::Base.helpers.auto_link(status.text, html: { target: '_blank', rel: 'nofollow noopener noreferrer' }, link: :urls)
         status.media_attachments.select(&:image?).each do |media|
           url = media.remote_url.presence || (media.file.attached? ? media.file.url : nil)
           if url
             alt = media.description.present? ? " alt=\"#{media.description}\"" : ""
-            description_html += "<br/><img src=\"#{url}\"#{alt}/>"
+            description_html += "<br/><img src=\"#{url}\"#{alt}/>".html_safe
           end
         end
         xml.description description_html
