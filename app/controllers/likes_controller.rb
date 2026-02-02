@@ -11,6 +11,11 @@ class LikesController < ApplicationController
 
   def create
     status = Status.find(params[:status_id])
+    if status.discarded?
+      redirect_to root_url, notice: "Sorry. That post has been deleted."
+      return
+    end
+
     @like = Like.new(status: status, account: current_user.account)
     
     respond_to do |format|

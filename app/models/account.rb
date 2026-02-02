@@ -7,7 +7,7 @@ class Account < ApplicationRecord
   has_many :passive_relationships, class_name: 'Follow', foreign_key: 'target_account_id', dependent: :destroy
   has_many :account_followers, -> { order('follows.id desc') }, through: :passive_relationships, source: :account
 
-  has_many :statuses, dependent: :destroy
+  has_many :statuses, -> { kept }, dependent: :destroy
   has_many :likes
   has_many :mentions
 

@@ -20,6 +20,13 @@
   </p>
 
   <%= link_to "Show", status, target: '_blank', class: "rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>
-  <%= button_to "Delete", admin_status_path(status), method: :delete, class: "mt-2 rounded-lg py-3 px-5 bg-gray-100 font-medium" %>
+  <% if status.discarded? %>
+    <p class="my-5">
+      <strong class="block font-medium mb-1">Deleted:</strong>
+      <%= status.deleted_at %>
+    </p>
+  <% else %>
+    <%= button_to "Delete", admin_status_path(status), method: :delete, class: "mt-2 rounded-lg py-3 px-5 bg-gray-100 font-medium" %>
+  <% end %>
   <hr class="mt-6">
 </div>

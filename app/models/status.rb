@@ -1,10 +1,14 @@
 class Status < ApplicationRecord
+  include Discard::Model
+
+  self.discard_column = :deleted_at
+
   belongs_to :account
   belongs_to :direct_recipient, class_name: 'Account', optional: true
   belongs_to :thread, foreign_key: 'in_reply_to_id', class_name: 'Status', optional: true
   belongs_to :reblog, foreign_key: 'reblog_of_id', class_name: 'Status', optional: true
 
-  has_many :replies, foreign_key: 'in_reply_to_id', class_name: 'Status', inverse_of: :thread
+  has_many :replies, -> { kept }, foreign_key: 'in_reply_to_id', class_name: 'Status', inverse_of: :thread
   has_many :mentions, dependent: :destroy
   has_many :likes, dependent: :destroy
   has_many :media_attachments, dependent: :destroy

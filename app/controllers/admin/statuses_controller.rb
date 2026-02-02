@@ -10,7 +10,7 @@ class Admin::StatusesController < ApplicationController
 
   # DELETE /admin/statuses/1 or /admin/statuses/1.json
   def destroy
-    @status.destroy
+    @status.discard
 
     respond_to do |format|
       format.html { redirect_to admin_statuses_url, notice: "Status was successfully destroyed." }

@@ -44,6 +44,15 @@ RSpec.describe "Accounts", type: :request do
     }
   end
 
+  let(:remote_status) { create :status, account_id: origin_account.id, uri: "#{origin_url}/statuses/123" }
+  let(:valid_delete_attributes) do
+    { id: "#{origin_url}#deletes/123",
+      type: 'Delete',
+      actor: origin_url,
+      object: remote_status.uri
+    }
+  end
+
   before do
     allow(IndieWeb::Endpoints).to receive(:get).and_return(indieweb_info)
     allow(WebFinger).to receive(:discover!).and_return(webfinger_info)
@@ -108,6 +117,32 @@ RSpec.describe "Accounts", type: :request do
       activity = Activity.new(receiver_inbox, valid_move_attributes.to_json, origin_url, private_key)
 
       post receiver_inbox, params: valid_move_attributes.to_json, headers: activity.request_headers
+
+      expect(response).to have_http_status(401)
+    end
+  end
+
+  describe "delete" do
+    it "returns success and deletes the status when actor owns it" do
+      receiver_inbox = "#{recipient_url}/inbox"
+
+      activity = Activity.new(receiver_inbox, valid_delete_attributes.to_json, origin_url, private_key)
+
+      post receiver_inbox, params: valid_delete_attributes.to_json, headers: activity.request_headers
+
+      expect(response).to have_http_status(202)
+      expect(Status.find_by(id: remote_status.id)).to be_discarded
+    end
+
+    it "returns failure when actor does not own the status" do
+      other_account = create :account, identifier: "https://other.example/user", name: "Other"
+      remote_status.update(account_id: other_account.id)
+
+      receiver_inbox = "#{recipient_url}/inbox"
+
+      activity = Activity.new(receiver_inbox, valid_delete_attributes.to_json, origin_url, private_key)
+
+      post receiver_inbox, params: valid_delete_attributes.to_json, headers: activity.request_headers
 
       expect(response).to have_http_status(401)
     end

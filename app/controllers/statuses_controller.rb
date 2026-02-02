@@ -22,7 +22,7 @@ class StatusesController < ApplicationController
   end
 
   def private_mentions
-    @statuses = Status.where(direct_recipient: current_user.account).or(@current_user.account.statuses.where('direct_recipient_id IS NOT NULL'))
+    @statuses = Status.kept.where(direct_recipient: current_user.account).or(@current_user.account.statuses.where('direct_recipient_id IS NOT NULL'))
   end
 
   def mentions
@@ -65,6 +65,11 @@ class StatusesController < ApplicationController
 
     respond_to do |format|
       format.html do
+        if @status.discarded?
+          redirect_to root_url, notice: "Sorry. That post has been deleted."
+          return
+        end
+
         @new_status = Status.new
         @new_status.in_reply_to_id = @status.id
 

@@ -79,7 +79,7 @@ class User < ApplicationRecord
   def feed
     status_ids = Mention.where(account: self.account).map {|m| m.status.id}
     # anyone mentioned in a direct message may see it
-    Status.where(direct_recipient: nil, account_id: self.account.active_relationships.select(:target_account_id)).or(Status.where(direct_recipient: nil, account_id: self.account.id)).or(Status.where(id: status_ids))
+    Status.kept.where(direct_recipient: nil, account_id: self.account.active_relationships.select(:target_account_id)).or(Status.where(direct_recipient: nil, account_id: self.account.id)).or(Status.where(id: status_ids))
   end
 
   def get(url)

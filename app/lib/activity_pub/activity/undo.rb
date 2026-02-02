@@ -21,7 +21,7 @@ class ActivityPub::Activity::Undo < ActivityPub::Activity
       reblog_uri = @json['object']['object']
       Rails.logger.info "#{self.class}##{__method__} undo announce [#{@account.id}], boost of #{reblog_uri}"
       status = Status.find_by(uri: uri)
-      status.destroy! if status.present?
+      status.discard if status.present?
     else
       Rails.logger.info "#{self.class}##{__method__} Error. Unsupported type for undo: #{@json['object']['type']}"
     end

@@ -6,7 +6,7 @@ class AccountsController < ApplicationController
 
   authorize_resource
 
-  ACTIVITIES = ['Follow', 'Undo', 'Accept', 'Create', 'Update', 'Announce', 'Move', 'Like']
+  ACTIVITIES = ['Follow', 'Undo', 'Accept', 'Create', 'Update', 'Announce', 'Move', 'Like', 'Delete']
 
   def followers
     @followers = current_user.account.account_followers.page(params[:page])
@@ -86,13 +86,13 @@ class AccountsController < ApplicationController
       #process_items @json['items']
     when 'OrderedCollection', 'OrderedCollectionPage'
       #process_items @json['orderedItems']
-    when 'Follow', 'Undo', 'Accept', 'Create', 'Update', 'Announce', 'Move', 'Like'
+    when 'Follow', 'Undo', 'Accept', 'Create', 'Update', 'Announce', 'Move', 'Like', 'Delete'
       if process_header
         Rails.logger.info "inbox: current mastodon account id: #{@current_mastodon_account.id}"
         response_code = process_item(@json)
       else
         Rails.logger.info "*** inbox: Error: signature validation failed. ***"
-        response_code = 400
+        response_code = 401
       end
     else
       Rails.logger.info "no match: #{@json['type']}"
@@ -145,7 +145,7 @@ class AccountsController < ApplicationController
   def log_item(item)
     if ACTIVITIES.include? item['type']
       info = case item['type']
-      when 'Follow'
+      when 'Follow', 'Delete'
         "for #{item['object']}"
       when 'Create', 'Undo', 'Update'
         "for type #{item['object']['type']}"
@@ -161,7 +161,7 @@ class AccountsController < ApplicationController
 
     activity = ActivityPub::Activity.factory(item, @current_mastodon_account, @target_account)
     response_code = case item['type']
-    when 'Follow', 'Like', 'Move', 'Accept', 'Announce', 'Create', 'Update', 'Undo'
+    when 'Follow', 'Like', 'Move', 'Accept', 'Announce', 'Create', 'Update', 'Undo', 'Delete'
       activity&.perform
     else
       Rails.logger.info "process_item does not support item type: #{item['type']}"
