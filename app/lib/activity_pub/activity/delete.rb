@@ -2,6 +2,7 @@ class ActivityPub::Activity::Delete < ActivityPub::Activity
   def perform
     Rails.logger.info "#{self.class}##{__method__}"
 
+    # XXX this does not attempt to delete an account
     object_uri = @json['object'].is_a?(Hash) ? @json['object']['id'] : @json['object']
     status = Status.find_by(uri: object_uri)
 
