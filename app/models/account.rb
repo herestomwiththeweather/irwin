@@ -412,7 +412,6 @@ class Account < ApplicationRecord
 
   def create_status!(status_object, thread = nil)
     Rails.logger.info "#{__method__} id: #{status_object['id']}"
-    mentions = []
     media_attachments = []
     direct_recipient = nil
 
@@ -442,17 +441,14 @@ class Account < ApplicationRecord
       thread = Status.find_by(uri: in_reply_to_id)
     end
 
+    mention_tags = []
     if status_object['tag'].present?
       if status_object['tag'].is_a?(Hash)
         status_object['tag'] = [ status_object['tag'] ]
       end
       status_object['tag'].each do |tag|
         if 'Mention' == tag['type']
-          Rails.logger.info "#{__method__} found mention: looking up #{tag['name']} : #{tag['href']}"
-          account = Account.fetch_and_create_mastodon_account(tag['href'])
-          if account.present?
-            mentions << Mention.new(account: account, silent: false)
-          end
+          mention_tags << tag
         end
       end
     end
@@ -491,9 +487,8 @@ class Account < ApplicationRecord
 
     Rails.logger.info "#{self.class}##{__method__} created status #{status.id}"
 
-    mentions.each do |m|
-      m.status = status
-      m.save
+    if mention_tags.any?
+      FetchMentionsJob.perform_later(status.id, mention_tags)
     end
 
     media_attachments.each do |a|

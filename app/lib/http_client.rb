@@ -67,6 +67,8 @@ class HttpClient
     request = build_request(method)
     http = Net::HTTP.new(@url.host, @url.port)
     http.use_ssl = true
+    http.open_timeout = 5
+    http.read_timeout = 10
     response = http.request(request)
     if response.is_a?(Net::HTTPRedirection)
       Rails.logger.info "#{self.class}#{__method__} #{response.code} redirect to: #{response['location']}"
