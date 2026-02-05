@@ -1,0 +1,36 @@
+<div class="mt-4 px-5">
+  <div class="flex justify-between items-center">
+    <h1 class="font-bold text-4xl"><%= @domain %></h1>
+  </div>
+
+  <p class="mt-2 text-gray-600">
+    <%= @accounts.total_count %> accounts
+  </p>
+
+  <table class="min-w-full mt-4">
+    <thead>
+      <tr class="border-b">
+        <th class="text-left py-2">Username</th>
+        <th class="text-left py-2">Name</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @accounts.each do |account| %>
+        <tr class="border-b hover:bg-gray-50">
+          <td class="py-2">
+            <%= link_to account.preferred_username, account %>
+          </td>
+          <td class="py-2">
+            <%= account.name %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <%= paginate @accounts %>
+
+  <div class="mt-4">
+    <%= link_to "Back to Domains", admin_domains_path, class: "rounded-lg py-2 px-4 bg-gray-100 inline-block font-medium" %>
+  </div>
+</div>

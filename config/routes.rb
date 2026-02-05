@@ -3,6 +3,7 @@ Rails.application.routes.draw do
   namespace :admin do
     resources :rules
     resources :statuses, only: [:index, :show, :destroy]
+    resources :domains, only: [:index, :show], constraints: { id: /[^\/]+/ }
     resources :accounts, only: [:index]
     resources :users, except: [:new, :create]
   end
