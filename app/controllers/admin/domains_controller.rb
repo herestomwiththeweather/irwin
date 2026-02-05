@@ -11,7 +11,6 @@ class Admin::DomainsController < ApplicationController
 
   def show
     @domain = params[:id]
-    Rails.logger.info "domain: #{@domain}"
     @accounts = Account.where(domain: @domain).order(:preferred_username).page(params[:page])
   end
 end
