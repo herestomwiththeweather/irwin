@@ -90,29 +90,32 @@ class HttpClient
       JSON.parse(response.body).presence || {}
     end
 
-  rescue OpenSSL::SSL::SSLError => e
-    Rails.logger.info "#{self.class}#{__method__} SSL error from #{@url.host}: #{e.message}"
-    nil
-  rescue Errno::ENETUNREACH => e
-    Rails.logger.info "#{self.class}#{__method__} unreachable error from #{@url.host}: #{e.message}"
-    nil
-  rescue Errno::ECONNREFUSED => e
-    Rails.logger.info "#{self.class}#{__method__} connection refused error from #{@url.host}: #{e.message}"
-    nil
-  rescue Errno::ECONNRESET => e
-    Rails.logger.info "#{self.class}#{__method__} connection reset error from #{@url.host}: #{e.message}"
-    nil
-  rescue Net::ReadTimeout, Net::OpenTimeout => e
-    Rails.logger.info "#{self.class}#{__method__} timeout error from #{@url.host}: #{e.message}"
-    nil
-  rescue JSON::ParserError
-    Rails.logger.info "#{self.class}#{__method__} error from #{@url.host}: could not parse #{content_type || ''}: #{response.body}"
-    nil
-  rescue SocketError => e
-    Rails.logger.info "#{self.class}#{__method__} socket error from #{@url.host}: #{e.message}"
-    nil
-  rescue EOFError => e
-    Rails.logger.info "#{self.class}#{__method__} EOF error from #{@url.host}: #{e.message}"
+  rescue OpenSSL::SSL::SSLError,
+         Errno::ENETUNREACH,
+         Errno::ECONNREFUSED,
+         Errno::ECONNRESET,
+         Net::ReadTimeout,
+         Net::OpenTimeout,
+         JSON::ParserError,
+         SocketError,
+         EOFError => e
+
+    ActiveSupport::Notifications.instrument('http_client.network_events', name: e.class.name, message: e.message, host: @url.host, path: @url.path, backtrace: e.backtrace&.join("\n"))
+    error_type = case e
+                 when OpenSSL::SSL::SSLError then 'SSL error'
+                 when Errno::ENETUNREACH then 'unreachable error'
+                 when Errno::ECONNREFUSED then 'connection refused error'
+                 when Errno::ECONNRESET then 'connection reset error'
+                 when Net::ReadTimeout, Net::OpenTimeout then 'timeout error'
+                 when JSON::ParserError then 'JSON parse error'
+                 when SocketError then 'socket error'
+                 when EOFError then 'EOF error'
+                 end
+    detail = case e
+             when JSON::ParserError then "could not parse #{content_type || ''}: #{response.body}"
+             else e.message
+             end
+    Rails.logger.info "#{self.class}#{__method__} #{error_type} from #{@url.host}: #{detail}"
     nil
   end
 
