@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_01_31_205836) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_07_045812) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -108,6 +108,13 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_31_205836) do
     t.datetime "updated_at", null: false
     t.index ["account_id", "target_account_id"], name: "index_follows_on_account_id_and_target_account_id", unique: true
     t.index ["identifier"], name: "index_follows_on_identifier"
+  end
+
+  create_table "hosts", force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_hosts_on_name", unique: true
   end
 
   create_table "likes", force: :cascade do |t|
