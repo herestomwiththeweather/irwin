@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_07_045812) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_07_054414) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -148,6 +148,17 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_07_045812) do
     t.index ["status_id"], name: "index_mentions_on_status_id"
   end
 
+  create_table "network_events", force: :cascade do |t|
+    t.bigint "host_id", null: false
+    t.integer "event_type"
+    t.text "message"
+    t.string "path"
+    t.text "backtrace"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["host_id"], name: "index_network_events_on_host_id"
+  end
+
   create_table "notifications", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "account_id"
@@ -231,6 +242,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_07_045812) do
   add_foreign_key "likes", "statuses"
   add_foreign_key "media_attachments", "accounts"
   add_foreign_key "media_attachments", "statuses"
+  add_foreign_key "network_events", "hosts"
   add_foreign_key "notifications", "accounts"
   add_foreign_key "notifications", "statuses"
   add_foreign_key "notifications", "users"
