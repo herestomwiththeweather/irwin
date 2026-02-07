@@ -1,0 +1,21 @@
+<div class="w-full mt-4 px-5">
+  <% if notice.present? %>
+    <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-lg inline-block" id="notice"><%= notice %></p>
+  <% end %>
+
+  <% content_for :title, "Network events" %>
+
+  <div class="flex justify-between items-center">
+    <h1 class="font-bold text-4xl">Network events</h1>
+  </div>
+
+  <div id="network_events" class="min-w-full">
+    <% @network_events.each do |network_event| %>
+      <div id="<%= dom_id network_event %>">
+        <%= render network_event %>
+      </div>
+    <% end %>
+  </div>
+
+  <%= paginate @network_events %>
+</div>

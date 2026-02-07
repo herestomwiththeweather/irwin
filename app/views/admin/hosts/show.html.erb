@@ -1,0 +1,13 @@
+<div class="w-full mt-4 px-5">
+  <div class="flex justify-between items-center">
+    <h1 class="font-bold text-4xl"><%= @host.name %></h1>
+  </div>
+
+  <div id="network_events" class="min-w-full mt-4">
+    <% @host.network_events.order('created_at DESC').each do |network_event| %>
+      <div id="<%= dom_id network_event %>">
+        <%= render network_event, hide_host: true %>
+      </div>
+    <% end %>
+  </div>
+</div>

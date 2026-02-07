@@ -1,0 +1,9 @@
+<div class="flex gap-4 my-2">
+  <span><%= link_to network_event.created_at.strftime('%b %d %H:%M'), [:admin, network_event] %></span>
+  <% unless local_assigns[:hide_host] %>
+    <span><%= link_to network_event.host.name, [:admin, network_event.host] %></span>
+  <% end %>
+  <span><%= network_event.event_type %></span>
+  <span class="flex-1"><%= network_event.message %></span>
+</div>
+
