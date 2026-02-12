@@ -1,4 +1,9 @@
 class Follow < ApplicationRecord
+  include Discard::Model
+
+  self.discard_column = :deleted_at
+  default_scope -> { kept }
+
   belongs_to :account
   belongs_to :target_account, class_name: 'Account'
 

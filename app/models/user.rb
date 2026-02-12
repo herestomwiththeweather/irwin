@@ -8,6 +8,7 @@ class User < ApplicationRecord
   has_many :like_notifications
   has_many :mention_notifications
   has_many :follow_notifications
+  has_many :reject_notifications
 
   belongs_to :account, optional: true
 

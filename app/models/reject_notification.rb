@@ -1,0 +1,2 @@
+class RejectNotification < Notification
+end

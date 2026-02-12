@@ -31,6 +31,8 @@ class ActivityPub::Activity
         ActivityPub::Activity::Like
       when 'Move'
         ActivityPub::Activity::Move
+      when 'Reject'
+        ActivityPub::Activity::Reject
       when 'Undo'
         ActivityPub::Activity::Undo
       end

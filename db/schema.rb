@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_07_054414) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_11_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -106,7 +106,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_07_054414) do
     t.datetime "accepted_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "deleted_at"
     t.index ["account_id", "target_account_id"], name: "index_follows_on_account_id_and_target_account_id", unique: true
+    t.index ["deleted_at"], name: "index_follows_on_deleted_at"
     t.index ["identifier"], name: "index_follows_on_identifier"
   end
 

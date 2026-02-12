@@ -6,7 +6,7 @@ class AccountsController < ApplicationController
 
   authorize_resource
 
-  ACTIVITIES = ['Follow', 'Undo', 'Accept', 'Create', 'Update', 'Announce', 'Move', 'Like', 'Delete']
+  ACTIVITIES = ['Follow', 'Undo', 'Accept', 'Create', 'Update', 'Announce', 'Move', 'Like', 'Delete', 'Reject']
 
   def followers
     @followers = current_user.account.account_followers.page(params[:page])
@@ -86,7 +86,7 @@ class AccountsController < ApplicationController
       #process_items @json['items']
     when 'OrderedCollection', 'OrderedCollectionPage'
       #process_items @json['orderedItems']
-    when 'Follow', 'Undo', 'Accept', 'Create', 'Update', 'Announce', 'Move', 'Like', 'Delete'
+    when *ACTIVITIES
       if process_header
         Rails.logger.info "inbox: current mastodon account id: #{@current_mastodon_account.id}"
         response_code = process_item(@json)
@@ -161,7 +161,7 @@ class AccountsController < ApplicationController
 
     activity = ActivityPub::Activity.factory(item, @current_mastodon_account, @target_account)
     response_code = case item['type']
-    when 'Follow', 'Like', 'Move', 'Accept', 'Announce', 'Create', 'Update', 'Undo', 'Delete'
+    when *ACTIVITIES
       activity&.perform
     else
       Rails.logger.info "process_item does not support item type: #{item['type']}"

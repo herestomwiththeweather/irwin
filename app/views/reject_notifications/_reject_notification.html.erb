@@ -1,0 +1,3 @@
+<%= turbo_frame_tag(dom_id reject_notification) do %>
+  <div><%= image_tag reject_notification.account.icon_url_or_default, style: 'display: inline; padding: 2px; max-width: 50px; max-height: 50px;' %><b><%= link_to reject_notification.account.name, reject_notification.account, data: {'turbo-frame': '_top'} %></b> rejected your follow request <%= time_ago_in_words(reject_notification.created_at) %> ago</div>
+<% end %>
