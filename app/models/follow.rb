@@ -8,7 +8,7 @@ class Follow < ApplicationRecord
   belongs_to :target_account, class_name: 'Account'
 
   validates :account, presence: true
-  validates :target_account, presence: true, uniqueness: { scope: :account_id }
+  validates :target_account, presence: true, uniqueness: { scope: :account_id, conditions: -> { kept } }
 
   before_create :generate_identifier
 
