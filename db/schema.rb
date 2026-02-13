@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_11_000000) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_12_230621) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -88,6 +88,16 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_11_000000) do
     t.bigint "client_app_id"
     t.index ["token"], name: "index_authorization_codes_on_token", unique: true
     t.index ["user_id"], name: "index_authorization_codes_on_user_id"
+  end
+
+  create_table "blocks", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "target_account_id"
+    t.string "uri"
+    t.datetime "deleted_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_blocks_on_account_id"
   end
 
   create_table "client_apps", force: :cascade do |t|
@@ -240,6 +250,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_11_000000) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "authorization_codes", "users"
+  add_foreign_key "blocks", "accounts"
   add_foreign_key "likes", "accounts"
   add_foreign_key "likes", "statuses"
   add_foreign_key "media_attachments", "accounts"

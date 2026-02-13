@@ -7,6 +7,9 @@ class Account < ApplicationRecord
   has_many :passive_relationships, class_name: 'Follow', foreign_key: 'target_account_id', dependent: :destroy
   has_many :account_followers, -> { order('follows.id desc') }, through: :passive_relationships, source: :account
 
+  has_many :block_relationships, class_name: 'Block', foreign_key: 'account_id', dependent: :destroy
+  has_many :account_blocking, -> { order('blocks.id desc') }, through: :block_relationships, source: :target_account
+
   has_many :statuses, -> { kept }, dependent: :destroy
   has_many :likes
   has_many :mentions
@@ -393,6 +396,21 @@ class Account < ApplicationRecord
 
   def bsky?
     "bsky.brid.gy" == domain
+  end
+
+  def blocking?(other_account)
+    account_blocking.include?(other_account)
+  end
+
+  def block!(other_account)
+    block_relationships.where(target_account: other_account).first_or_create!(target_account: other_account)
+    follow = Follow.find_by(account: other_account, target_account: self)
+    follow.discard unless follow.nil?
+  end
+
+  def unblock!(other_account)
+    block = block_relationships.find_by(target_account: other_account)
+    block.discard unless block.nil?
   end
 
   def webfinger_to_s

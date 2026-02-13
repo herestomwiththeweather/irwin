@@ -1,6 +1,6 @@
 class AccountsController < ApplicationController
   before_action :set_target_account, only: [:inbox, :outbox]
-  before_action :set_account, only: [:show, :edit, :update, :follow]
+  before_action :set_account, only: [:show, :edit, :update, :follow, :block, :unblock]
   skip_before_action :verify_authenticity_token, only: [:inbox]
   before_action :login_required, except: [:inbox, :outbox, :show]
 
@@ -66,6 +66,26 @@ class AccountsController < ApplicationController
     end
   end
 
+  def block
+    Rails.logger.info "#{self.class}##{__method__} user #{current_user.id} blocking account #{@account.id}"
+    current_user.account&.block!(@account)
+    respond_to do |format|
+      format.html do
+        redirect_to account_path(@account), notice: "Blocked #{@account.webfinger_to_s}"
+      end
+    end
+  end
+
+  def unblock
+    Rails.logger.info "#{self.class}##{__method__} user #{current_user.id} unblocking account #{@account.id}"
+    current_user.account&.unblock!(@account)
+    respond_to do |format|
+      format.html do
+        redirect_to account_path(@account), notice: "Unblocked #{@account.webfinger_to_s}"
+      end
+    end
+  end
+
   def outbox
     render json: {}, status: 200
   end
@@ -89,7 +109,12 @@ class AccountsController < ApplicationController
     when *ACTIVITIES
       if process_header
         Rails.logger.info "inbox: current mastodon account id: #{@current_mastodon_account.id}"
-        response_code = process_item(@json)
+        if Block.exists?(account: @target_account, target_account: @current_mastodon_account)
+          Rails.logger.info "inbox: blocked account #{@current_mastodon_account.id} for account #{@target_account.id}"
+          response_code = 202
+        else
+          response_code = process_item(@json)
+        end
       else
         Rails.logger.info "*** inbox: Error: signature validation failed. ***"
         response_code = 401

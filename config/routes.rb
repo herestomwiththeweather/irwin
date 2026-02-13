@@ -18,6 +18,8 @@ Rails.application.routes.draw do
   resources :accounts, only: [:index, :new, :create, :show, :edit, :update] do
     member do
       post :follow
+      post :block
+      post :unblock
     end
   end
   constraints(username_with_domain: /[^\/]+/) do

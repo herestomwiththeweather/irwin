@@ -45,7 +45,9 @@
       <%= link_to 'Log in', login_path %> | <%= link_to 'Sign up', signup_path %> | <%= link_to 'Code of Conduct', rules_path %>
     <% end %>
     </div>
-    <p style="color: green"><%= notice %></p>
+    <% if notice.present? %>
+      <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-lg inline-block" id="notice"><%= notice %></p>
+    <% end %>
     <%= yield %>
     <div class="px-3 my-3">
       This website is <a href="https://github.com/herestomwiththeweather/irwin">open source</a>

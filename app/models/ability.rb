@@ -36,7 +36,7 @@ class Ability
       end
     end
     can [:create], Status
-    can [:read, :index, :inbox, :outbox, :follow, :following, :followers, :create], Account
+    can [:read, :index, :inbox, :outbox, :follow, :following, :followers, :create, :block, :unblock], Account
     can :update, Account, user: user
     can [:index], Notification
   end
