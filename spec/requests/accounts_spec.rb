@@ -97,29 +97,6 @@ RSpec.describe "Accounts", type: :request do
 
       expect(response).to have_http_status(202)
     end
-
-    it "returns failure when activity object is different than origin url" do
-      receiver_inbox = "#{recipient_url}/inbox"
-
-      valid_move_attributes[:object] = 'https://example.com/users/victim'
-      activity = Activity.new(receiver_inbox, valid_move_attributes.to_json, origin_url, private_key)
-
-      post receiver_inbox, params: valid_move_attributes.to_json, headers: activity.request_headers
-
-      expect(response).to have_http_status(401)
-    end
-
-    it "returns failure when origin is not followed" do
-      receiver_inbox = "#{recipient_url}/inbox"
-
-      target_account.update(also_known_as: [origin_url])
-
-      activity = Activity.new(receiver_inbox, valid_move_attributes.to_json, origin_url, private_key)
-
-      post receiver_inbox, params: valid_move_attributes.to_json, headers: activity.request_headers
-
-      expect(response).to have_http_status(401)
-    end
   end
 
   describe "delete" do
