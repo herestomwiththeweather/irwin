@@ -1,8 +1,17 @@
 class LikesController < ApplicationController
-  before_action :login_required
+  before_action :login_required, except: [:show]
 
   def index
     @likes = current_user.account.likes.page(params[:page])
+  end
+
+  def show
+    @like = Like.find(params[:id])
+    if @like.account.remote?
+      render plain: '', status: 404
+    else
+      redirect_to(@like.account.url, allow_other_host: true)
+    end
   end
 
   def received
@@ -35,7 +44,7 @@ class LikesController < ApplicationController
   end
 
   def destroy
-    @like = Like.find(params[:id])
+    @like = Like.find_by!(id: params[:id], account_id: current_user.account_id)
     status = @like.status
     result = @like.remove!
     @like.destroy

@@ -39,7 +39,7 @@ Rails.application.routes.draw do
     end
   end
   resources :follows, only: [:destroy]
-  resources :likes, only: [:create, :index, :destroy] do
+  resources :likes, only: [:create, :index, :show, :destroy] do
     collection do
       get :received
     end
