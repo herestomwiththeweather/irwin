@@ -6,7 +6,12 @@ Rails.application.routes.draw do
     resources :rules
     resources :statuses, only: [:index, :show, :destroy]
     resources :domains, only: [:index, :show], constraints: { id: /[^\/]+/ }
-    resources :accounts, only: [:index]
+    resources :accounts, only: [:index] do
+      collection do
+        get :different_domains
+        get :custom_domains
+      end
+    end
     resources :users, except: [:new, :create]
   end
   require 'sidekiq/web'

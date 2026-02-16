@@ -2,6 +2,10 @@
 
   <div class="flex justify-between items-center">
     <h1 class="font-bold text-4xl">Accounts</h1>
+    <div>
+    <%= link_to "Different Domains", different_domains_admin_accounts_path %> | 
+    <%= link_to "Custom Domains", custom_domains_admin_accounts_path %>
+    </div>
   </div>
   <%= search_form_for @query, url: admin_accounts_path do |f| %>
     <div class="inline">

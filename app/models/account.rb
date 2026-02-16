@@ -271,6 +271,10 @@ class Account < ApplicationRecord
     find_by(identifier: actor['id'])
   end
 
+  def self.with_different_domains
+    where("domain != substring(identifier from '://([^/]+)')")
+  end
+
   def check_configuration
     # just for creating this account for local users
     return if !local?
@@ -396,6 +400,14 @@ class Account < ApplicationRecord
 
   def bsky?
     "bsky.brid.gy" == domain
+  end
+
+  def different_domain?
+    domain != URI.parse(identifier).hostname
+  end
+
+  def custom_domain?
+    PublicSuffix.domain(domain) != PublicSuffix.domain(URI.parse(identifier).hostname)
   end
 
   def blocking?(other_account)

@@ -6,4 +6,12 @@ class Admin::AccountsController < ApplicationController
     @query = Account.ransack(params[:query])
     @admin_accounts = @query.result.page(params[:page])
   end
+
+  def different_domains
+    @admin_accounts = Account.with_different_domains.order('created_at DESC').page(params[:page])
+  end
+
+  def custom_domains
+    @admin_accounts = Account.with_different_domains.select { |a| a.custom_domain? }
+  end
 end
