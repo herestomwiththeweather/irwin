@@ -9,7 +9,12 @@ xml.rss version: "2.0" do
       xml.item do
         xml.title status.text.truncate(100)
 
-        description_html = ActionController::Base.helpers.auto_link(status.text, html: { target: '_blank', rel: 'nofollow noopener noreferrer' }, link: :urls)
+        description_html = ""
+        if status.thread.present?
+          description_html += ActionController::Base.helpers.link_to("replying to", status.thread.uri).html_safe
+          description_html += " #{status.thread.account.webfinger_to_s}<br/><br/>".html_safe
+        end
+        description_html += ActionController::Base.helpers.auto_link(status.text, html: { target: '_blank', rel: 'nofollow noopener noreferrer' }, link: :urls)
         status.media_attachments.select(&:image?).each do |media|
           url = media.remote_url.presence || (media.file.attached? ? media.file.url : nil)
           if url
