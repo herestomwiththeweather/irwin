@@ -30,6 +30,20 @@ RSpec.describe Account, type: :model do
     end
   end
 
+  describe "when finding an account by webfinger" do
+    let(:bob_webfinger_address) { 'BOB@Example.com' }
+
+    before do
+      @account = FactoryBot.create(:account, preferred_username: 'bob', domain: 'example.com')
+    end
+
+    it "should do a case-insensitive lookup for username and domain" do
+      webfinger_client = WebfingerClient.new(bob_webfinger_address)
+      matching_account = Account.find_by_webfinger(webfinger_client)
+      expect(matching_account).to_not be_nil
+    end
+  end
+
   describe "when creating a new account via webfinger" do
     let(:bob_webfinger_info) { {"subject" => "acct:bob@example.com", "links"=>[{"rel"=>"self", "type"=>"application/activity+json", "href"=>"https://activitypub.test/users/bob" }]} }
     let(:empty_webfinger_info) { {"subject" => "acct:empty@example.com", "links"=>[{"rel"=>"self", "type"=>"application/activity+json", "href"=>"https://activitypub.test/users/empty" }]} }

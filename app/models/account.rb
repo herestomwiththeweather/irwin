@@ -67,25 +67,19 @@ class Account < ApplicationRecord
       return nil
     end
 
+    if actor['preferredUsername'].blank?
+      Rails.logger.info "#{__method__} Error: preferredUsername missing for actor url: #{actor_url}"
+      return nil
+    end
+
     # make a webfinger request to the activitypub server in case custom domain
     ap_server_domain = URI.parse(actor_url).hostname
+    webfinger_address = "#{actor['preferredUsername']}@#{ap_server_domain}"
 
-    if actor['preferredUsername'].present?
-      webfinger_address = "#{actor['preferredUsername']}@#{ap_server_domain}"
-      begin
-        result = WebFinger.discover! "acct:#{webfinger_address}"
-      rescue WebFinger::NotFound => e
-        Rails.logger.info "#{__method__} WebFinger unexpectedly not found for #{webfinger_address}: #{e.message}"
-        return nil
-      rescue WebFinger::BadRequest => e
-        Rails.logger.info "#{__method__} Error: Bad request for webfinger: #{webfinger_address}: #{e.message}"
-        return nil
-      rescue NoMethodError => e
-        Rails.logger.info "#{__method__} Error: Bad webfinger response: #{webfinger_address}: #{e.message}"
-        return nil
-      end
-    else
-      Rails.logger.info "#{__method__} Error: preferredUsername missing for actor url: #{actor_url}"
+    discovery_client = WebfingerClient.new(webfinger_address)
+    result = discovery_client.discover
+    if result.nil?
+      Rails.logger.info "#{__method__} Error. WebFinger request failed for #{webfinger_address}"
       return nil
     end
 
@@ -99,19 +93,11 @@ class Account < ApplicationRecord
 
       # check that custom domain agrees with activitypub server
       # but only log if there is a discrepancy
-      begin
-        result2 = WebFinger.discover! webfinger_address_from_ap_server
-      rescue WebFinger::NotFound => e
-        Rails.logger.info "#{__method__} WebFinger not found for #{webfinger_address_from_ap_server}: #{e.message}"
-      rescue WebFinger::BadRequest => e
-        # see https://github.com/swicg/activitypub-webfinger/issues/28
-        Rails.logger.info "#{__method__} WebFinger verification failed. Server may only have host-meta: #{webfinger_address_from_ap_server}: #{e.message}"
-      rescue WebFinger::Exception => e
-        # e.g. "Failed to open TCP connection"
-        Rails.logger.info "#{__method__} WebFinger exception for #{webfinger_address_from_ap_server}: #{e.message}"
-      else
+      discovery_client2 = WebfingerClient.new(webfinger_address_from_ap_server)
+      result2 = discovery_client2.discover
+      if result2.present?
         authoritative_webfinger_subject = result2['subject']
-        actor_url2 = result['links'].select {|link| link['rel'] == 'self'}.first['href']
+        actor_url2 = discovery_client2.actor_url
 
         if 0 != authoritative_webfinger_subject.casecmp(webfinger_address_from_ap_server)
           Rails.logger.info "#{__method__} Error: subject #{authoritative_webfinger_subject} did not match #{webfinger_address_from_ap_server}"
@@ -121,29 +107,29 @@ class Account < ApplicationRecord
           Rails.logger.info "#{__method__} Verified custom domain for #{authoritative_webfinger_subject}"
           actor['domain'] = domain
         end
-      ensure
-        Rails.logger.info "#{__method__} finished webfinger verification"
       end
     end
 
     Account.create_mastodon_account(actor)
   end
 
+  def self.find_by_webfinger(webfinger_client)
+    Account.find_by("LOWER(preferred_username) = ? AND LOWER(domain) = ?", webfinger_client.username.downcase, webfinger_client.domain.downcase)
+  end
+
   def self.fetch_and_create_mastodon_account_by_address(address)
-    address&.strip!
-    preferred_username, domain = address.split('@')
-    account = Account.find_by(preferred_username: preferred_username, domain: domain)
+    forward_discovery_client = WebfingerClient.new(address)
+    account = find_by_webfinger(forward_discovery_client)
     return account if account.present?
 
-    full_address = "acct:#{address}"
-    result = WebFinger.discover! full_address
+    result = forward_discovery_client.discover
     webfinger_subject = result['subject']
-    if 0 != webfinger_subject.casecmp(full_address)
+    if 0 != webfinger_subject.casecmp(forward_discovery_client.acct_uri)
       # webfinger spec allows subject to be different
-      Rails.logger.info "#{__method__} subject #{webfinger_subject} did not match forward #{full_address}"
+      Rails.logger.info "#{__method__} subject #{webfinger_subject} did not match forward #{forward_discovery_client.acct_uri}"
     end
 
-    actor_url = result['links'].select {|link| link['rel'] == 'self'}.first['href']
+    actor_url = forward_discovery_client.actor_url
 
     actor = strict_fetch_actor(actor_url)
     if nil == actor
@@ -152,24 +138,21 @@ class Account < ApplicationRecord
     end
     ap_server_domain = URI.parse(actor['id']).hostname
 
-    # domain is returned by webfinger server
-    if 0 != domain.casecmp(ap_server_domain)
-      Rails.logger.info "#{__method__} verifying webfinger as #{domain} does not match #{ap_server_domain}"
-      result2 = WebFinger.discover! "acct:#{actor['preferredUsername']}@#{ap_server_domain}"
+    if 0 != forward_discovery_client.domain.casecmp(ap_server_domain)
+      Rails.logger.info "#{__method__} verifying webfinger as #{forward_discovery_client.domain} does not match #{ap_server_domain}"
+      reverse_discovery_client = WebfingerClient.new("#{actor['preferredUsername']}@#{ap_server_domain}")
+      result2 = reverse_discovery_client.discover 
 
       final_webfinger_subject = result2['subject']
       if 0 != final_webfinger_subject.casecmp(webfinger_subject)
         Rails.logger.info "#{__method__} Error: subject #{final_webfinger_subject} did not match reverse #{webfinger_subject}"
       else
         # normally domain is not present unless domain is verified by webfinger to be different than activitypub server
-        actor['domain'] = domain
+        actor['domain'] = forward_discovery_client.domain
       end
     end
 
     Account.create_mastodon_account(actor)
-  rescue WebFinger::NotFound => e
-    Rails.logger.info "#{self.class}##{__method__} WebFinger not found for #{address}: #{e.message}"
-    nil
   end
 
   def self.fetch_and_create_or_update_mastodon_account(actor_url)
@@ -279,8 +262,15 @@ class Account < ApplicationRecord
     # just for creating this account for local users
     return if !local?
 
-    result = WebFinger.discover! "acct:#{webfinger_to_s}"
-    webfinger_actor_url = result['links'].select {|link| link['rel'] == 'self'}.first['href']
+    webfinger_client = WebfingerClient.new(webfinger_to_s)
+    result = webfinger_client.discover
+    if result.nil?
+      Rails.logger.info "#{self.class}##{__method__} Error. webfinger request to #{webfinger_to_s} failed."
+      errors.add :base, "Webfinger: not found"
+      return
+    end
+
+    webfinger_actor_url = webfinger_client.actor_url
     if webfinger_actor_url != user.actor_url
       Rails.logger.info "#{self.class}##{__method__} Error unexpected webfinger actor_url: #{webfinger_actor_url}"
       errors.add :base, "Webfinger: Expected #{user.actor_url} but found #{webfinger_actor_url}"
@@ -292,9 +282,6 @@ class Account < ApplicationRecord
     self.outbox = "#{user.actor_url}/outbox"
     self.followers = "#{user.actor_url}/followers"
     self.following = "#{user.actor_url}/following"
-  rescue WebFinger::NotFound => e
-    Rails.logger.info "#{self.class}##{__method__} WebFinger::NotFound exception: #{e.message}"
-    errors.add :base, "Webfinger: not found"
   end
 
   def likes_received
