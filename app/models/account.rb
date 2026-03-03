@@ -433,7 +433,10 @@ class Account < ApplicationRecord
     direct_recipient = nil
 
     if status_object['to'].present?
-      if status_object['to'].include?('https://www.w3.org/ns/activitystreams#Public')
+      if status_object['to'].is_a?(String)
+        status_object['to'] = [ status_object['to'] ]
+      end
+      if status_object['to'].include?('https://www.w3.org/ns/activitystreams#Public') || status_object['to'].include?('as:Public')
         Rails.logger.info "#{__method__} received public post"
       else
         status_object['to'].each do |recipient|
@@ -444,8 +447,13 @@ class Account < ApplicationRecord
 
         if direct_recipient.nil?
           Rails.logger.info "#{__method__} direct message recipient not found"
-          status_object['cc'].each do |cc_recipient|
-            Rails.logger.info "#{__method__} cc: recipient: #{cc_recipient}"
+          if status_object['cc'].present?
+            if status_object['cc'].is_a?(String)
+              status_object['cc'] = [ status_object['cc'] ]
+            end
+            status_object['cc'].each do |cc_recipient|
+              Rails.logger.info "#{__method__} cc: recipient: #{cc_recipient}"
+            end
           end
         end
       end
