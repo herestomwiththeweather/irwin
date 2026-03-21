@@ -115,6 +115,9 @@ class AccountsController < ApplicationController
         else
           response_code = process_item(@json)
         end
+      elsif @json['type'] == 'Delete' && @current_mastodon_account.nil?
+        Rails.logger.info "inbox: Delete from unknown account"
+        response_code = 202
       else
         Rails.logger.info "*** inbox: Error: signature validation failed. ***"
         response_code = 401
@@ -160,6 +163,14 @@ class AccountsController < ApplicationController
 
     comparison_string = signed_components.join("\n")
 
+    return true if @current_mastodon_account.verify(signature, comparison_string)
+
+    Rails.logger.info "#{__method__} signature verification failed for account: #{@current_mastodon_account.id}"
+
+    refreshed_account = Account.fetch_and_update_by_key(key_id)
+    return false if refreshed_account.nil?
+
+    @current_mastodon_account = refreshed_account
     @current_mastodon_account.verify(signature, comparison_string)
   end
 

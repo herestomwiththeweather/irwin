@@ -40,14 +40,23 @@ class Account < ApplicationRecord
 
   CONTEXT = 'https://w3id.org/identity/v1'
 
-  def self.fetch_by_key(key_url)
-    account = nil
-    Rails.logger.info "Account#fetch_by_key request url: #{key_url}"
+  def self.actor_url_without_fragment(key_url)
     uri = URI.parse(key_url)
-    mastodon_identifier = uri.fragment.nil? ? key_url : key_url.sub(uri.fragment,'').chomp('#')
-    account = Account.fetch_and_create_mastodon_account(mastodon_identifier)
+    uri.fragment.nil? ? key_url : key_url.sub(uri.fragment, '').chomp('#')
+  end
 
-    account
+  def self.fetch_and_update_by_key(key_url)
+    # fetch the actor regardless if the account exists so it can be refreshed
+    Rails.logger.info "#{self.class}##{__method__} request url: #{key_url}"
+    actor_url = actor_url_without_fragment(key_url)
+    Account.fetch_and_create_or_update_mastodon_account(actor_url)
+  end
+
+  def self.fetch_by_key(key_url)
+    # if the account exists, just return the account without fetching the actor
+    Rails.logger.info "#{self.class}##{__method__} request url: #{key_url}"
+    actor_url = actor_url_without_fragment(key_url)
+    Account.fetch_and_create_mastodon_account(actor_url)
   end
 
   def self.fetch_and_create_mastodon_account(actor_url)
