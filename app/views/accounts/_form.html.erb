@@ -28,7 +28,7 @@
 
   <div class='py-5'>
     <%= form.label :domain %><br />
-    <%= form.text_field :domain, value: account.url.presence || current_user.domain %>
+    <%= form.text_field :domain, value: account.domain.presence || current_user.domain %>
   </div>
 
   <div class='py-5'>
