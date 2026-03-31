@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_12_230621) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_29_201648) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -44,6 +44,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_12_230621) do
     t.bigint "moved_to_account_id"
     t.string "domain"
     t.string "image", default: ""
+    t.boolean "indexable", default: false, null: false
     t.index ["preferred_username", "domain"], name: "index_accounts_on_preferred_username_and_domain", unique: true
   end
 

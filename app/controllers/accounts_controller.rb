@@ -49,6 +49,7 @@ class AccountsController < ApplicationController
   def update
     respond_to do |format|
       if @account.update(account_params)
+        NotifyUpdateJob.perform_later(@account.id) if @account.previous_changes.any?
         format.html { redirect_to root_url, notice: "Account was successfully updated." }
       else
         format.html { render :edit, status: :unprocessable_entity }
@@ -208,7 +209,7 @@ class AccountsController < ApplicationController
   private
 
   def account_params
-    params.require(:account).permit(:name, :preferred_username, :domain, :summary, :url, :icon, :image)
+    params.require(:account).permit(:name, :preferred_username, :domain, :summary, :url, :icon, :image, :indexable)
   end
 
   def set_target_account

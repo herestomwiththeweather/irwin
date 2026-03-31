@@ -346,6 +346,7 @@ class Account < ApplicationRecord
     self.identifier = actor['id']
     self.domain = actor['domain'].present? ? actor['domain'] : URI.parse(identifier).hostname
     self.preferred_username = actor['preferredUsername']
+    self.indexable = actor['indexable'] if actor['indexable'].present?
     self.name = actor['name']
     self.also_known_as = actor['alsoKnownAs']
 
@@ -589,6 +590,48 @@ class Account < ApplicationRecord
     Rails.logger.info "#{self.class}##{__method__} id: #{id}"
     update_mastodon_account(item['object'])
     self.save!
+  end
+
+  def notify_update
+    return false unless local?
+
+    person = {}
+    person['id'] = user.actor_url
+    person['type'] = 'Person'
+    person['preferredUsername'] = preferred_username
+    person['indexable'] = indexable
+    person['inbox'] = "#{user.actor_url}/inbox"
+    person['outbox'] = "#{user.actor_url}/outbox"
+    person['following'] = "#{user.actor_url}/following"
+    person['followers'] = user.followers_url
+    person['name'] = name
+    person['summary'] = summary
+    person['url'] = url
+    person['alsoKnownAs'] = also_known_as
+    person['publicKey'] = {
+      'id' => user.main_key_url,
+      'owner' => user.actor_url,
+      'publicKeyPem' => user.public_key
+    }
+    person['icon']  = { 'type' => 'Image', 'mediaType' => 'image/jpeg', 'url' => icon }  if icon.present?
+    person['image'] = { 'type' => 'Image', 'mediaType' => 'image/jpeg', 'url' => image } if image.present?
+
+    activity = {}
+    activity['type'] = 'Update'
+    activity['actor'] = user.actor_url
+    activity['id'] = "#{user.actor_url}#updates/#{Time.now.utc.to_i}"
+    activity['to'] = [
+      "https://www.w3.org/ns/activitystreams#Public"
+    ]
+    activity['cc'] = [user.followers_url]
+    activity['object'] = person
+
+    account_followers.each do |follower|
+      Rails.logger.info "#{__method__} sending to [#{follower.id}] #{follower.webfinger_to_s}"
+      user.post(follower, activity)
+    end
+
+    true
   end
 
   def matches_activity_actor?(actor_identifier)
