@@ -13,6 +13,6 @@ class FollowsController < ApplicationController
   private
 
   def set_follow
-    @follow = Follow.find(params[:id])
+    @follow = Follow.find_by!(account: current_user.account, id: params[:id])
   end
 end
