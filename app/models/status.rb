@@ -426,27 +426,29 @@ class Status < ApplicationRecord
   end
 
   def doc
-    # p tag to prevent more than 1 root element
-    @doc ||= REXML::Document.new("<p>#{text}</p>")
+    @doc ||= Nokogiri::HTML.fragment(text)
   end
 
   def mention_anchors_found
-    doc.elements.to_a('//a[contains(@class, "mention")]')
+    doc.css('a.mention')
   end
 
   def text_with_modified_mentions
     mention_anchors_found.each do |mention|
-      Rails.logger.info "#{__method__} status #{id}: #{mention.attributes['href']}"
-      mention_to_replace = mentions.find_by(account: Account.find_by(url: mention.attributes['href']))
+      Rails.logger.info "#{self.class}##{__method__} status #{id}: #{mention['href']}"
+      # fallback to identifier for bsky accounts since href in mention is DID format rather than profile handle format stored in url
+      mention_to_replace = mentions.find_by(account: Account.find_by("url = ? OR identifier = ?", mention['href'], mention['href']))
       if mention_to_replace
-        mention.attributes['href'] = Rails.application.routes.url_helpers.account_url(mention_to_replace.account, host: ENV['SERVER_NAME'], protocol: 'https')
-        mention.attributes['data-turbo-frame'] = '_top'
+        mention['href'] = Rails.application.routes.url_helpers.account_url(mention_to_replace.account, host: ENV['SERVER_NAME'], protocol: 'https')
+        mention['data-turbo-frame'] = '_top'
+      else
+        Rails.logger.info "#{self.class}##{__method__} Error: status #{id}: account not found for #{mention['href']}"
       end
     end
 
-    doc.to_s
+    doc.to_html
   rescue => e
-    Rails.logger.info "#{self.class}##{__method__} rexml exception: #{e.message}"
+    Rails.logger.info "#{self.class}##{__method__} nokogiri exception: #{e.message}"
     text
   end
 

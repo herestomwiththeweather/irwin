@@ -8,7 +8,7 @@ RSpec.describe Status, type: :model do
   let(:alice_account) { create :account, domain: 'example.com', preferred_username: 'alice', identifier: alice_url, name: "Alice" }
   let(:bob_account) { create :account, domain: 'example.com', preferred_username: 'bob', identifier: bob_url, name: "Bob" }
   let(:content) { 'having coffee with alice@example.com and @bob@example.com at Cafe Caffeine' }
-  let(:remote_content) { "<p>mention test: <span class=\"h-card\" translate=\"no\"><a href=\"https://example.com/@alice\" class=\"u-url mention\">@<span>alice@example.com</span></a></span> hello</p>" }
+  let(:remote_content) { "<p>mention test: <span class=\"h-card\" translate=\"no\"><a href=\"https://example.com/@alice\" class=\"u-url mention\">@<span>alice@example.com</span></a></span><br> hello</p>" }
 
   describe "When creating a status" do
     before do
