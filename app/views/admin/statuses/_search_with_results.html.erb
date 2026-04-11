@@ -1,0 +1,23 @@
+<%= turbo_frame_tag "admin_search_with_results" do %>
+  <%= form_with url: admin_statuses_path, method: :get, scope: :query do |f| %>
+    <div class="inline">
+      <%= f.search_field :text, value: local_assigns[:query_params]&.dig("text") %>
+    </div>
+    <div class="inline">
+      <%= f.select :language, Status::LANGUAGES, { include_blank: true, selected: local_assigns[:query_params]&.dig(:language) } %>
+    </div>
+    <div class="inline">
+      <%= f.submit class: "rounded-lg py-3 px-5 bg-blue-600 text-white inline-block font-medium cursor-pointer" %>
+    </div>
+  <% end %>
+  <% if local_assigns[:statuses] %>
+    <% if statuses.empty? %>
+      No results
+    <% else %>
+      <div id="statuses" class="min-w-full">
+        <%= render partial: 'admin/statuses/status', collection: statuses %>
+      </div>
+      <%= paginate statuses, params: { controller: 'admin/statuses', action: 'index', query: local_assigns[:query_params] } %>
+    <% end %>
+  <% end %>
+<% end %>

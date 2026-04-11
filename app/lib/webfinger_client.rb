@@ -1,6 +1,6 @@
 class WebfingerClient
   def initialize(address)
-    @address = address&.strip
+    @address = address&.strip&.delete_prefix('@')
     @username, @domain = @address.split('@')
     @json_response = nil
   end

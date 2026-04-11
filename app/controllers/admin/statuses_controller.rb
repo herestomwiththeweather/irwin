@@ -2,13 +2,12 @@ class Admin::StatusesController < ApplicationController
   before_action :admin_login_required
   before_action :set_status, only: %i[ destroy ]
 
-  # GET /admin/statuses or /admin/statuses.json
   def index
-    @query = Status.ransack_search(params[:query])
-    @statuses = @query.result.page(params[:page])
+    if params[:query].present? || params[:page].present?
+      SearchJob.perform_later(current_user.id, params[:query]&.permit(:text, :language), params[:page])
+    end
   end
 
-  # DELETE /admin/statuses/1 or /admin/statuses/1.json
   def destroy
     @status.discard
 
@@ -18,7 +17,6 @@ class Admin::StatusesController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
     def set_status
       @status = Status.find(params[:id])
     end

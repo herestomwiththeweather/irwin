@@ -2,16 +2,6 @@
   <div class="flex justify-between items-center">
     <h1 class="font-bold text-4xl">Statuses</h1>
   </div>
-  <%= search_form_for @query, url: admin_statuses_path do |f| %>
-    <div class="inline">
-      <%= f.search_field :text_i_cont %>
-    </div>
-    <div class="inline">
-      <%= f.submit class: "rounded-lg py-3 px-5 bg-blue-600 text-white inline-block font-medium cursor-pointer" %>
-    </div>
-  <% end %>
-  <div id="statuses" class="min-w-full">
-    <%= render @statuses %>
-  </div
-  <%= paginate(@statuses) %>
+  <%= turbo_stream_from ["admin_statuses_channel", current_user] %>
+  <%= render partial: 'search_with_results' %>
 </div>

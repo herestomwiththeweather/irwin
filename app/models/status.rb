@@ -33,9 +33,23 @@ class Status < ApplicationRecord
     []
   end
 
-  def self.ransack_search(query_params)
-    permitted_params = query_params.permit(:text_i_cont, :language_eq) if query_params.present?
-    ransack({direct_recipient_id_null: true}.merge(permitted_params || {}))
+  def self.search(query_params)
+    scope = where(direct_recipient_id: nil)
+
+    text = query_params[:text]
+    if (matched_data = text.match(/\A"(.*)"\z/))
+      scope = scope.where("text ILIKE ?", "%#{matched_data[1]}%")
+    else
+      text.split.each do |word|
+        scope = scope.where("text ILIKE ?", "%#{word}%")
+      end
+    end
+
+    if (language = query_params[:language]).present?
+      scope = scope.where(language: language)
+    end
+
+    scope
   end
 
   # languages supported by DeepL gem
