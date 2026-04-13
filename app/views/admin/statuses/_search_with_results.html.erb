@@ -1,12 +1,18 @@
 <%= turbo_frame_tag "admin_search_with_results" do %>
-  <%= form_with url: admin_statuses_path, method: :get, scope: :query do |f| %>
-    <div class="inline">
+  <%= form_with url: admin_statuses_path, method: :get, scope: :query, class: "max-w-lg" do |f| %>
+    <div class="grid mb-2" style="grid-template-columns: 6rem 1fr;">
+      <%= f.label :text, class: "self-center" %>
       <%= f.search_field :text, value: local_assigns[:query_params]&.dig("text") %>
     </div>
-    <div class="inline">
+    <div class="grid mb-2" style="grid-template-columns: 6rem 1fr;">
+      <%= f.label :language, class: "self-center" %>
       <%= f.select :language, Status::LANGUAGES, { include_blank: true, selected: local_assigns[:query_params]&.dig(:language) } %>
     </div>
-    <div class="inline">
+    <div class="grid mb-2" style="grid-template-columns: 6rem 1fr;">
+      <%= f.label :url, class: "self-center" %>
+      <%= f.search_field :url, value: local_assigns[:query_params]&.dig("url") %>
+    </div>
+    <div class="block">
       <%= f.submit class: "rounded-lg py-3 px-5 bg-blue-600 text-white inline-block font-medium cursor-pointer" %>
     </div>
   <% end %>

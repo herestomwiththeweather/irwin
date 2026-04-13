@@ -4,7 +4,7 @@ class Admin::StatusesController < ApplicationController
 
   def index
     if params[:query].present? || params[:page].present?
-      SearchJob.perform_later(current_user.id, params[:query]&.permit(:text, :language), params[:page])
+      SearchJob.perform_later(current_user.id, params[:query]&.permit(:text, :language, :url), params[:page])
     end
   end
 

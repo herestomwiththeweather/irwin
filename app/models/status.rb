@@ -36,6 +36,12 @@ class Status < ApplicationRecord
   def self.search(query_params)
     scope = where(direct_recipient_id: nil)
 
+    if (url = query_params[:url]).present?
+      # if not present, try to fetch
+      status = from_object_uri(url)
+      return scope.where(url: url)
+    end
+
     text = query_params[:text]
     if (matched_data = text.match(/\A"(.*)"\z/))
       scope = scope.where("text ILIKE ?", "%#{matched_data[1]}%")
