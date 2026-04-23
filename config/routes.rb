@@ -93,4 +93,7 @@ Rails.application.routes.draw do
   get '/login' => 'sessions#new', as: :login
   get '/logout' => 'sessions#destroy', as: :logout
   root 'statuses#index'
+
+  get '/authorize_interaction' => 'intents#follow'
+  get '/intents/like' => 'intents#like'
 end
