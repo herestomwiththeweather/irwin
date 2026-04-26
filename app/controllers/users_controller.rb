@@ -22,6 +22,10 @@ class UsersController < ApplicationController
   end
 
   def actor
+    if request.headers['Accept']&.match?(/application\/activity\+json/)
+      render json: @target_user, serializer: UserSerializer, content_type: 'application/activity+json'
+      return
+    end
     respond_to do |format|
       format.html do
         if 'Bridgy Fed (https://fed.brid.gy/)' == request.user_agent

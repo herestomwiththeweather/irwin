@@ -89,6 +89,14 @@ RSpec.describe "Users", type: :request do
       json = JSON.parse(response.body)
       expect(json['outbox']).to eql("#{actor_url}/outbox")
     end
+
+    it 'returns json when accept header includes activity+json and text/html' do
+      headers = {'Accept': 'application/ld+json; profile="https://www.w3.org/ns/activitystreams", application/activity+json, text/html;q=0.1'}
+      get actor_url, headers: headers
+
+      expect(response).to have_http_status(200)
+      expect(response.content_type).to include('application/activity+json')
+    end
   end
 
   describe "GET /actor/alice@example.com/outbox" do
