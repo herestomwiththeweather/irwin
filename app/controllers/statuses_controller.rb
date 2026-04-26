@@ -11,9 +11,11 @@ class StatusesController < ApplicationController
   end
 
   def translate
-    @translation = DeepL.translate @status.text, @status.language.upcase, current_user.language.upcase
-    Rails.logger.info "#{self.class}##{__method__} #{@translation.text}"
-    @status.text = @translation.text
+    if @status.language
+      @translation = DeepL.translate @status.text, @status.language.upcase, current_user.language.upcase
+      Rails.logger.info "#{self.class}##{__method__} #{@translation.text}"
+      @status.text = @translation.text
+    end
     render partial: @status, locals: { child_view: false }
   end
 
