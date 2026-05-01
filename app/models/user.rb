@@ -63,6 +63,14 @@ class User < ApplicationRecord
     Preference.first.user || User.first
   end
 
+  def self.active_month
+    User.where('last_logged_in_at > ?', 30.days.ago).length
+  end
+
+  def self.active_halfyear
+    User.where('last_logged_in_at > ?', 180.days.ago).length
+  end
+
   def unique_preferred_username
     if account.present?
       candidate_username = account.preferred_username

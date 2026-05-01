@@ -9,6 +9,7 @@ class SessionsController < ApplicationController
       if user.account.blank?
         session[:return_to] = authorizations_url
       end
+      user.update_column(:last_logged_in_at, Time.current)
       redirect_back_or_default root_url
     else
       redirect_to login_url, notice: "Login failed."

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_03_29_201648) do
+ActiveRecord::Schema[7.1].define(version: 2026_05_01_225335) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -233,7 +233,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_29_201648) do
     t.bigint "account_id"
     t.string "language", default: "en"
     t.boolean "guest", default: true
+    t.datetime "last_logged_in_at"
     t.index ["account_id"], name: "index_users_on_account_id"
+    t.index ["last_logged_in_at"], name: "index_users_on_last_logged_in_at"
   end
 
   create_table "versions", force: :cascade do |t|

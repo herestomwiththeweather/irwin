@@ -7,7 +7,8 @@ class WellKnown::NodeinfoController < ApplicationController
     render json: { version: '2.0',
                    software: software,
                    usage: { users: users },
-                   protocols: protocols }, status:200, camelize_keys: true
+                   openRegistrations: global_prefs.enable_registrations,
+                   protocols: protocols }, status: 200
   end
 
   private
@@ -17,7 +18,7 @@ class WellKnown::NodeinfoController < ApplicationController
   end
 
   def users
-    { total: User.count }
+    { total: User.count, activeMonth: User.active_month, activeHalfyear: User.active_halfyear }
   end
 
   def protocols
