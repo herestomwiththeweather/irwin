@@ -93,6 +93,7 @@ class UsersController < ApplicationController
       username, domain = identifier.split('@')
       # domain will be this server
       @target_user = User.by_username(username)
+      raise ActiveRecord::RecordNotFound if @target_user.nil?
       render json: @target_user, serializer: WebfingerSerializer, content_type: 'application/jrd+json'
     else
       Rails.logger.info "#{__method__} error raw resource: #{raw_resource}"

@@ -71,12 +71,12 @@ class HttpClient
     http.read_timeout = 10
     response = http.request(request)
     if response.is_a?(Net::HTTPRedirection)
-      Rails.logger.info "#{self.class}#{__method__} #{response.code} redirect to: #{response['location']}"
+      Rails.logger.info "#{self.class}##{__method__} #{response.code} redirect to: #{response['location']}"
       redirect_url = URI(response['location'])
       @url = redirect_url.scheme.present? ? redirect_url : @url.merge(redirect_url)
       return request(method, redirects_left - 1)
     elsif !response.is_a?(Net::HTTPSuccess)
-      Rails.logger.info "#{self.class}#{__method__} error from #{@url.host}: #{response.code}: #{response.message}"
+      Rails.logger.info "#{self.class}##{__method__} error from #{@url.host}: #{response.code}: #{response.message}"
     end
 
     return {} if response.body.blank?
@@ -84,7 +84,7 @@ class HttpClient
     content_type = response['Content-Type']
 
     if content_type.present? && content_type.include?('text/html')
-      Rails.logger.info "#{self.class}#{__method__} error from #{@url.host}: received html"
+      Rails.logger.info "#{self.class}##{__method__} error from #{@url.host}: received html"
       { html_response: response.body }
     else
       JSON.parse(response.body).presence || {}

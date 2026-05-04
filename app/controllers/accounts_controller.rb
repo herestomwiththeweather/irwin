@@ -108,7 +108,7 @@ class AccountsController < ApplicationController
     when 'OrderedCollection', 'OrderedCollectionPage'
       #process_items @json['orderedItems']
     when *ACTIVITIES
-      if process_header
+      if !ignore_nonexistent_account? && process_header
         Rails.logger.info "inbox: current mastodon account id: #{@current_mastodon_account.id}"
         if Block.exists?(account: @target_account, target_account: @current_mastodon_account)
           Rails.logger.info "inbox: blocked account #{@current_mastodon_account.id} for account #{@target_account.id}"
@@ -134,6 +134,21 @@ class AccountsController < ApplicationController
 
   def capitalized(text)
     text.gsub(/(?:^|-)([a-z])/) { |m| m.upcase }
+  end
+
+  def ignore_nonexistent_account?
+    # ignore deletion of account that does not exist locally
+    return false if 'Delete' != @json['type']
+
+    # return false if this is a deletion of a status
+    object_id = @json['object'].is_a?(Hash) ? @json['object']['id'] : @json['object']
+    return false if @json['actor'] != object_id
+
+    # return false if account exists locally
+    return false if Account.find_by(identifier: @json['actor'])
+
+    Rails.logger.info "#{self.class}##{__method__} ignoring delete for actor: #{@json['actor']}"
+    true
   end
 
   def process_header
