@@ -2,7 +2,7 @@ class FetchThreadJobError < StandardError; end
 
 class FetchThreadJob < ApplicationJob
   queue_as :default
-  sidekiq_options retry: 2
+  sidekiq_options retry: 0
 
   def perform(status_id)
     status = Status.find(status_id)
