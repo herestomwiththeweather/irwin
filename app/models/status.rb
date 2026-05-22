@@ -436,7 +436,7 @@ class Status < ApplicationRecord
   end
 
   def mention_anchors_found
-    doc.css('a.mention')
+    doc.css('a.mention:not(.hashtag)')
   end
 
   def text_with_modified_mentions
