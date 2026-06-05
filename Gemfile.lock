@@ -317,7 +317,8 @@ GEM
       rdf (~> 3.3)
     rdoc (6.7.0)
       psych (>= 4.0.0)
-    redis (4.8.1)
+    redis (5.4.1)
+      redis-client (>= 0.22.0)
     redis-client (0.22.2)
       connection_pool
     reline (0.5.9)
@@ -416,7 +417,7 @@ DEPENDENCIES
   rails_autolink
   ransack
   rdf-normalize (~> 0.5)
-  redis (~> 4.0)
+  redis (~> 5.0)
   rexml
   rspec-rails
   sidekiq (= 7.2.4)
