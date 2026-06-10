@@ -594,7 +594,7 @@ class Account < ApplicationRecord
   def quote_subpolicy(subpolicy)
     flags = 0
 
-    allowed_actors = subpolicy.nil? ? [] : subpolicy.dup
+    allowed_actors = Array(subpolicy).dup
 
     if allowed_actors.delete('as:Public') || allowed_actors.delete('Public') || allowed_actors.delete('https://www.w3.org/ns/activitystreams#Public')
       Rails.logger.info "#{self.class}##{__method__} found public actors"
