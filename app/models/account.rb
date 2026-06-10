@@ -441,6 +441,8 @@ class Account < ApplicationRecord
     Rails.logger.info "#{__method__} id: #{status_object['id']}"
     media_attachments = []
     direct_recipient = nil
+    quote = nil
+    quote_approval_policy = 0
 
     if status_object['to'].present?
       if status_object['to'].is_a?(String)
@@ -487,6 +489,18 @@ class Account < ApplicationRecord
         end
       end
     end
+
+    if status_object['interactionPolicy'].present?
+      quote_approval_policy = quote_policy(status_object['interactionPolicy'])
+    end
+
+    if status_object['quote'].present?
+      quote = Quote.new(account: self,
+                        approval_uri: nil,
+                        legacy: false,
+                        state: :pending)
+    end
+
     if status_object['attachment'].present?
       if status_object['attachment'].is_a?(Hash)
         status_object['attachment'] = [ status_object['attachment'] ]
@@ -506,10 +520,12 @@ class Account < ApplicationRecord
       s.created_at = status_object['published']&.to_datetime
       s.language = language
       s.thread = thread
-      s.in_reply_to_uri = status_object['inReplyTo']
+      # brid.gy may set inReplyTo to an object
+      s.in_reply_to_uri = status_object['inReplyTo'].is_a?(Hash) ? status_object['inReplyTo']['id'] : status_object['inReplyTo']
       s.text = status_object['content'] || ''
       s.direct_recipient = direct_recipient
       s.url = status_object['url']
+      s.quote_approval_policy = quote_approval_policy
     end
 
     if status.errors.any?
@@ -539,6 +555,20 @@ class Account < ApplicationRecord
       end
     end
 
+    if quote
+      quote.quoted_status = Status.from_object_uri(status_object['quote'])
+      quote.quoted_account = quote.quoted_status&.account
+      quote.status = status
+      if status_object['quoteAuthorization'].present?
+        Rails.logger.info "#{self.class}##{__method__} quoteAuthorization: #{status_object['quoteAuthorization']}"
+        quote.approval_uri = status_object['quoteAuthorization']
+        quote.verify
+      else
+        Rails.logger.info "#{self.class}##{__method__} *** NO quoteAuthorization"
+      end
+      quote.save!
+    end
+
     status
 
   rescue NoMethodError => e
@@ -547,6 +577,48 @@ class Account < ApplicationRecord
   rescue ActiveRecord::RecordInvalid => e
     Rails.logger.info "#{self.class}##{__method__} exception: #{e.message}"
     nil
+  end
+
+  def quote_policy(interaction_policy)
+    flags = 0
+    if interaction_policy['canQuote'].present?
+      flags |= quote_subpolicy(interaction_policy['canQuote']['automaticApproval'])
+      Rails.logger.info "#{self.class}##{__method__} automaticApproval flags: #{flags}"
+      flags <<= 16
+      flags |= quote_subpolicy(interaction_policy['canQuote']['manualApproval'])
+      Rails.logger.info "#{self.class}##{__method__} total flags: #{flags}"
+    end
+    flags
+  end
+
+  def quote_subpolicy(subpolicy)
+    flags = 0
+
+    allowed_actors = subpolicy.nil? ? [] : subpolicy.dup
+
+    if allowed_actors.delete('as:Public') || allowed_actors.delete('Public') || allowed_actors.delete('https://www.w3.org/ns/activitystreams#Public')
+      Rails.logger.info "#{self.class}##{__method__} found public actors"
+      flags |= Quote::APPROVAL_POLICY_FLAGS[:public]
+    end
+    if allowed_actors.delete(followers)
+      Rails.logger.info "#{self.class}##{__method__} found followers actors"
+      flags |= Quote::APPROVAL_POLICY_FLAGS[:followers]
+    end
+    if allowed_actors.delete(following)
+      Rails.logger.info "#{self.class}##{__method__} found following actors"
+      flags |= Quote::APPROVAL_POLICY_FLAGS[:following]
+    end
+
+    if allowed_actors.delete(identifier)
+      Rails.logger.info "#{self.class}##{__method__} found actor uri actors"
+    end
+
+    unless allowed_actors.empty?
+      Rails.logger.info "#{self.class}##{__method__} found unexpected actors"
+      flags |= Quote::APPROVAL_POLICY_FLAGS[:unsuported_policy]
+    end
+
+    flags
   end
 
   def create_boost!(item)
@@ -580,6 +652,16 @@ class Account < ApplicationRecord
       err_msg = "#{self.class}##{__method__} error [id: #{id}] unauthorized update for: #{status_url}"
       Rails.logger.info err_msg
       raise StandardError, err_msg
+    end
+
+    if status.quote
+      if item['object']['quoteAuthorization'].present?
+        Rails.logger.info "#{self.class}##{__method__} quoteAuthorization: #{item['object']['quoteAuthorization']}"
+        status.quote.approval_uri = item['object']['quoteAuthorization']
+        status.quote.verify
+      else
+        Rails.logger.info "#{self.class}##{__method__} NO quoteAuthorization"
+      end
     end
 
     status.text = item['object']['content']

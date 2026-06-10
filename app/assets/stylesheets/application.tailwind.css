@@ -2,6 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+.quote-accepted .quote-inline {
+  display: none;
+}
+
+.status__quote {
+  margin-block-start: 16px;
+  margin-inline-start: 0px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  color: #111827;
+  position: relative;
+  overflow: hidden;
+  padding: 12px;
+}
+
 @layer base {
   a {
      @apply underline;

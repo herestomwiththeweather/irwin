@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_05_01_225335) do
+ActiveRecord::Schema[7.1].define(version: 2026_06_02_031422) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -194,6 +194,25 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_01_225335) do
     t.bigint "client_app_id"
   end
 
+  create_table "quotes", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "status_id", null: false
+    t.string "approval_uri"
+    t.bigint "quoted_account_id"
+    t.bigint "quoted_status_id"
+    t.integer "state", default: 0, null: false
+    t.boolean "legacy", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "quoted_account_id", "id"], name: "index_quotes_on_account_id_and_quoted_account_id_and_id"
+    t.index ["account_id"], name: "index_quotes_on_account_id"
+    t.index ["approval_uri"], name: "index_quotes_on_approval_uri", where: "(approval_uri IS NOT NULL)"
+    t.index ["quoted_account_id"], name: "index_quotes_on_quoted_account_id"
+    t.index ["quoted_status_id", "id"], name: "index_quotes_on_quoted_status_id_and_id"
+    t.index ["quoted_status_id"], name: "index_quotes_on_quoted_status_id"
+    t.index ["status_id"], name: "index_quotes_on_status_id", unique: true
+  end
+
   create_table "rules", force: :cascade do |t|
     t.text "text", default: "", null: false
     t.integer "priority", default: 0, null: false
@@ -215,6 +234,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_01_225335) do
     t.string "in_reply_to_uri"
     t.bigint "direct_recipient_id"
     t.datetime "deleted_at"
+    t.integer "quote_approval_policy", default: 0, null: false
     t.index ["account_id"], name: "index_statuses_on_account_id"
     t.index ["deleted_at"], name: "index_statuses_on_deleted_at"
     t.index ["in_reply_to_id"], name: "index_statuses_on_in_reply_to_id"
@@ -262,5 +282,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_01_225335) do
   add_foreign_key "notifications", "accounts"
   add_foreign_key "notifications", "statuses"
   add_foreign_key "notifications", "users"
+  add_foreign_key "quotes", "accounts"
+  add_foreign_key "quotes", "accounts", column: "quoted_account_id", on_delete: :nullify
+  add_foreign_key "quotes", "statuses"
+  add_foreign_key "quotes", "statuses", column: "quoted_status_id", on_delete: :nullify
   add_foreign_key "statuses", "accounts"
 end
