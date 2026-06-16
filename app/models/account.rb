@@ -441,7 +441,6 @@ class Account < ApplicationRecord
     Rails.logger.info "#{__method__} id: #{status_object['id']}"
     media_attachments = []
     direct_recipient = nil
-    quote = nil
     quote_approval_policy = 0
 
     if status_object['to'].present?
@@ -492,13 +491,6 @@ class Account < ApplicationRecord
 
     if status_object['interactionPolicy'].present?
       quote_approval_policy = quote_policy(status_object['interactionPolicy'])
-    end
-
-    if status_object['quote'].present?
-      quote = Quote.new(account: self,
-                        approval_uri: nil,
-                        legacy: false,
-                        state: :pending)
     end
 
     if status_object['attachment'].present?
@@ -555,18 +547,14 @@ class Account < ApplicationRecord
       end
     end
 
-    if quote
-      quote.quoted_status = Status.from_object_uri(status_object['quote'])
-      quote.quoted_account = quote.quoted_status&.account
-      quote.status = status
-      if status_object['quoteAuthorization'].present?
-        Rails.logger.info "#{self.class}##{__method__} quoteAuthorization: #{status_object['quoteAuthorization']}"
-        quote.approval_uri = status_object['quoteAuthorization']
-        quote.verify
-      else
-        Rails.logger.info "#{self.class}##{__method__} *** NO quoteAuthorization"
-      end
+    if status_object['quote'].present?
+      quote = Quote.find_or_initialize_by(status: status)
+      quote.account = self
+      quote.legacy = false
+      quote.state = :pending if quote.new_record?
       quote.save!
+
+      FetchQuotedStatusJob.perform_later(quote.id, status_object['quote'], status_object['quoteAuthorization'])
     end
 
     status
