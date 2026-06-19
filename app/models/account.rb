@@ -646,7 +646,7 @@ class Account < ApplicationRecord
       if item['object']['quoteAuthorization'].present?
         Rails.logger.info "#{self.class}##{__method__} quoteAuthorization: #{item['object']['quoteAuthorization']}"
         status.quote.approval_uri = item['object']['quoteAuthorization']
-        status.quote.verify
+        status.quote.verify!
       else
         Rails.logger.info "#{self.class}##{__method__} NO quoteAuthorization"
       end

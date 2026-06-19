@@ -11,11 +11,14 @@
       <% quoted_status = status&.quote&.quoted_status %>
       <div class="status__quote">
         <div class="status_info">
-  <%= image_tag quoted_status&.account&.icon_url_or_default, style: 'display: inline; padding: 2px; max-width: 40px; max-height: 40px;' %><b><%= link_to quoted_status&.account&.name, quoted_status&.account, data: {'turbo-frame': '_top'} %></b> posted <%= local_or_origin_link(quoted_status) %>
+          <%= image_tag quoted_status&.account&.icon_url_or_default, style: 'display: inline; padding: 2px; max-width: 40px; max-height: 40px;' %><b><%= link_to quoted_status&.account&.name, quoted_status&.account, data: {'turbo-frame': '_top'} %></b> posted <%= local_or_origin_link(quoted_status) %>
         </div>
         <div class="status_content">
           <%= sanitized(quoted_status, self) %>
         </div>
+        <% quoted_status&.media_attachments&.each do |media_attachment| %>
+          <%= render partial: media_attachment %>
+        <% end %>
       </div>
     <% end %>
     <% if 'history' == action_name %>

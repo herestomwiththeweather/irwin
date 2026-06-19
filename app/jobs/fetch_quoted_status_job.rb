@@ -7,7 +7,7 @@ class FetchQuotedStatusJob < ApplicationJob
   def perform(quote_id, quoted_uri, quote_authorization_uri = nil)
     quote = Quote.find(quote_id)
 
-    if quote.quoted_status.blank?
+    if quote.quoted_status.nil?
       quoted_status = Status.from_object_uri(quoted_uri)
       raise FetchQuotedStatusJobError if quoted_status.nil?
 
@@ -18,7 +18,7 @@ class FetchQuotedStatusJob < ApplicationJob
 
     if quote_authorization_uri.present? && quote.approval_uri.blank?
       quote.update!(approval_uri: quote_authorization_uri)
-      quote.verify
+      quote.verify!
     end
   end
 end

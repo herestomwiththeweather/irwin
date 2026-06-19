@@ -13,7 +13,7 @@ class Quote < ApplicationRecord
   belongs_to :quoted_account, class_name: 'Account', optional: true
   belongs_to :quoted_status, class_name: 'Status', optional: true
 
-  def verify
+  def verify!
     json_authorization = User.representative.get(approval_uri)
     if nil == json_authorization
       Rails.logger.info "#{self.class}##{__method__} error fetching quote #{self.id} authorization"
