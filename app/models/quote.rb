@@ -14,6 +14,11 @@ class Quote < ApplicationRecord
   belongs_to :quoted_status, class_name: 'Status', optional: true
 
   def verify!
+    if URI(approval_uri).host != URI(quoted_status.uri).host
+      Rails.logger.info "#{self.class}##{__method__} error quote #{self.id} approval_uri domain does not match quoted_status domain"
+      return false
+    end
+
     json_authorization = User.representative.get(approval_uri)
     if nil == json_authorization
       Rails.logger.info "#{self.class}##{__method__} error fetching quote #{self.id} authorization"
