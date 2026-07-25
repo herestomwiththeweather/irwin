@@ -156,12 +156,13 @@ class AccountsController < ApplicationController
     @current_mastodon_account = nil
     signature_header = request.headers['Signature'].split(',').map do |pair|
       pair.split('=', 2).map do |value|
-        value.gsub(/\A"/, '').gsub(/"\z/, '') # "foo" -> foo
+        value.strip.gsub(/\A"/, '').gsub(/"\z/, '') # "foo" -> foo
       end
     end.to_h
 
     key_id    = signature_header['keyId']
     headers   = signature_header['headers']
+
     signature = Base64.decode64(signature_header['signature'])
 
     Rails.logger.info "key_id: #{key_id}"
