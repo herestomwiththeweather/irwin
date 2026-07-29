@@ -499,6 +499,8 @@ class Account < ApplicationRecord
       end
       status_object['attachment'].each do |attachment|
         remote_url = attachment['url']
+        next if remote_url.blank?
+
         content_type = attachment['mediaType']
         description = attachment['name']
         Rails.logger.info "#{__method__} found attachment (#{content_type}) url: #{remote_url}"
