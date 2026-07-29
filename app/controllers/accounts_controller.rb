@@ -163,6 +163,11 @@ class AccountsController < ApplicationController
     key_id    = signature_header['keyId']
     headers   = signature_header['headers']
 
+    if signature_header['signature'].nil? || headers.nil? || key_id.nil?
+      Rails.logger.info "#{self.class}##{__method__} malformed Signature header from #{request.remote_ip}: #{signature_header.inspect}"
+      return false
+    end
+
     signature = Base64.decode64(signature_header['signature'])
 
     Rails.logger.info "key_id: #{key_id}"
