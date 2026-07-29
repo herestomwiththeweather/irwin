@@ -67,6 +67,7 @@ gem 'rack-cors'
 gem 'paper_trail'
 gem 'diff-lcs'
 gem 'discard'
+gem 'rack-attack'
 
 gem 'json-ld'
 gem 'json-ld-preloaded', '~> 3.2'

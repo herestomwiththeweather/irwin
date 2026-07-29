@@ -1,0 +1,2 @@
+module Admin::IpBlocksHelper
+end

@@ -59,7 +59,16 @@ Rails.application.configure do
   config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
 
   # Use a different cache store in production.
-  # config.cache_store = :mem_cache_store
+  config.cache_store = :redis_cache_store, {
+    url: ENV["REDIS_URL"],
+    ssl_params: { verify_mode: OpenSSL::SSL::VERIFY_NONE },
+    namespace: "irwin_cache",
+    expires_in: 1.day,
+    pool: { size: ENV.fetch("RAILS_MAX_THREADS", 5).to_i },
+    error_handler: ->(method:, returning:, exception:) {
+      Rails.logger.error("Rails.cache #{method} failed: #{exception.class}: #{exception.message}")
+    }
+  }
 
   # Use a real queuing backend for Active Job (and separate queues per environment).
   # config.active_job.queue_adapter = :resque

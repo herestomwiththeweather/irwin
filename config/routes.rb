@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
   get '/admin' => 'admin/dashboard#index', as: :admin
   namespace :admin do
+    resources :ip_blocks
     resources :network_events, except: [:new, :create]
     resources :hosts, only: [:show]
     resources :rules
