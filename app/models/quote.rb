@@ -14,8 +14,8 @@ class Quote < ApplicationRecord
   belongs_to :quoted_status, class_name: 'Status', optional: true
 
   def verify!
-    if URI(approval_uri).host != URI(quoted_status.uri).host
-      Rails.logger.info "#{self.class}##{__method__} error quote #{self.id} approval_uri domain does not match quoted_status domain"
+    if URI(approval_uri).host != URI(quoted_account.identifier).host
+      Rails.logger.info "#{self.class}##{__method__} error quote #{self.id} approval_uri domain does not match quoted_account domain"
       return false
     end
 
