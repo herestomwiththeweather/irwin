@@ -35,6 +35,8 @@ class ActivityPub::Activity
         ActivityPub::Activity::Reject
       when 'Undo'
         ActivityPub::Activity::Undo
+      when 'QuoteRequest'
+        ActivityPub::Activity::QuoteRequest
       end
     end
   end

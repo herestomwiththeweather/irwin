@@ -1,0 +1,2 @@
+class QuoteNotification < Notification
+end

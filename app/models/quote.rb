@@ -51,4 +51,25 @@ class Quote < ApplicationRecord
 
     true
   end
+
+  def accept!
+    activity = {}
+    activity['actor'] = quoted_account.user.actor_url
+    activity['type'] = 'Accept'
+    activity['id'] = object_id_url
+    activity['to'] = account.identifier
+    activity['result'] = Rails.application.routes.url_helpers.quote_authorization_url(self, host: ENV['SERVER_NAME'], protocol: 'https')
+
+    activity['object'] = {"id" => quote_request_uri,
+                          "type" => "QuoteRequest",
+                          "actor" => account.identifier,
+                          "instrument" => status.uri,
+                          "object" => quoted_status.uri}
+
+    quoted_account.user.post(account, activity) && self.update_attribute(:state, :accepted)
+  end
+
+  def object_id_url
+    "https://#{ENV['SERVER_NAME']}/activities/#{id}"
+  end
 end

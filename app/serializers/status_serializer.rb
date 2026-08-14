@@ -5,7 +5,7 @@ class StatusSerializer < ApplicationSerializer
 
   attr_accessor :action_name
 
-  attributes :id, :type, '@context', :in_reply_to, :published, :content_map, :content, :attributed_to, :language, :to, :cc, :replies
+  attributes :id, :type, '@context', :in_reply_to, :published, :content_map, :content, :attributed_to, :language, :to, :cc, :replies, :interaction_policy
   attribute :tag, unless: -> { object.mentions.empty? }
   attribute :attachment, unless: -> { object.media_attachments.empty? }
 
@@ -72,6 +72,10 @@ class StatusSerializer < ApplicationSerializer
 
   def attachment
     object.media_attachments.map {|media_attachment| media_attachment.info}
+  end
+
+  def interaction_policy
+    object.account.interaction_policy
   end
 
   def replies

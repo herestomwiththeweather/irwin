@@ -267,6 +267,14 @@ class Account < ApplicationRecord
     where("domain != substring(identifier from '://([^/]+)')")
   end
 
+  def interaction_policy
+    {
+      canQuote: {
+        automaticApproval: ['https://www.w3.org/ns/activitystreams#Public']
+      }
+    }
+  end
+
   def check_configuration
     # just for creating this account for local users
     return if !local?
@@ -647,8 +655,10 @@ class Account < ApplicationRecord
     if status.quote
       if item['object']['quoteAuthorization'].present?
         Rails.logger.info "#{self.class}##{__method__} quoteAuthorization: #{item['object']['quoteAuthorization']}"
-        status.quote.approval_uri = item['object']['quoteAuthorization']
-        status.quote.verify!
+        if URI(item['object']['quoteAuthorization']).host != ENV['SERVER_NAME']
+          status.quote.approval_uri = item['object']['quoteAuthorization']
+          status.quote.verify!
+        end
       else
         Rails.logger.info "#{self.class}##{__method__} NO quoteAuthorization"
       end

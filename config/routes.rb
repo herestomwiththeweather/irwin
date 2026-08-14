@@ -55,6 +55,7 @@ Rails.application.routes.draw do
   resources :authorizations, only: [:index, :show]
   resources :access_tokens, only: [:destroy]
   resources :notifications, only: [:index]
+  resources :quote_authorizations, only: [:show]
 
   namespace :api do
     namespace :v1 do

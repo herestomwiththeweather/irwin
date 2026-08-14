@@ -9,6 +9,7 @@ class User < ApplicationRecord
   has_many :mention_notifications
   has_many :follow_notifications
   has_many :reject_notifications
+  has_many :quote_notifications
 
   belongs_to :account, optional: true
 
@@ -104,9 +105,22 @@ class User < ApplicationRecord
     body["@context"] = ["https://www.w3.org/ns/activitystreams"]
 
     if 'Create' == body['type'] && body['signature'].present?
+      body["@context"] << {
+        "gts" => "https://gotosocial.org/ns#",
+        "interactionPolicy" => { "@id" => "gts:interactionPolicy", "@type" => "@id" },
+        "canQuote" => { "@id" => "gts:canQuote", "@type" => "@id" },
+        "automaticApproval" => { "@id" => "gts:automaticApproval", "@type" => "@id" },
+        "manualApproval" => { "@id" => "gts:manualApproval", "@type" => "@id" }
+      }
       json_signature = account.sign_json(body)
       Rails.logger.info "#{__method__} user id: #{id} json_signature: #{json_signature}"
       body['signature']['signatureValue'] = json_signature
+    end
+
+    if 'Accept' == body['type'] && 'QuoteRequest' == body['object']['type']
+      body["@context"] << {
+        "QuoteRequest" => "https://w3id.org/fep/044f#QuoteRequest"
+      }
     end
 
     json_response = HttpClient.new(receiver.inbox, main_key_url, private_key, body.to_json).post

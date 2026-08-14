@@ -6,7 +6,7 @@ class AccountsController < ApplicationController
 
   authorize_resource
 
-  ACTIVITIES = ['Follow', 'Undo', 'Accept', 'Create', 'Update', 'Announce', 'Move', 'Like', 'Delete', 'Reject']
+  ACTIVITIES = ['Follow', 'Undo', 'Accept', 'Create', 'Update', 'Announce', 'Move', 'Like', 'Delete', 'Reject', 'QuoteRequest']
 
   def followers
     @followers = current_user.account.account_followers.page(params[:page])
@@ -203,7 +203,7 @@ class AccountsController < ApplicationController
   def log_item(item)
     if ACTIVITIES.include? item['type']
       info = case item['type']
-      when 'Follow', 'Delete'
+      when 'Follow', 'Delete', 'QuoteRequest'
         "for #{item['object']}"
       when 'Create', 'Undo', 'Update'
         "for type #{item['object']['type']}"

@@ -5,6 +5,11 @@ class FetchQuotedStatusJob < ApplicationJob
   sidekiq_options retry: 5
 
   def perform(quote_id, quoted_uri, quote_authorization_uri = nil)
+    if ENV['SERVER_NAME'] == URI(quoted_uri).host
+      Rails.logger.info "#{self.class}##{__method__} quoted object is local: #{quoted_uri}"
+      return
+    end
+
     quote = Quote.find(quote_id)
 
     if quote.quoted_status.nil?

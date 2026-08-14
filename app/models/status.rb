@@ -360,6 +360,7 @@ class Status < ApplicationRecord
           language => marked_up_text
         },
         "content" => marked_up_text,
+        "interactionPolicy" => account.interaction_policy,
         "to" => [
           direct_recipient.present? ? direct_recipient.identifier : "https://www.w3.org/ns/activitystreams#Public"
         ]
