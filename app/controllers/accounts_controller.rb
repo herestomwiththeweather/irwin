@@ -152,22 +152,16 @@ class AccountsController < ApplicationController
   end
 
   def process_header
-    Rails.logger.info "--- process_header ---"
     @current_mastodon_account = nil
-    signature_header = request.headers['Signature'].split(',').map do |pair|
-      pair.split('=', 2).map do |value|
-        value.strip.gsub(/\A"/, '').gsub(/"\z/, '') # "foo" -> foo
-      end
-    end.to_h
 
-    key_id    = signature_header['keyId']
-    headers   = signature_header['headers']
-
-    if signature_header['signature'].nil? || headers.nil? || key_id.nil?
-      Rails.logger.info "#{self.class}##{__method__} malformed Signature header from #{request.remote_ip}: #{signature_header.inspect}"
+    signature_header = FediSignature.parse_header(request.headers['Signature'])
+    if signature_header.nil?
+      Rails.logger.info "#{self.class}##{__method__} malformed Signature header from #{request.remote_ip}: #{request.headers['Signature'].inspect}"
       return false
     end
 
+    key_id    = signature_header['keyId']
+    headers   = signature_header['headers']
     signature = Base64.decode64(signature_header['signature'])
 
     Rails.logger.info "key_id: #{key_id}"
@@ -178,12 +172,9 @@ class AccountsController < ApplicationController
 
     return false if @current_mastodon_account.nil?
 
-    signed_components = headers.split.map do |signed_header|
-      header_value = '(request-target)' == signed_header ? "post #{request.path}" : request.headers[capitalized(signed_header)]
-      "#{signed_header}: #{header_value}"
+    comparison_string = FediSignature.signing_string(headers.split) do |header|
+      '(request-target)' == header ? "post #{request.path}" : request.headers[capitalized(header)]
     end
-
-    comparison_string = signed_components.join("\n")
 
     return true if @current_mastodon_account.verify(signature, comparison_string)
 

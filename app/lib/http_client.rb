@@ -43,12 +43,20 @@ class HttpClient
     headers['Date'] = date
     headers['User-Agent'] = "Ruby (Irwin/#{Irwin::Version.to_s}; +https://#{ENV['SERVER_NAME']}/)"
 
-    signed_string = "(request-target): #{method_string} #{@url.path}\nhost: #{@url.host}\ndate: #{date}"
-    signed_string += "\ndigest: #{digest}" if @body.present?
-    keypair=OpenSSL::PKey::RSA.new(@private_key)
-    signature = Base64.strict_encode64(keypair.sign(OpenSSL::Digest::SHA256.new, signed_string))
-    digest_option = @body.present? ? ' digest' : ''
-    headers['Signature'] = "keyId=\"#{@main_key_url}\",signature=\"#{signature}\",algorithm=\"rsa-sha256\",headers=\"(request-target) host date#{digest_option}\""
+    header_names = ['(request-target)', 'host', 'date']
+    header_names << 'digest' if @body.present?
+
+    header_values = {
+      '(request-target)' => "#{method_string} #{@url.path}",
+      'host' => @url.host,
+      'date' => date,
+      'digest' => digest,
+    }
+
+    signing_string = FediSignature.signing_string(header_names) { |name| header_values[name] }
+    signature = FediSignature.sign(signing_string, @private_key)
+
+    headers['Signature'] = FediSignature.build_header(@main_key_url, signature, header_names)
 
     headers
   end
