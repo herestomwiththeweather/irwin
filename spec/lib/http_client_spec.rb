@@ -13,4 +13,14 @@ RSpec.describe HttpClient do
       expect(client).to be_instance_of(HttpClient)
     end
   end
-end 
+
+  describe "#get" do
+    it "returns nil for 401 response" do
+      response = Net::HTTPUnauthorized.new('1.1', '401', 'Unauthorized')
+      allow_any_instance_of(Net::HTTP).to receive(:request).and_return(response)
+
+      client = HttpClient.new(actor_url, actor_url, private_key)
+      expect(client.get).to be_nil
+    end
+  end
+end

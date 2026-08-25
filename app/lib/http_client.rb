@@ -85,6 +85,7 @@ class HttpClient
       return request(method, redirects_left - 1)
     elsif !response.is_a?(Net::HTTPSuccess)
       Rails.logger.info "#{self.class}##{__method__} error from #{@url.host}: #{response.code}: #{response.message}"
+      return nil
     end
 
     return {} if response.body.blank?
@@ -93,7 +94,8 @@ class HttpClient
 
     if content_type.present? && content_type.include?('text/html')
       Rails.logger.info "#{self.class}##{__method__} error from #{@url.host}: received html"
-      { html_response: response.body }
+      # treat html response to post as success. see https://github.com/herestomwiththeweather/irwin/issues/37.
+      method == :post ? { html_response: response.body } : nil
     else
       JSON.parse(response.body).presence || {}
     end
