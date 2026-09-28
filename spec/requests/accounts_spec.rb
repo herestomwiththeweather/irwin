@@ -53,6 +53,7 @@ RSpec.describe "Accounts", type: :request do
   end
 
   before do
+    travel_to '1992-02-19T22:00:00Z'
     allow(IndieWeb::Endpoints).to receive(:get).and_return(indieweb_info)
 
     # intended for recipient to fetch origin account
@@ -120,6 +121,150 @@ RSpec.describe "Accounts", type: :request do
       post receiver_inbox, params: valid_delete_attributes.to_json, headers: activity.request_headers
 
       expect(response).to have_http_status(401)
+    end
+  end
+
+  describe "malformed signature headers (cavage)" do
+    it "returns failure for a created_time outside of window" do
+      receiver_inbox = "#{recipient_url}/inbox"
+
+      activity = Activity.new(receiver_inbox, valid_like_attributes.to_json, origin_url, private_key)
+
+      headers = activity.request_headers
+      # plus 1 hour and 1 minute
+      headers['Date'] = 'Wed, 19 Feb 1992 23:01:00 GMT'
+      post receiver_inbox, params: valid_like_attributes.to_json, headers: headers
+
+      expect(response).to have_http_status(401)
+    end
+
+    it "returns failure for a missing date header" do
+      receiver_inbox = "#{recipient_url}/inbox"
+
+      activity = Activity.new(receiver_inbox, valid_like_attributes.to_json, origin_url, private_key)
+
+      headers = activity.request_headers
+      headers.delete('Date')
+      post receiver_inbox, params: valid_like_attributes.to_json, headers: headers
+
+      expect(response).to have_http_status(401)
+    end
+
+    it "returns failure for a missing digest header" do
+      receiver_inbox = "#{recipient_url}/inbox"
+
+      activity = Activity.new(receiver_inbox, valid_like_attributes.to_json, origin_url, private_key)
+
+      headers = activity.request_headers
+      headers.delete('Digest')
+      post receiver_inbox, params: valid_like_attributes.to_json, headers: headers
+
+      expect(response).to have_http_status(401)
+    end
+  end
+
+  describe "malformed signature headers (RFC 9421)" do
+    def rfc9421_headers(url, body, key_id, private_key, created: nil)
+      uri = URI(url)
+      digest = "SHA-256=#{Digest::SHA256.base64digest(body)}"
+      date = Time.now.utc.httpdate
+
+      net_request = Net::HTTP::Post.new(uri)
+      net_request['Content-type'] = 'application/activity+json'
+      net_request['Digest'] = digest
+      net_request['Date'] = date
+      net_request.body = body
+
+      key = Linzer.new_rsa_v1_5_sha256_key(private_key, key_id)
+      params = created.nil? ? {} : { created: created }
+      Linzer.sign!(net_request, key: key, components: %w[@method @path content-type digest date], params: params)
+
+      {
+        'Content-type' => 'application/activity+json',
+        'Digest' => digest,
+        'Date' => date,
+        'Signature-Input' => net_request['signature-input'],
+        'Signature' => net_request['signature'],
+      }
+    end
+
+    it "returns failure with a request older than a day" do
+      receiver_inbox = "#{recipient_url}/inbox"
+
+      headers = rfc9421_headers(receiver_inbox, valid_like_attributes.to_json, origin_url, private_key, created: 698709600)
+
+      post receiver_inbox, params: valid_like_attributes.to_json, headers: headers
+
+      expect(response).to have_http_status(401)
+    end
+
+    it "returns failure instead of raising exception when the Signature header is missing" do
+      receiver_inbox = "#{recipient_url}/inbox"
+
+      headers = rfc9421_headers(receiver_inbox, valid_like_attributes.to_json, origin_url, private_key)
+      headers.delete('Signature')
+
+      post receiver_inbox, params: valid_like_attributes.to_json, headers: headers
+
+      expect(response).to have_http_status(401)
+    end
+
+    it "returns failure instead of raising exception when the Signature header is garbage" do
+      receiver_inbox = "#{recipient_url}/inbox"
+
+      headers = rfc9421_headers(receiver_inbox, valid_like_attributes.to_json, origin_url, private_key)
+      headers['Signature'] = 'garbage'
+
+      post receiver_inbox, params: valid_like_attributes.to_json, headers: headers
+
+      expect(response).to have_http_status(401)
+    end
+
+    it "returns failure instead of raising exception when created parameter is missing" do
+      receiver_inbox = "#{recipient_url}/inbox"
+
+      headers = rfc9421_headers(receiver_inbox, valid_like_attributes.to_json, origin_url, private_key)
+      headers['Signature-Input'] = headers['Signature-Input'].sub(/;created=\d+/, '')
+
+      post receiver_inbox, params: valid_like_attributes.to_json, headers: headers
+
+      expect(response).to have_http_status(401)
+      expect(JSON.parse(response.body)).to eq({ 'error' => 'Incompatible request signature.' })
+    end
+
+    def rfc9421_content_digest_headers(url, body, key_id, private_key)
+      uri = URI(url)
+      content_digest = "sha-256=:#{Digest::SHA256.base64digest(body)}:"
+      date = Time.now.utc.httpdate
+
+      net_request = Net::HTTP::Post.new(uri)
+      net_request['Content-type'] = 'application/activity+json'
+      net_request['Content-Digest'] = content_digest
+      net_request['Date'] = date
+      net_request.body = body
+
+      key = Linzer.new_rsa_v1_5_sha256_key(private_key, key_id)
+      Linzer.sign!(net_request, key: key, components: %w[@method @target-uri content-type content-digest date])
+
+      {
+        'Content-type' => 'application/activity+json',
+        'Content-Digest' => content_digest,
+        'Date' => date,
+        'Signature-Input' => net_request['signature-input'],
+        'Signature' => net_request['signature'],
+      }
+    end
+
+    it "returns failure when the Content-Digest value doesn't match the body" do
+      receiver_inbox = "#{recipient_url}/inbox"
+
+      headers = rfc9421_content_digest_headers(receiver_inbox, valid_like_attributes.to_json, origin_url, private_key)
+      headers['Content-Digest'] = "sha-256=:#{Digest::SHA256.base64digest('tampered body')}:"
+
+      post receiver_inbox, params: valid_like_attributes.to_json, headers: headers
+
+      expect(response).to have_http_status(401)
+      expect(JSON.parse(response.body)['error']).to match(/\AInvalid Digest value\. Computed SHA-256 digest: .*; given: .*\z/)
     end
   end
 end

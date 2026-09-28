@@ -93,7 +93,10 @@ class AccountsController < ApplicationController
 
   def inbox
     response_code = 200
-    raise StandardError unless request.headers['Signature'].present?
+    if !(request.headers['Signature'].present?)
+      render plain: '', status: 401
+      return
+    end
 
     @body = request.body.string
     Rails.logger.info @body
@@ -127,14 +130,15 @@ class AccountsController < ApplicationController
       Rails.logger.info "no match: #{@json['type']}"
       #process_items [@json]
     end
-    render plain: '', status: response_code
+
+    if @signature_error
+      render json: { error: @signature_error }, status: response_code
+    else
+      render plain: '', status: response_code
+    end
   end
 
   private
-
-  def capitalized(text)
-    text.gsub(/(?:^|-)([a-z])/) { |m| m.upcase }
-  end
 
   def ignore_nonexistent_account?
     # ignore deletion of account that does not exist locally
@@ -154,37 +158,37 @@ class AccountsController < ApplicationController
   def process_header
     @current_mastodon_account = nil
 
-    signature_header = FediSignature.parse_header(request.headers['Signature'])
-    if signature_header.nil?
-      Rails.logger.info "#{self.class}##{__method__} malformed Signature header from #{request.remote_ip}: #{request.headers['Signature'].inspect}"
+    key_id = inbox_delivery.key_id
+    if key_id.nil?
       return false
     end
 
-    key_id    = signature_header['keyId']
-    headers   = signature_header['headers']
-    signature = Base64.decode64(signature_header['signature'])
-
-    Rails.logger.info "key_id: #{key_id}"
-    Rails.logger.info "headers: #{headers}"
-    Rails.logger.info "signature (base64 encoded): #{signature_header['signature']}"
-
     @current_mastodon_account = Account.fetch_by_key(key_id)
-
-    return false if @current_mastodon_account.nil?
-
-    comparison_string = FediSignature.signing_string(headers.split) do |header|
-      '(request-target)' == header ? "post #{request.path}" : request.headers[capitalized(header)]
+    if @current_mastodon_account.nil?
+      return false
     end
 
-    return true if @current_mastodon_account.verify(signature, comparison_string)
+    if inbox_delivery.verified?(@current_mastodon_account.public_key)
+      return true
+    end
 
     Rails.logger.info "#{__method__} signature verification failed for account: #{@current_mastodon_account.id}"
 
     refreshed_account = Account.fetch_and_update_by_key(key_id)
-    return false if refreshed_account.nil?
+    if refreshed_account.nil?
+      return false
+    end
 
     @current_mastodon_account = refreshed_account
-    @current_mastodon_account.verify(signature, comparison_string)
+    inbox_delivery.verified?(@current_mastodon_account.public_key)
+  rescue Serge::SignatureVerificationError => e
+    Rails.logger.info "#{__method__} SignatureVerificationError: #{e.message}"
+    @signature_error = e.message
+    false
+  end
+
+  def inbox_delivery
+    @inbox_delivery ||= Serge::InboxDelivery.new(request)
   end
 
   def process_items(items)

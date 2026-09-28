@@ -53,10 +53,10 @@ class HttpClient
       'digest' => digest,
     }
 
-    signing_string = FediSignature.signing_string(header_names) { |name| header_values[name] }
-    signature = FediSignature.sign(signing_string, @private_key)
+    signing_string = Serge::FediSignature.signing_string(header_names) { |name| header_values[name] }
+    signature = Serge::FediSignature.sign(signing_string, @private_key)
 
-    headers['Signature'] = FediSignature.build_header(@main_key_url, signature, header_names)
+    headers['Signature'] = Serge::FediSignature.build_header(@main_key_url, signature, header_names)
 
     headers
   end
