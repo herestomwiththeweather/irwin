@@ -130,7 +130,7 @@ RSpec.describe "Accounts", type: :request do
 
       activity = Activity.new(receiver_inbox, valid_like_attributes.to_json, origin_url, private_key)
 
-      headers = activity.request_headers
+      headers = activity.request_headers(true)
       # plus 1 hour and 1 minute
       headers['Date'] = 'Wed, 19 Feb 1992 23:01:00 GMT'
       post receiver_inbox, params: valid_like_attributes.to_json, headers: headers
@@ -143,7 +143,7 @@ RSpec.describe "Accounts", type: :request do
 
       activity = Activity.new(receiver_inbox, valid_like_attributes.to_json, origin_url, private_key)
 
-      headers = activity.request_headers
+      headers = activity.request_headers(true)
       headers.delete('Date')
       post receiver_inbox, params: valid_like_attributes.to_json, headers: headers
 
@@ -155,7 +155,7 @@ RSpec.describe "Accounts", type: :request do
 
       activity = Activity.new(receiver_inbox, valid_like_attributes.to_json, origin_url, private_key)
 
-      headers = activity.request_headers
+      headers = activity.request_headers(true)
       headers.delete('Digest')
       post receiver_inbox, params: valid_like_attributes.to_json, headers: headers
 

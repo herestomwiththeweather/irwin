@@ -6,8 +6,8 @@ class Activity
     @private_key = private_key
   end
 
-  def request_headers
+  def request_headers(legacy_signature = false)
     client = HttpClient.new(@inbox_url, @key_url, @private_key, @body)
-    client.request_headers('post')
+    client.request_headers('post', legacy_signature)
   end
 end

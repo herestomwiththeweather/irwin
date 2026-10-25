@@ -21,21 +21,24 @@ class HttpClient
     false
   end
 
-  def get
-    @headers = request_headers('get')
+  def get(legacy_signature = false)
+    @headers = request_headers('get', legacy_signature)
     request(:get)
   end
 
-  def post
-    @headers = request_headers('post')
+  def post(legacy_signature = false)
+    @headers = request_headers('post', legacy_signature)
     request(:post)
   end
 
-  def request_headers(method_string)
+  def request_headers(method_string, legacy_signature = false)
+    if !legacy_signature && Host.find_by(name: @url.host)&.legacy_signature
+      Rails.logger.info "#{self.class}##{__method__} setting legacy signature for #{@url.host}"
+      legacy_signature = true
+    end
+
     if @body.present?
       headers = {"Content-type"=>"application/activity+json"}
-      digest = "SHA-256=#{Digest::SHA256.base64digest(@body)}"
-      headers['Digest'] = digest
     else
       headers = {'Accept': 'application/activity+json, application/json, application/ld+json'}
     end
@@ -43,20 +46,39 @@ class HttpClient
     headers['Date'] = date
     headers['User-Agent'] = "Ruby (Irwin/#{Irwin::Version.to_s}; +https://#{ENV['SERVER_NAME']}/)"
 
-    header_names = ['(request-target)', 'host', 'date']
-    header_names << 'digest' if @body.present?
+    if legacy_signature
+      Rails.logger.info "#{self.class}##{__method__} signing request with cavage"
+      header_names = ['(request-target)', 'host', 'date']
+      if @body.present?
+        header_names << 'digest'
+        digest = "SHA-256=#{Digest::SHA256.base64digest(@body)}"
+        headers['Digest'] = digest
+      end
 
-    header_values = {
-      '(request-target)' => "#{method_string} #{@url.path}",
-      'host' => @url.host,
-      'date' => date,
-      'digest' => digest,
-    }
+      header_values = {
+        '(request-target)' => "#{method_string} #{@url.path}",
+        'host' => @url.host,
+        'date' => date,
+        'digest' => digest,
+      }
 
-    signing_string = Serge::FediSignature.signing_string(header_names) { |name| header_values[name] }
-    signature = Serge::FediSignature.sign(signing_string, @private_key)
+      signing_string = Serge::FediSignature.signing_string(header_names) { |name| header_values[name] }
+      signature = Serge::FediSignature.sign(signing_string, @private_key)
 
-    headers['Signature'] = Serge::FediSignature.build_header(@main_key_url, signature, header_names)
+      headers['Signature'] = Serge::FediSignature.build_header(@main_key_url, signature, header_names)
+    else
+      Rails.logger.info "#{self.class}##{__method__} signing request with rfc9421"
+
+      headers.merge!(
+        Serge::MessageSignature.headers(
+          method: method_string,
+          url: @url,
+          body: @body,
+          public_key_id: @main_key_url,
+          private_key: @private_key
+        )
+      )
+    end
 
     headers
   end
@@ -84,8 +106,14 @@ class HttpClient
       @url = redirect_url.scheme.present? ? redirect_url : @url.merge(redirect_url)
       return request(method, redirects_left - 1)
     elsif !response.is_a?(Net::HTTPSuccess)
-      Rails.logger.info "#{self.class}##{__method__} error from #{@url.host}: #{response.code}: #{response.message}"
-      return nil
+      if response.is_a?(Net::HTTPUnauthorized) && @headers.key?('Signature-Input')
+        Rails.logger.info "#{self.class}##{__method__} retrying #{@url.host} with cavage signature: #{response.code}: #{response.message}"
+        @headers = request_headers(method.to_s, true)
+        return request(method, redirects_left)
+      else
+        Rails.logger.info "#{self.class}##{__method__} error from #{@url.host}: #{response.code}: #{response.message}"
+        return nil
+      end
     end
 
     return {} if response.body.blank?

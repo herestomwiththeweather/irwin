@@ -92,11 +92,11 @@ class User < ApplicationRecord
     Status.kept.where(direct_recipient: nil, account_id: self.account.active_relationships.select(:target_account_id)).or(Status.where(direct_recipient: nil, account_id: self.account.id)).or(Status.where(id: status_ids))
   end
 
-  def get(url)
-    HttpClient.new(url, main_key_url, private_key).get
+  def get(url, legacy_signature = false)
+    HttpClient.new(url, main_key_url, private_key).get(legacy_signature)
   end
 
-  def post(receiver, body)
+  def post(receiver, body, legacy_signature = false)
     if receiver.local?
       Rails.logger.info "#{self.class}##{__method__} receiver is local: [#{receiver.id}] #{receiver.webfinger_to_s}"
       return true
@@ -123,7 +123,7 @@ class User < ApplicationRecord
       }
     end
 
-    json_response = HttpClient.new(receiver.inbox, main_key_url, private_key, body.to_json).post
+    json_response = HttpClient.new(receiver.inbox, main_key_url, private_key, body.to_json).post(legacy_signature)
     if nil == json_response
       return false
     end
