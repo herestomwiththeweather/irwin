@@ -358,7 +358,7 @@ GEM
       ffi (~> 1.12)
       logger
     securerandom (0.4.1)
-    serge (0.2.0)
+    serge (0.3.0)
       activesupport (>= 7.1, < 9)
       linzer (~> 0.8)
       rack (~> 3.2)

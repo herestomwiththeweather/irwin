@@ -42,43 +42,21 @@ class HttpClient
     else
       headers = {'Accept': 'application/activity+json, application/json, application/ld+json'}
     end
-    date = Time.now.utc.httpdate
-    headers['Date'] = date
+
     headers['User-Agent'] = "Ruby (Irwin/#{Irwin::Version.to_s}; +https://#{ENV['SERVER_NAME']}/)"
 
-    if legacy_signature
-      Rails.logger.info "#{self.class}##{__method__} signing request with cavage"
-      header_names = ['(request-target)', 'host', 'date']
-      if @body.present?
-        header_names << 'digest'
-        digest = "SHA-256=#{Digest::SHA256.base64digest(@body)}"
-        headers['Digest'] = digest
-      end
+    klass = legacy_signature ? Serge::FediSignature : Serge::MessageSignature
+    Rails.logger.info "#{self.class}##{__method__} signing request with #{klass}"
 
-      header_values = {
-        '(request-target)' => "#{method_string} #{@url.path}",
-        'host' => @url.host,
-        'date' => date,
-        'digest' => digest,
-      }
-
-      signing_string = Serge::FediSignature.signing_string(header_names) { |name| header_values[name] }
-      signature = Serge::FediSignature.sign(signing_string, @private_key)
-
-      headers['Signature'] = Serge::FediSignature.build_header(@main_key_url, signature, header_names)
-    else
-      Rails.logger.info "#{self.class}##{__method__} signing request with rfc9421"
-
-      headers.merge!(
-        Serge::MessageSignature.headers(
-          method: method_string,
-          url: @url,
-          body: @body,
-          public_key_id: @main_key_url,
-          private_key: @private_key
-        )
+    headers.merge!(
+      klass.headers(
+        method: method_string,
+        url: @url,
+        body: @body,
+        public_key_id: @main_key_url,
+        private_key: @private_key
       )
-    end
+    )
 
     headers
   end
