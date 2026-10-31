@@ -21,6 +21,14 @@ class HttpClient
     false
   end
 
+  def self.same_host?(url1, url2)
+    host1 = URI(url1.to_s).host
+    host2 = URI(url2.to_s).host
+    host1.present? && host2.present? && host1.casecmp?(host2)
+  rescue URI::InvalidURIError
+    false
+  end
+
   def get(legacy_signature = false)
     @headers = request_headers('get', legacy_signature)
     request(:get)
@@ -103,7 +111,12 @@ class HttpClient
       # treat html response to post as success. see https://github.com/herestomwiththeweather/irwin/issues/37.
       method == :post ? { html_response: response.body } : nil
     else
-      JSON.parse(response.body).presence || {}
+      json = JSON.parse(response.body).presence || {}
+      if method == :get && json.is_a?(Hash) && json['id'].present? && !HttpClient.same_host?(json['id'], @url)
+        Rails.logger.info "#{self.class}##{__method__} error from #{@url.host}: id #{json['id']} does not match origin"
+        return nil
+      end
+      json
     end
 
   rescue OpenSSL::SSL::SSLError,

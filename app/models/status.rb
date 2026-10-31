@@ -124,6 +124,11 @@ class Status < ApplicationRecord
       json_status['attributedTo']['id']
     end
 
+    unless HttpClient.same_host?(json_status['id'], original_actor_url)
+      Rails.logger.info "#{__method__} error status #{json_status['id']} not attributable to #{original_actor_url}"
+      return nil
+    end
+
     if thread
       if json_status['inReplyTo'] != thread.uri
         Rails.logger.info "#{__method__} inReplyTo: #{json_status['inReplyTo']}"
