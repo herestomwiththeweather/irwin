@@ -213,6 +213,10 @@ class AccountsController < ApplicationController
     log_item(item)
 
     activity = ActivityPub::Activity.factory(item, @current_mastodon_account, @target_account)
+    if activity.nil?
+      return 400
+    end
+
     response_code = case item['type']
     when *ACTIVITIES
       activity&.perform
