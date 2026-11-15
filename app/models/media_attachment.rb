@@ -8,6 +8,18 @@ class MediaAttachment < ApplicationRecord
   VIDEO_MIME_TYPES = %w(video/webm video/mp4 video/quicktime video/ogg).freeze
   AUDIO_MIME_TYPES = %w(audio/wave audio/wav audio/x-wav audio/x-pn-wave audio/vnd.wave audio/ogg audio/vorbis audio/mpeg audio/mp3 audio/webm audio/flac audio/aac audio/m4a audio/x-m4a audio/mp4 audio/3gpp video/x-ms-asf).freeze
 
+  ACTIVITY_TYPE_DEFAULT_MIME_TYPES = {
+    'Image' => 'image/jpeg',
+    'Video' => 'video/mp4',
+    'Audio' => 'audio/mpeg'
+  }.freeze
+
+  def self.content_type_flexible(attachment)
+    return attachment['mediaType'] if attachment['mediaType'].present?
+
+    ACTIVITY_TYPE_DEFAULT_MIME_TYPES[attachment['type']]
+  end
+
   def info
     {
       "width" => file.metadata['width'],

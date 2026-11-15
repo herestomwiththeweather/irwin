@@ -509,7 +509,7 @@ class Account < ApplicationRecord
         remote_url = attachment['url']
         next if remote_url.blank?
 
-        content_type = attachment['mediaType']
+        content_type = MediaAttachment.content_type_flexible(attachment)
         description = attachment['name']
         Rails.logger.info "#{__method__} found attachment (#{content_type}) url: #{remote_url}"
         media_attachments << MediaAttachment.new(account: self, content_type: content_type, remote_url: remote_url, description: description)
