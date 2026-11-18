@@ -16,7 +16,6 @@ Rails.application.routes.draw do
     resources :users, except: [:new, :create]
   end
   require 'sidekiq/web'
-  require 'admin_constraint'
   mount Sidekiq::Web => '/sidekiq', :constraints => AdminConstraint.new
 
   resources :rules, only: [:index]
