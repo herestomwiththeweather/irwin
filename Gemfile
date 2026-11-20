@@ -5,6 +5,7 @@ ruby "3.3.14"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "8.0.0"
+gem "connection_pool", "< 3"
 
 gem "propshaft"
 
