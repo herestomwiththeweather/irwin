@@ -11,7 +11,7 @@ class StatusSerializer < ApplicationSerializer
 
   def initialize(object, options={})
     super
-    @action_name = options[:template]
+    @action_name = options[:action_name]
   end
 
   def id

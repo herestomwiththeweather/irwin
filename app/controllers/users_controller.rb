@@ -62,7 +62,7 @@ class UsersController < ApplicationController
       format.html do
       end
       format.all do
-        render json: @target_user, serializer: ListSerializer, content_type: 'application/activity+json'
+        render json: @target_user, serializer: ListSerializer, action_name: action_name, content_type: 'application/activity+json'
       end
     end
   end
@@ -74,7 +74,7 @@ class UsersController < ApplicationController
       format.html do
       end
       format.all do
-        render json: @target_user, serializer: ListSerializer, content_type: 'application/activity+json'
+        render json: @target_user, serializer: ListSerializer, action_name: action_name, content_type: 'application/activity+json'
       end
     end
   end
