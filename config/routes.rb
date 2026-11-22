@@ -74,6 +74,7 @@ Rails.application.routes.draw do
 
   get '/.well-known/webfinger' => 'users#webfinger', as: :webfinger
   get '/.well-known/nodeinfo' => 'well_known/nodeinfo#index', as: :nodeinfo
+  get '/.well-known/host-meta' => 'well_known/host_meta#show', as: :host_meta
   get '/nodeinfo/2.0' => 'well_known/nodeinfo#show', as: :nodeinfo_schema
   get '/actor/:id' => 'users#actor', as: :actor, id: /[^\/]+?/, constraints: { format: /(xml|rss)/ }
   post '/actor/:id/inbox' => 'accounts#inbox', as: :inbox, id: /[^\/]+/
