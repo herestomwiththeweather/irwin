@@ -105,7 +105,12 @@ GEM
     bindex (0.8.1)
     bootsnap (1.18.4)
       msgpack (~> 1.2)
+    brakeman (8.1.1)
+      racc
     builder (3.3.0)
+    bundler-audit (0.9.3)
+      bundler (>= 1.2.0)
+      thor (~> 1.0)
     cancancan (3.6.1)
     case_transform (0.2)
       activesupport
@@ -420,6 +425,8 @@ DEPENDENCIES
   aws-sdk-s3
   bcrypt (~> 3.1.7)
   bootsnap
+  brakeman
+  bundler-audit
   cancancan
   connection_pool (< 3)
   cssbundling-rails

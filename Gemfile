@@ -81,6 +81,12 @@ group :development, :test do
   gem 'dotenv-rails', require: 'dotenv/load'
   gem 'rspec-rails'
   gem 'factory_bot_rails'
+
+  # Audits gems for known security defects (use config/bundler-audit.yml to ignore issues)
+  gem "bundler-audit", require: false
+
+  # Static analysis for security vulnerabilities [https://brakemanscanner.org/]
+  gem "brakeman", require: false
 end
 
 group :development do
